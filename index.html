@@ -2,22 +2,22 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>New Phone, Who Dis? (한국어 파티 카드게임)</title>
 <style>
-*{box-sizing:border-box}html,body{height:100%;margin:0}
+*{box-sizing:border-box}html,body{height:100%;margin:0}@supports(height:100dvh){html,body{height:100dvh}}
 body{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:#12141c;color:#e9ecf5;overflow:hidden}
 .hidden{display:none!important}button{font:inherit;cursor:pointer}
-#status{height:32px;display:flex;align-items:center;gap:12px;padding:0 16px;background:#000;font-size:13px;font-weight:600}
+#status{height:var(--sb,32px);display:flex;align-items:center;gap:12px;padding:0 16px;background:#000;font-size:13px;font-weight:600}
 #status .sp{flex:1}#status input[type=range]{width:70px;accent-color:#4c8dff}
 #status button{background:none;border:0;color:#fff;font-size:15px;padding:2px 4px}#status button.off{opacity:.35}
 .bat{display:inline-flex;align-items:center;gap:4px}.bat i{display:inline-block;width:24px;height:11px;border:1.5px solid #fff;border-radius:3px;position:relative;padding:1px}
 .bat i:after{content:"";position:absolute;right:-4px;top:2px;width:2px;height:4px;background:#fff;border-radius:1px}.bat b{display:block;height:100%;background:#4cd964;border-radius:1px}
-.screen{height:calc(100% - 32px);display:flex;align-items:center;justify-content:center}
+.screen{height:calc(100% - var(--sb,32px));display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:8px 0}.screen>.box,.screen>.menu{margin:auto}
 .box{background:#1d2130;border-radius:20px;padding:28px;width:min(520px,92vw);box-shadow:0 10px 40px #0008}
 .box h1{margin:0 0 6px;font-size:26px}.muted{color:#9aa3bd;font-size:13px}
 input,select{width:100%;padding:11px 12px;margin:6px 0;border-radius:10px;border:1px solid #39405a;background:#12141c;color:#fff;font:inherit}
 .btn{background:#4c8dff;color:#fff;border:0;border-radius:12px;padding:11px 18px;font-weight:700}.btn:disabled{opacity:.4;cursor:not-allowed}.btn.g{background:#39405a}
 .row{display:flex;gap:8px;margin-top:8px}.row>*{flex:1}
 .chip{display:inline-block;background:#12141c;border-radius:999px;padding:6px 12px;margin:3px}
-#game{height:calc(100% - 32px);display:grid;grid-template-columns:250px 1fr;grid-template-rows:1fr 230px;grid-template-areas:"side main" "hand hand"}
+#game{height:calc(100% - var(--sb,32px));display:grid;grid-template-columns:250px 1fr;grid-template-rows:1fr 230px;grid-template-areas:"side main" "hand hand"}
 #side{grid-area:side;padding:14px;background:#171a26;overflow:auto}
 #side h3{margin:0 0 10px;font-size:14px;color:#9aa3bd}
 .pl{display:flex;align-items:center;gap:10px;padding:9px;border-radius:12px;margin-bottom:7px;background:#1f2333}.pl.me{outline:2px solid #4c8dff}.pl.jd{background:#3a2f12}
@@ -48,7 +48,6 @@ main{grid-area:main;display:flex;justify-content:center;padding:10px;min-height:
 .card:hover:not(:disabled){transform:translateY(-34px) scale(1.05);z-index:50;box-shadow:0 6px 20px #000a}.card.sel{transform:translateY(-52px) scale(1.08);z-index:60;outline:3px solid #ff9f0a}
 .card:disabled{opacity:.5;cursor:default}.note{color:#9aa3bd;margin:auto;font-size:14px}
 .rank{background:#fff;border-radius:14px;padding:10px 14px;width:100%;text-align:left;border:1px solid #ddd}.rank div{padding:3px 0;display:flex;justify-content:space-between}
-@media(max-width:820px){#game{grid-template-columns:1fr;grid-template-areas:"main" "hand";grid-template-rows:1fr 220px}#side{display:none}.card{width:120px;margin-left:-60px}}
 input[type=range]{padding:0;border:0;background:none;margin:6px 0;accent-color:#4c8dff;height:24px}
 :root{--lobby-bg:url("assets/lobby-bg.png")}
 .bgscreen{background:linear-gradient(rgba(8,10,18,.6),rgba(8,10,18,.8)),var(--lobby-bg) center/cover no-repeat,radial-gradient(circle at 30% 20%,#2a3563,#12141c 70%)}
@@ -60,7 +59,7 @@ input[type=range]{padding:0;border:0;background:none;margin:6px 0;accent-color:#
 #hand{height:234px;padding-top:62px;flex:none}
 
 .bgscreen{background:linear-gradient(rgba(6,8,16,.32),rgba(6,8,16,.62)),var(--lobby-bg) center/cover no-repeat,radial-gradient(circle at 30% 20%,#2a3563,#12141c 70%)}
-.menu{display:flex;gap:28px;width:min(940px,92vw);margin:0 auto 0 6vw;align-items:stretch}
+.menu{display:flex;gap:28px;width:min(940px,92vw);margin:auto auto auto 6vw;align-items:stretch}
 #nav{width:270px;flex:none;display:flex;flex-direction:column;justify-content:center}
 #nav h1{font-size:30px;line-height:1.2;margin:0 0 22px;text-shadow:0 2px 14px #000}
 #nav button{width:100%;text-align:left;font-size:20px;font-weight:700;padding:16px 20px;margin:7px 0;border:1px solid #ffffff26;border-radius:14px;background:rgba(20,24,40,.62);color:#fff;backdrop-filter:blur(6px);transition:transform .2s,background .2s}
@@ -69,7 +68,6 @@ input[type=range]{padding:0;border:0;background:none;margin:6px 0;accent-color:#
 .stage h2{margin:0 0 12px}.stage label{display:block;margin-top:10px}
 .pn{position:absolute;inset:0;padding:26px 26px 44px;overflow:auto;opacity:0;visibility:hidden;transform:translateX(28px);transition:opacity .28s,transform .28s,visibility 0s .28s}
 .pn.on{opacity:1;visibility:visible;transform:none;transition:opacity .28s .06s,transform .28s .06s,visibility 0s}
-@media(max-width:760px){.menu{flex-direction:column}#nav{width:auto}#nav h1{font-size:22px;margin-bottom:8px}#nav button{padding:10px 16px;font-size:16px;margin:4px 0}.stage{min-height:420px}}
 .card{z-index:var(--z);transition:transform .24s cubic-bezier(.2,.85,.3,1.08),box-shadow .24s ease-out}
 .card:hover:not(:disabled){transform:rotate(calc(var(--r)*.3)) translateY(-30px) scale(1.04);box-shadow:0 10px 22px #0008}
 .card.sel,.card.sel:hover:not(:disabled){transform:rotate(0) translateY(-46px) scale(1.07);z-index:60;outline:3px solid #ff9f0a;box-shadow:0 12px 26px #000a}
@@ -82,7 +80,54 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
 .set{background:#ffffff12;border-radius:14px;padding:8px 14px;margin:8px 0}
 .pn{background:rgba(14,18,32,.88);border-radius:22px;border:1px solid #ffffff22;backdrop-filter:blur(10px)}
 .help h3{margin:14px 0 4px;color:#ffd24c;font-size:15px}.help p,.help li{font-size:14px;line-height:1.6;color:#d6dbec;margin:0 0 4px}.help ul{margin:0;padding-left:18px}
-@media(max-width:760px){.menu{margin:0 auto}}
+
+/* ===== 모바일 반응형 ===== (PC/태블릿 기본 레이아웃은 위 규칙 그대로)
+   세로 휴대폰: 참여자 가로 스트립 / 문자창 / 전송 바 / 가로 스크롤 카드 패
+   가로 휴대폰: [참여자 | 문자창 | 카드 목록(세로 스크롤)] 3열 */
+.box{max-width:calc(100vw - 16px)}
+@media (max-width:700px) and (orientation:portrait){
+ :root{--sb:28px}#status{gap:8px;padding:0 10px;font-size:12px}
+ .box{padding:18px;border-radius:16px}.set{grid-template-columns:96px 1fr 54px;gap:6px;padding:8px 10px}
+ .menu{flex-direction:column;width:94vw;margin:auto;gap:10px}
+ #nav{width:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}#nav h1{grid-column:1/3;font-size:22px;margin:0}#nav button{margin:0;padding:12px 14px;font-size:16px}#nav button:hover,#nav button.act{transform:none}
+ .stage{flex:none;min-height:400px}.pn{padding:16px 16px 40px}
+ #game{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"side" "main" "hand"}
+ #side{display:flex;align-items:center;gap:8px;padding:6px 8px;overflow-x:auto;overflow-y:hidden}
+ #side h3,#soloN{display:none}#plist{display:flex;gap:6px}
+ .pl{flex:none;margin:0;padding:5px 8px;gap:6px;border-radius:10px}.av{width:24px;height:24px;font-size:13px}.pl .n{font-size:12px;max-width:120px}.pl small{font-size:10px}.pl .s{font-size:16px}
+ #goal{flex:none;margin:0;font-size:11px;max-width:100px;line-height:1.25}#quitB{flex:none;width:auto;padding:6px 10px;font-size:12px}
+ main{padding:4px}#phone{width:100%;border-radius:16px}#chatHdr{padding:5px;font-size:13px}#chatHdr small{display:none}
+ #chat{padding:10px;gap:8px}.msg{max-width:90%}.msg .b{font-size:15px;padding:8px 12px}
+ #bar{padding:6px;min-height:50px;flex-wrap:wrap}#bar .btn{padding:10px 18px;font-size:15px}
+ #handWrap{justify-content:flex-start}
+ #preview{height:46px;font-size:13.5px;line-height:1.25;width:96%}
+ #hand{width:100%;min-width:0;height:158px;padding:6px 8px;justify-content:flex-start;align-items:center;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+ .card{width:116px;height:140px;margin:0 6px 0 0!important;padding:8px;scroll-snap-align:center;transform:none!important;box-shadow:0 2px 8px #0008}
+ .card:first-child{margin-left:auto!important}.card:last-child{margin-right:auto!important}
+ .card small{font-size:9px;margin-bottom:3px}.card b{font-size:12.5px;max-height:106px}
+ .card.sel,.card.sel:hover:not(:disabled){outline:3px solid #ff9f0a;transform:translateY(-6px)!important;background:#fff3d6}
+}
+@media (max-height:520px) and (orientation:landscape){
+ :root{--sb:24px}#status{padding:0 10px;font-size:11px;gap:8px}#status button{font-size:12px}
+ .box{padding:14px}.set{padding:6px 10px;margin:5px 0}
+ .menu{flex-direction:row;width:96vw;gap:12px;margin:auto}
+ #nav{width:150px}#nav h1{font-size:16px;margin:0 0 6px}#nav button{padding:8px 12px;font-size:14px;margin:3px 0}
+ .stage{flex:1 1 auto;min-height:0;height:calc(100dvh - var(--sb) - 20px);align-self:stretch}.pn{padding:12px 14px 36px}
+ #game{grid-template-columns:128px minmax(0,1fr) 200px;grid-template-rows:minmax(0,1fr);grid-template-areas:"side main hand"}
+ #side{padding:6px;overflow-y:auto}#side h3,#soloN{display:none}
+ .pl{padding:5px 6px;margin-bottom:4px;gap:6px;border-radius:10px}.av{width:22px;height:22px;font-size:12px}.pl .n{font-size:11px}.pl small{font-size:9px}.pl .s{font-size:15px}
+ #goal{font-size:10px;margin:4px 0;line-height:1.25}#quitB{padding:5px;font-size:11px}
+ main{padding:4px}#phone{border-radius:14px}#chatHdr{padding:4px;font-size:12px}#chatHdr small{display:none}
+ #chat{padding:8px;gap:6px}.msg .b{font-size:13.5px;padding:7px 11px}.msg{max-width:88%}
+ #bar{padding:5px;min-height:44px;flex-wrap:wrap}#bar .btn{padding:7px 14px;font-size:13px}#bar .t{font-size:12px}
+ #handWrap{padding:6px;justify-content:flex-start;align-items:stretch;overflow:hidden}#preview{display:none}
+ #hand{flex:1;min-height:0;height:auto;padding:0;flex-direction:column;justify-content:flex-start;align-items:stretch;overflow-y:auto;overflow-x:hidden;gap:6px}
+ .card{width:100%;height:auto;flex:none;margin:0!important;padding:7px 9px;transform:none!important;box-shadow:0 1px 4px #0008}.card small{display:none}.card b{max-height:none;font-size:12.5px}
+ .card.sel,.card.sel:hover:not(:disabled){outline:3px solid #ff9f0a;background:#fff3d6;transform:none!important}
+}
+@media (min-width:701px) and (max-width:1000px) and (min-height:521px){
+ .card{width:126px;height:158px;margin-left:-38px}.card b{font-size:12.5px;max-height:112px}#hand{max-width:100%}
+}
 </style></head><body>
 <div id="status"><span id="clock">--:--</span><span class="sp"></span>
 <button id="setB" title="설정">⚙️ 설정</button>
@@ -96,10 +141,10 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
 <div class="pn" id="pn-create"><h2>방 만들기</h2><label class="muted">게임 모드</label><select id="cMode"><option value="online">온라인 멀티플레이</option><option value="solo">혼자 플레이 (가상 플레이어 2명)</option></select><label class="muted">목표 점수</label><select id="cTarget"><option value="5">5점</option><option value="10">10점</option></select><label class="muted">받은 메시지 카드 선택 방식</label><select id="cPick"><option value="random">무작위</option><option value="choose">심판이 선택</option></select><div class="row"><button class="btn g" data-go="start">뒤로</button><button class="btn" id="createB">방 만들기</button></div></div>
 <div class="pn help" id="pn-help"><h2>도움말</h2>
 <h3>기본 규칙</h3><p>황당한 문자(상황 카드)가 도착하면, 손패 7장 중 가장 웃긴 답장 카드를 골라 보내는 파티 게임입니다.</p>
-<h3>진행 방식</h3><ul><li>문자가 도착합니다. 무작위로 나오거나, 방 설정에 따라 심판이 후보 5장 중 하나를 골라 출제합니다.</li><li>심판을 뺀 모두가 답장 카드를 하나씩 제출합니다.</li><li>모두 제출하면 이름 없이 공개되고 음성으로 읽어 줍니다.</li><li>심판이 가장 웃긴 답장을 고르면 그 작성자가 1점을 얻습니다.</li><li>다음 라운드에서는 심판이 교대하고, 목표 점수(5점/10점)에 먼저 도달하면 게임이 끝납니다.</li></ul>
+<h3>진행 방식</h3><ul><li>문자가 도착합니다. 무작위로 나오거나, 방 설정에 따라 심판이 후보 5장 중 하나를 골라 출제합니다.</li><li>심판을 뺀 모두가 답장 카드를 하나씩 제출합니다.</li><li>모두 제출하면 이름 없이 한 장씩 차례로 공개되고, 음성으로 읽은 뒤 다음 답장이 나옵니다.</li><li>심판이 가장 웃긴 답장을 고르면 그 작성자가 1점을 얻습니다.</li><li>다음 라운드에서는 심판이 교대하고, 목표 점수(5점/10점)에 먼저 도달하면 게임이 끝납니다.</li></ul>
 <h3>카드 제출과 심판 판정</h3><ul><li>카드를 클릭하면 선택되고 위쪽에 내용이 크게 표시됩니다. [이 답장 보내기]를 누르면 제출되며, 제출 후에는 바꿀 수 없습니다.</li><li>심판은 카드를 내지 않습니다. 공개된 말풍선을 눌러 고른 뒤 [이 답장 선택]으로 확정합니다.</li></ul>
 <h3>2인 모드와 3인 이상 모드</h3><ul><li><b>2명</b>: 심판도 점수도 없습니다. 둘 다 답장하면 이름과 함께 공개되고, 서로의 카드를 구경하며 방장이 다음 문자로 넘깁니다.</li><li><b>3명 이상</b>: 심판이 돌아가며 판정하는 점수 대결입니다. 답장 작성자는 판정이 끝날 때까지 공개되지 않습니다.</li><li><b>혼자 플레이</b>: 가상 플레이어 2명과 진행합니다. 가상 플레이어는 AI가 아니라 규칙 기반 봇입니다.</li></ul>
-<h3>기타</h3><p>상단 ⚙️ 설정에서 효과음, 음성 읽기(TTS) 엔진·속도·음량을 바꿀 수 있습니다.</p></div>
+<h3>기타</h3><p>상단 ⚙️ 설정에서 효과음, 음성 읽기(TTS) 엔진·속도·음량, 화면 언어와 음성 언어를 바꿀 수 있습니다.</p></div>
 <div class="pn" id="pn-settings"><h2>설정</h2><div id="setHost"></div></div>
 <div class="pn" id="pn-exit"><h2>나가기</h2><p style="font-size:22px;font-weight:700">이건 웹 게임입니다. 직접 종료하세요.</p></div>
 <p id="connectMsg" class="muted hidden" style="position:absolute;left:26px;right:26px;bottom:10px;margin:0;color:#ff8a8a"></p>
@@ -304,14 +349,178 @@ const REPLY_ORIGINAL=[
 "자수하겠습니다. 근데 먼저 밥부터 먹고요."
 ];
 INBOX.push(...INBOX_ORIGINAL);REPLIES.push(...REPLY_ORIGINAL);
+// ===== 카드 영어 번역 (키 = 한국어 원문). 화면/음성 언어가 English일 때 사용. 새 카드를 추가하면 여기에도 번역을 추가하세요 =====
+const CARD_EN={
+"점심때 먹었던 치즈 이름이 뭐였지?": "What was the name of that cheese we had at lunch?",
+"5시간째 멈추지 않는 문제가 생겼어!": "I have a problem that's been going strong for five hours now!",
+"우리 회사가 파산한 지 벌써 1년이라니 믿겨져?": "Can you believe it's already been a year since our company went bankrupt?",
+"지금 네가 듣고 싶지 않을 수도 있겠지만, 의사가 헤르페스일 수 있다고 하더라.": "You might not want to hear this right now, but the doctor said it could be herpes.",
+"남편이 죽었어요. 재혼은 싫고 성관계만 원해요. 여기 눌러 채팅하기.": "My husband passed away. I don't want to remarry, I just want sex. Tap here to chat.",
+"엄마가 네 방에서 이상한 소리를 들었다는데 설명해 봐.": "Mom says she heard strange noises coming from your room. Care to explain?",
+"실례지만 혹시 어제 제 전 남자친구와 같이 계셨나요?": "Excuse me, but were you with my ex-boyfriend yesterday?",
+"축하해! 네가 우리 회사의 신임 CEO로 선정됐어. 월급은 최저임금이야.": "Congratulations! You've been chosen as our company's new CEO. The salary is minimum wage.",
+"아들아, 아빠가 너에게 숨겨온 비밀이 있단다.": "Son, there's a secret your father has been keeping from you.",
+"나 지금 경찰서인데 네 도움이 꼭 필요해.": "I'm at the police station right now and I really need your help.",
+"혹시 네가 어제 인터넷에 올린 그 사진, 가족들도 봐도 되는 거니?": "That photo you posted online yesterday, is the family allowed to see it too?",
+"우리 강아지가 네 이름을 부르면서 울고 있어.": "My dog is crying and calling out your name.",
+"죄송한데 고객님 카드로 3억 원이 결제됐습니다.": "Sorry to bother you, but 300 million won was just charged to your card.",
+"나 사실 너한테 첫눈에 반했어. 우리 오늘부터 사귈래?": "I actually fell for you at first sight. Want to start dating today?",
+"선생님이 네 생활기록부에서 뭔가를 발견하셨대.": "Your teacher found something in your school record.",
+"지금 당장 집으로 와. 설명은 나중에 할게.": "Come home right now. I'll explain later.",
+"네가 어제 보낸 음성 메시지, 회사 단체방에 올라왔어.": "That voice message you sent yesterday just got posted in the company group chat.",
+"아빠가 네 검색 기록을 봤다. 가족회의를 소집하마.": "Dad here. I saw your search history. I'm calling a family meeting.",
+"저기요, 혹시 제 장례식에 와주실 수 있나요?": "Excuse me, could you possibly come to my funeral?",
+"우리 헤어지자. 이유는 네가 너무 잘 알 거야.": "Let's break up. You know exactly why.",
+"방금 네 이름으로 대출 신청이 들어왔는데?": "A loan application was just submitted in your name. Was that you?",
+"나 임신한 것 같아. 우리 이제 어떻게 하지?": "I think I'm pregnant. What do we do now?",
+"오늘 소개팅 상대가 네 사진을 보고 도망갔어.": "Today's blind date took one look at your photo and ran.",
+"이 메시지를 10명에게 보내지 않으면 평생 솔로가 됩니다.": "If you don't forward this message to 10 people, you'll be single for life.",
+"안녕하세요. 저는 미래에서 온 당신의 손자입니다.": "Hello. I'm your grandson from the future.",
+"네가 맡긴 식물이 오늘 드디어 말을 하기 시작했어.": "The plant you left with me finally started talking today.",
+"우리 집에 네가 두고 간 물건이 있는데… 이게 대체 뭐야?": "You left something at my place. What on earth is this?",
+"긴급 공지: 오늘부터 우리 가족 단톡방에서 아빠가 퇴출됩니다.": "Urgent notice: as of today, Dad is being kicked out of our family group chat.",
+"어젯밤 네가 한 말, 녹음해 뒀어. 들어볼래?": "I recorded what you said last night. Want to hear it?",
+"확실히 말해둘게. 엄마랑 아빠가 이혼하는 건 사랑이 식어서가 아니야. 너 때문이야.": "Let me be clear: Mom and Dad aren't divorcing because the love faded. It's because of you.",
+"나 지금 임테기 하고있는데 모르는거지 뭐 3~5분 뒤에 너 아빠 될 수도 있어.": "I'm taking a pregnancy test right now, and who knows, in 3 to 5 minutes you might be a dad.",
+"내가 천왕성을 부수고나면 행성은 7개만 남을거야 ㅎㅎ": "Once I destroy Uranus, only 7 planets will be left lol",
+"나한테 아빠라고 말하는 거 그만해줄래? 진짜 불편해": "Can you stop calling me Dad? It's really uncomfortable.",
+"[Web발신] 고객님의 택배가 반송되었습니다. 사유: 내용물이 너무 부끄러움.": "[Automated message] Your package was returned to sender. Reason: the contents were too embarrassing.",
+"부장님이 방금 단톡방에 우리 사진을 잘못 올리셨어. 전체 공개로.": "The department head just posted our photo in the group chat by mistake. Visible to everyone.",
+"오빠 어제 기억 안 난다더니 사실 다 기억나. 영상도 있어.": "Babe, you said you didn't remember last night, but I remember everything. I have video, too.",
+"엄마가 네 서랍에서 이상한 걸 발견했는데, 이거 뭐에 쓰는 거니? 사진 보낸다.": "Mom found something strange in your drawer. What is this for? Sending a photo.",
+"저는 당신 전 애인의 현 남편입니다. 만나서 얘기 좀 합시다.": "I'm the current husband of your ex. We need to talk in person.",
+"[국세청] 귀하의 은밀한 소비 내역이 확인되어 연락드립니다.": "[Tax Agency] We're contacting you because your private spending history has been flagged.",
+"우리 사이 이대로 괜찮을까? 사실 남편이 다 알고 있어.": "Are we really okay like this? Actually, my husband knows everything.",
+"교수님이 네 과제를 읽다가 우셨대. 좋은 의미는 아니야.": "Professor cried while reading your assignment. And not in a good way.",
+"할머니가 가족 단톡방에 야한 링크를 공유하셨어. 심지어 즐겨찾기였대.": "Grandma shared a racy link in the family group chat. It was in her bookmarks, apparently.",
+"여보, 결혼기념일 선물로 아파트 계약했어. 근데 명의는 비서 이름이야.": "Honey, I signed for an apartment as our anniversary gift. But it's in my secretary's name.",
+"면접관인데요, 이력서 특기란에 적으신 '눈빛으로 사람 홀리기'는 농담이죠?": "This is your interviewer. The \"seducing people with my eyes\" you put under special skills is a joke, right?",
+"옆집인데요. 어젯밤 벽 너머로 들린 소리가 너무 커서 박수를 쳐드리고 싶었습니다.": "It's your next-door neighbor. What I heard through the wall last night was so loud I wanted to applaud.",
+"아빠가 새엄마를 소개해준대. 근데 우리 담임선생님이야.": "Dad's going to introduce me to my new stepmom. But she's my homeroom teacher.",
+"헤어진 지 1년 됐는데 아직도 네 넷플릭스 쓰고 있어. 그리고 네 침대도.": "It's been a year since we broke up and I'm still using your Netflix. And your bed.",
+"친자확인 결과가 나왔어. 놀라지 마.": "The paternity test results are in. Don't freak out.",
+"사장님이 너를 부르셔. 이유는 말씀 안 하셨고 손에 USB를 들고 계셔.": "The boss wants to see you. They didn't say why, but they're holding a USB drive.",
+"방금 소개팅남이 계산하고 갔는데 내 신장 시세까지 정산하고 갔더라.": "My blind date just paid and left, and the receipt included the market price of my kidney.",
+"여기 모텔인데 카운터에서 네 이름이 VIP 회원이래.": "I'm at a motel and the front desk says you're a VIP member.",
+"네 시험지에 낙서가 있던데, 이건 그림이야 아니면 자백이야?": "There's a doodle on your test paper. Is it a drawing or a confession?",
+"자기야 미안, 방금 말실수했어. 너를 남편 이름으로 불렀어.": "Sorry, babe, I just slipped up. I called you by my husband's name.",
+"로또 당첨됐어! 근데 당첨금은 전 애인이랑 반반 나눠야 해.": "I won the lottery! But I have to split the jackpot 50/50 with my ex.",
+"헤어졌는데 왜 아직도 내 카드로 커플룸을 예약해 놨어?": "We broke up, so why did you book a couples room with my card?",
+"엄마 친구 아들이 의사 됐대. 근데 그게 네 전 남친이래.": "Mom's friend's son became a doctor. Apparently he's your ex-boyfriend.",
+"신입 환영회 때 부른 노래 영상, 인사팀이 징계 근거로 쓰겠대.": "HR says they'll use the video of you singing at the welcome party as grounds for disciplinary action.",
+"[긴급] 회사 메일 잘못 보내셨어요. '전체 회신'으로 고백하셨어요.": "[Urgent] You sent the wrong company email. You confessed your feelings with \"Reply All.\"",
+"오늘 밤에 나 혼자 있는데, 혹시 우리 남편 퇴근하기 전에 올래?": "I'm home alone tonight. Want to come over before my husband gets off work?",
+"룸메이트가 네 칫솔로 뭘 했는지 알고 싶어?": "Want to know what your roommate did with your toothbrush?",
+"당신의 위치 공유 기록을 아내분께 전달했습니다. 좋은 하루 되세요.": "Your location-sharing history has been forwarded to your wife. Have a great day.",
+"소개팅 어플에서 매칭된 사람이 우리 엄마래. 프로필 사진이 진짜 엄마야.": "The person I matched with on the dating app is my mom. The profile photo is literally my mother.",
+"Alexa, 이 대화 좀 끝내 줘.": "Alexa, end this conversation for me.",
+"일단 변호사부터 선임하겠습니다.": "I'll be hiring a lawyer first.",
+"지금은 곤란해. 펭귄이랑 면접 중이거든.": "Not a good time. I'm in the middle of an interview with a penguin.",
+"그 얘기는 우리 둘만의 비밀로 하자. 그리고 난 네가 누군지 몰라.": "Let's keep this between us. Also, I have no idea who you are.",
+"죄송합니다. 고객님의 인생은 현재 점검 중입니다.": "Sorry, your life is currently under maintenance.",
+"ㅋㅋㅋㅋㅋㅋ 이걸 진짜 나한테 보냈다고?": "LOLOLOL you actually sent this to me?",
+"제가 아니라 제 쌍둥이가 했습니다. 쌍둥이는 없습니다만.": "It wasn't me, it was my twin. I don't have a twin, though.",
+"그럼 이제부터 모르는 사이인 걸로 하죠.": "Then let's pretend we've never met.",
+"읽씹이 답이라는 걸 몸소 보여드리겠습니다.": "Allow me to demonstrate that leaving you on read is the answer.",
+"이 대화는 넷플릭스 다큐멘터리로 제작될 예정입니다.": "This conversation will be made into a Netflix documentary.",
+"혹시 와이파이 비밀번호부터 알려주실래요?": "Could you start by telling me the Wi-Fi password?",
+"그럴 줄 알고 이미 비상 탈출구를 만들어 뒀죠.": "I saw this coming, so I already built an emergency exit.",
+"네, 그런데 제 변호사가 답하지 말래요.": "Yes, but my lawyer told me not to respond.",
+"이런 메시지는 처음 받아보네요. 차단은 처음이 아니지만.": "First time getting a message like this. Not my first time blocking someone, though.",
+"저는 지금 국가 기밀 임무 수행 중입니다. 김치찌개 배달이요.": "I'm on a top-secret national mission right now. Delivering kimchi stew.",
+"죄송해요. 제 폰이 술에 취해서 보냈나 봐요.": "Sorry, my phone must have been drunk when it sent that.",
+"아무튼 오늘 저녁은 치킨으로 합시다.": "Anyway, let's have fried chicken for dinner tonight.",
+"그게 무슨 뜻인지 모르겠지만 일단 사과할게요.": "I don't know what that means, but I'll apologize anyway.",
+"잠시 후 상담원이 연결됩니다. 예상 대기 시간: 영원.": "An agent will be with you shortly. Estimated wait time: forever.",
+"저는 이미 마음의 준비를 마쳤습니다. 통장은 아직입니다.": "I'm mentally prepared. My bank account isn't.",
+"내가 알던 세상은 이렇지 않았는데.": "The world I knew wasn't like this.",
+"좋은 소식이네요. 저는 나쁜 소식 담당입니다.": "That's good news. I'm in charge of the bad news.",
+"이 문자를 읽은 순간부터 당신은 제 상사입니다.": "The moment I read this text, you became my boss.",
+"저는 이미 탈퇴했습니다. 인생에서요.": "I've already unsubscribed. From life.",
+"죄송하지만 저는 감정이 없는 무료 체험판입니다.": "Sorry, but I'm a free trial version with no feelings.",
+"확인했습니다. 처리 결과는 다음 생에 안내드리겠습니다.": "Received. We'll let you know the outcome in your next life.",
+"이 대화 캡처해서 우리 엄마한테 보내도 돼요?": "Can I screenshot this conversation and send it to my mom?",
+"오히려 좋아. 최악을 예상했는데 더 최악이네.": "Honestly, great. I expected the worst, and this is even worse.",
+"잠시만요, 지금 제 양심이랑 통화 중입니다.": "One moment, I'm on the phone with my conscience.",
+"저도 같은 생각이었어요. 단 한 번도 생각해 본 적 없지만.": "I was thinking the same thing. Not that I've ever thought about it even once.",
+"그런데 혹시 오늘이 무슨 요일인지 아세요?": "By the way, do you happen to know what day it is today?",
+"답장하지 말라고 했는데 손가락이 말을 안 듣네요.": "I told myself not to reply, but my fingers won't listen.",
+"축하합니다! 당신은 오늘의 불행 당첨자입니다.": "Congratulations! You're today's unluckiest winner.",
+"그럼 저는 이만 제2의 인생을 살러 가보겠습니다.": "Well then, I'm off to start my second life.",
+"와우.. 내 동생이랑 그 짓을 해놓고 어떻게 나한테 문자를 하냐?": "Wow.. you did THAT with my younger sibling and you still have the nerve to text me?",
+"엄마, 뭐?": "Mom, what?",
+"답장하기 전에 말해두는데, 나 아홉 살이야.": "Before I reply, I should tell you: I'm nine years old.",
+"아빠?": "Dad?",
+"방금 읽은 걸 눈으로 씻어내고 싶습니다.": "I want to wash what I just read out of my eyes.",
+"네, 알겠습니다. 알겠다는 건 아닙니다.": "Yes, understood. By which I mean I don't understand at all.",
+"지금 심장이 두 번 멈췄다가 다시 뛰었습니다.": "My heart just stopped twice and then started again.",
+"이 문자는 못 본 걸로 하겠습니다. 이미 세 번 읽었지만요.": "I'm going to pretend I never saw this text. I've already read it three times.",
+"솔직히 저도 비슷한 생각을 한 적이 있습니다. 어제요.": "Honestly, I've had similar thoughts. Yesterday.",
+"제 인생 최고의 문자였습니다. 최악이라는 뜻입니다.": "That was the best text of my life. By \"best\" I mean worst.",
+"저는 이 문제에 대해 묵비권을 행사하겠습니다.": "I will be exercising my right to remain silent on this matter.",
+"일단 물부터 한 잔 마시고 오겠습니다.": "First, let me go get a glass of water.",
+"당신이 저를 그렇게 생각하는 줄 몰랐습니다. 알고 싶지도 않았고요.": "I didn't know you thought of me that way. I didn't want to know, either.",
+"이 일은 나중에 책으로 쓰겠습니다. 제목은 '왜 열어봤을까'입니다.": "I'm going to write a book about this someday. It's called \"Why Did I Open That?\"",
+"지금 제 표정은 당신이 상상하는 것보다 더 심각합니다.": "My face right now is more serious than you can imagine.",
+"전 아직 마음의 준비가 안 됐는데, 인생은 늘 이렇죠.": "I'm not mentally ready yet, but that's life for you.",
+"이 문자에는 답하지 않겠습니다. 이 문자가 답입니다.": "I won't be answering this text. This text is the answer.",
+"사실 하고 싶은 말이 있었는데 방금 잊어버렸습니다.": "I actually had something to say, but I just forgot it.",
+"저는 지금 바빠서 답을 못 합니다. 그래도 하고 있네요.": "I'm too busy to reply right now. And yet, here I am replying.",
+"이건 아무리 생각해도 제 잘못이 아닙니다. 아마도요.": "No matter how I look at it, this isn't my fault. Probably.",
+"방금 소름 돋았습니다. 팔뚝 말고 영혼에요.": "I just got goosebumps. Not on my arms, on my soul.",
+"일단 기록은 남기겠습니다. 인생 흑역사 폴더에요.": "I'll be keeping a record of this. In my folder of life's worst moments.",
+"하나만 물을게요. 이게 사실이라면 왜 지금 말해요?": "Just one question: if this is true, why are you telling me now?",
+"저를 찾지 마세요. 저도 저를 찾는 중입니다.": "Don't look for me. I'm still looking for myself.",
+"네? 방금 뭐라고 하셨죠? 아니요, 두 번 말하지 마세요.": "Sorry, what did you just say? No, don't say it twice.",
+"이 문자 때문에 오늘 저녁 메뉴를 바꿨습니다. 마음이 허해서요.": "This text made me change tonight's dinner. I'm feeling empty inside.",
+"이 대화를 계속할 수도, 끝낼 수도 없습니다. 둘 다 무섭습니다.": "I can't continue this conversation and I can't end it. Both scare me.",
+"일단 알겠어요. 일단이 어디까지인지는 저도 모르겠습니다.": "Okay, for now. How long \"for now\" lasts, I couldn't tell you.",
+"이 상황에서 제가 할 수 있는 최선은 읽씹입니다. 방금 읽었습니다.": "The best I can do in this situation is leave you on read. I just read it.",
+"오늘 이후로 문자 알림을 끄고 산속으로 들어가겠습니다.": "From today on, I'm turning off text notifications and moving to the mountains.",
+"제가 뭘 했다고 이러세요... 아니, 했네요.": "What did I even do to deserve this... oh wait, I did do it.",
+"이 문자, 제 상담 선생님이 좋아하겠네요. 상담비가 오르겠네요.": "My therapist is going to love this text. Their rates are going up.",
+"그 말씀, 정확히 어디까지가 농담인가요?": "That thing you said, exactly how much of it is a joke?",
+"이 얘기는 여기서 끝내죠. 저는 이미 끝났습니다.": "Let's end this conversation here. I'm already finished.",
+"일단 웃겠습니다. 울기 전에요.": "I'll laugh for now. Before I cry.",
+"저는 지금 아무 감정도 느끼지 않는 중입니다. 느끼면 큰일 나서요.": "I'm currently not feeling anything. If I did, it'd be a disaster.",
+"일단 진정하고 이 대화는 없던 걸로 합시다.": "Let's calm down and pretend this conversation never happened.",
+"지금 이 상황을 이해하려고 노력하는 중입니다. 실패 중입니다.": "I'm trying to understand this situation. I'm failing.",
+"방금 읽었는데 벌써 후회됩니다.": "I just read it and I already regret it.",
+"제 입장에서는 완전히 합리적인 선택이었습니다.": "From where I stand, it was a perfectly rational choice.",
+"이 문자, 증거로 보관해도 될까요?": "Can I keep this text as evidence?",
+"그 말을 듣고 나니 제가 더 불안해졌습니다.": "Hearing that has made me even more anxious.",
+"정중히 거절하겠습니다. 이유는 묻지 마세요.": "I respectfully decline. Please don't ask why.",
+"지금 통화 가능하세요? 아니, 가능하지 않으셔도 걸겠습니다.": "Can you talk right now? Actually, I'm calling anyway.",
+"저는 이 일과 아무 상관이 없고, 그래서 더 억울합니다.": "I have nothing to do with this, which makes it even more unfair.",
+"제 마음속의 변호사가 입을 열지 말라고 합니다.": "The lawyer in my head is telling me not to say a word.",
+"이 대화는 3분 뒤 자동으로 부끄러워집니다.": "This conversation will automatically become embarrassing in three minutes.",
+"지금 제 얼굴은 뭐라 설명할 수 없는 표정입니다.": "My face right now is making an expression I can't describe.",
+"그건 오해입니다. 정확히는 90%쯤 오해입니다.": "That's a misunderstanding. About 90 percent of one, anyway.",
+"지금 답장을 쓰는 제 손이 떨리고 있습니다.": "My hands are shaking as I write this reply.",
+"저는 책임질 준비가 안 됐습니다. 책임은 더더욱요.": "I'm not ready to take responsibility. Responsibility, even less so.",
+"일단 내일 아침에 이야기합시다. 서로 기억이 흐릿할 때요.": "Let's talk tomorrow morning, when both our memories are a bit hazy.",
+"이 일은 저희 둘만 아는 걸로 하죠. 둘 말고 몇 명 더요.": "Let's keep this between the two of us. And a few other people.",
+"저는 이제 모든 걸 포기하고 라면을 끓이러 갑니다.": "I'm giving up on everything and going to boil some instant noodles.",
+"잠깐만요, 이거 녹음되고 있나요? 아, 제가 하고 있었네요.": "Wait, is this being recorded? Oh, I'm the one recording.",
+"'사실 그렇게 놀랍지는 않았어요.' 라고 말하면 안 되겠죠?": "I guess I shouldn't say \"honestly, I'm not that surprised,\" right?",
+"제 변호사가 이 대화를 읽고 있습니다. 안녕하세요 변호사님.": "My lawyer is reading this conversation. Hello, counselor.",
+"전원이 꺼져 있어 연결이 되지 않습니다. 삐 소리 후 사망하세요.": "The number you have dialed is switched off. Please leave your death after the beep.",
+"저는 이 문자를 받은 적 없습니다. 방금 지웠습니다.": "I never received this text. I just deleted it.",
+"더 이상은 제 상담사도 감당 못 합니다. 상담사가 먼저 울었어요.": "Even my therapist can't handle this anymore. They cried first.",
+"확인 결과 해당 문자는 스팸이 아니라 사실이었습니다. 유감입니다.": "We checked, and that text wasn't spam. It was true. Sorry to hear that.",
+"너무 무서워서 지금 치킨을 시켰습니다. 위로가 필요해서요.": "I'm so scared that I just ordered fried chicken. I need comfort.",
+"사과는 못 하고 눈물만 납니다. 연기예요.": "I can't apologize, I can only cry. It's an act.",
+"변명은 안 하겠습니다. 변명은 이미 법무팀이 준비했습니다.": "I won't make excuses. The legal team already prepared them.",
+"이건 제 평생 가장 큰 오해입니다. 그리고 가장 정확한 오해입니다.": "This is the biggest misunderstanding of my life. And the most accurate one.",
+"자수하겠습니다. 근데 먼저 밥부터 먹고요.": "I'll turn myself in. But first, I'm having a meal."
+};
 const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const shuffle=a=>{a=[...a];for(let i=a.length;i>1;){const j=Math.random()*i--|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-const hhmm=()=>new Date().toLocaleTimeString("ko-KR",{hour:"numeric",minute:"2-digit"});
+const hhmm=d=>new Date(d||Date.now()).toLocaleTimeString(CFG.uiLang==="en"?"en-US":"ko-KR",{hour:"numeric",minute:"2-digit"});
 const MAXP=8,HAND=7;
 const PEER_CONFIG={};// 엄격한 NAT 환경용 TURN 서버가 있다면 {config:{iceServers:[...]}} 형태로 지정
 const TTS_PROXY_URL="";// Google Cloud TTS를 중계하는 백엔드 주소(예: Cloudflare Worker). 비워 두면 브라우저 내장 음성 사용. API 키는 절대 여기에 넣지 마세요.
-const CLOUD_VOICES=["ko-KR-Neural2-A","ko-KR-Neural2-C","ko-KR-Neural2-B","ko-KR-Wavenet-D","ko-KR-Wavenet-A","ko-KR-Wavenet-C"];
-const DEF={engine:"google",sfxOn:true,sfxVol:60,ttsOn:true,voice:"",rate:100,pitch:100,tvol:100};let CFG={...DEF};try{Object.assign(CFG,JSON.parse(localStorage.getItem("npwd-cfg")||"{}"))}catch(e){}
+const DEF={engine:"google",sfxOn:true,sfxVol:60,ttsOn:true,voice:"",uiLang:"ko",ttsLang:"en",v_ko:"",v_en:"",rate:100,pitch:100,tvol:100};let CFG={...DEF};try{Object.assign(CFG,JSON.parse(localStorage.getItem("npwd-cfg")||"{}"))}catch(e){}
 const save=()=>{try{localStorage.setItem("npwd-cfg",JSON.stringify(CFG))}catch(e){}};
 // ===== 효과음 (WebAudio) =====
 const Sfx={ctx:null,init(){try{this.ctx=this.ctx||new(window.AudioContext||window.webkitAudioContext)();this.ctx.resume()}catch(e){}},
@@ -319,44 +528,171 @@ const Sfx={ctx:null,init(){try{this.ctx=this.ctx||new(window.AudioContext||windo
  select(){this.tone(660,0,.08,"triangle")},click(){this.tone(620,0,.05,"triangle",.1)},nav(){this.tone(420,0,.08,"sine",.14);this.tone(630,.05,.1,"sine",.12)},send(){this.tone(250,0,.28,"sawtooth",.12,1600)},recv(){if(CFG.sfxOn&&this.ctx)Voice.hold=Voice.now()+360;this.tone(880,0,.12);this.tone(1175,.13,.2)},win(){if(CFG.sfxOn&&this.ctx)Voice.hold=Voice.now()+720;[523,659,784,1047].forEach((f,i)=>this.tone(f,i*.13,.28,"square",.14))}};
 // ===== TTS: Web Speech API 어댑터 (외부 AI TTS로 바꾸려면 speak()/next() 내부만 교체) =====
 // 한국어 음성만 사용, 속도·음높이·음량은 설정값 하나로 모든 문장에 동일 적용, 문장 단위 큐로 겹침 방지
-const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1e9,vDone:false,vWait:0,timer:0,cur:null,cache:new Map(),trace:[],el:typeof Audio!=="undefined"?new Audio():null,
+// ===== TTS: 기기별 경로 점검 + 안정화 =====
+// 경로: ① (Google 엔진 + TTS_PROXY_URL 설정 시) Google Cloud TTS(백엔드) → ② 브라우저 Web Speech → ③ 재생 불가 시 건너뜀(공개 순서는 멈추지 않음)
+//  · Android Chrome: Web Speech가 기기의 시스템 TTS(Google TTS/삼성 TTS)를 호출. 음성 이름에 "Google/Microsoft"가 없어 엔진 선택은 적용되지 않음
+//  · iOS Safari: WebKit 시스템 음성만 사용(한국어는 보통 1~2개). 엔진 선택 적용 안 됨 → 음높이·속도 차이로 화자 구분
+//  · 카카오톡·네이버 등 인앱 브라우저는 Web Speech가 없는 경우가 많음 → 감지하여 안내
+const UA=navigator.userAgent||"",IS_IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),IS_ANDROID=/Android/i.test(UA),IN_APP=/KAKAOTALK|NAVER|Instagram|FBAN|FBAV|DaumApps|Line\/|; wv\)/i.test(UA);
+const CLOUD={ko:{f:["ko-KR-Neural2-A","ko-KR-Neural2-B","ko-KR-Wavenet-A"],m:["ko-KR-Neural2-C","ko-KR-Wavenet-D","ko-KR-Wavenet-C"]},en:{f:["en-US-Neural2-C","en-US-Neural2-E","en-US-Neural2-F","en-US-Neural2-H"],m:["en-US-Neural2-D","en-US-Neural2-A","en-US-Neural2-I","en-US-Neural2-J"]}};
+const F_NAME=/sunhi|jimin|seohyeon|soonbok|yujin|yuna|sora|jenny|aria|jane|sara|nancy|michelle|emma|ava|ana|libby|sonia|mia|natasha|clara|heera|samantha|karen|moira|tessa|victoria|allison|susan|zira|hazel|catherine|zoe|serena|kate|fiona|joanna|ivy|kendra|kimberly|salli|amy|emily|nicky|google us english|google 한국/;
+const M_NAME=/injoon|bongjin|gookmin|hyunsu|guy|davis|jason|tony|brandon|christopher|eric|roger|steffan|andrew|brian|ryan|william|liam|alex|daniel|fred|tom|aaron|nathan|evan|david|mark|george|james|thomas|oliver|arthur|rishi/;
+const vGender=v=>{const n=(v.name||"").toLowerCase();if(/female|woman/.test(n))return"f";if(/(^|[^a-z])(male|man)([^a-z]|$)/.test(n))return"m";if(F_NAME.test(n))return"f";if(M_NAME.test(n))return"m";return null};
+const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1e9,vDone:false,vWait:0,timer:0,wd:0,wd2:0,cur:null,curItem:null,cache:new Map(),trace:[],stat:{started:0,ended:0,failed:0,retried:0},lastErr:"",el:typeof Audio!=="undefined"?new Audio():null,
  now(){return performance.now()},
  log(e,x){this.trace.push({e,t:Math.round(this.now()),x});if(this.trace.length>300)this.trace.shift()},// 콘솔에서 Voice.trace 로 발화 시작/종료 시점 확인
- // 첫 사용자 조작 때 하나뿐인 <audio>를 무음으로 "예열"해 두면 이후 Cloud 음성 재생이 모바일/Safari 자동재생 제한에 걸리지 않음
- unlock(){this.unlocked=true;if(this.primed||!this.el)return;this.primed=true;try{this.el.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";const p=this.el.play();p&&p.catch&&p.catch(()=>{})}catch(e){}},
- all(){return window.speechSynthesis?speechSynthesis.getVoices().filter(v=>/^ko/i.test((v.lang||"").replace("_","-"))):[]},
- match(){const re=CFG.engine==="microsoft"?/microsoft/i:/google/i;return this.all().filter(v=>re.test(v.name))},
- list(){const m=this.match();return m.length?m:this.all()},
- pick(p){const l=this.list(),i=Math.max(0,l.findIndex(v=>v.voiceURI===CFG.voice)),o=[...l.slice(i),...l.slice(0,i)];return{v:o[p%o.length],pm:[1,.88,1.12,.8,1.2][Math.floor(p/o.length)%5]}},
+ supported(){return !!window.speechSynthesis&&typeof SpeechSynthesisUtterance!=="undefined"},
+ cloudOn(){return CFG.engine==="google"&&!!TTS_PROXY_URL},
+ usable(){return this.supported()||this.cloudOn()},
+ // 첫 사용자 조작(탭) 안에서 한 번 "예열": iOS/Android는 사용자 제스처 없이 시작한 음성/오디오를 막을 수 있음
+ unlock(){this.unlocked=true;if(this.primed)return;this.primed=true;
+  if(this.supported()){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}catch(e){}}
+  if(this.el){try{this.el.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";const p=this.el.play();p&&p.catch&&p.catch(()=>{})}catch(e){}}},
+ all(l=CFG.ttsLang){if(!this.supported())return[];const re=l==="en"?/^en/i:/^ko/i;return speechSynthesis.getVoices().filter(v=>re.test((v.lang||"").replace("_","-"))).sort((a,b)=>(/^en-us/i.test(b.lang)?1:0)-(/^en-us/i.test(a.lang)?1:0))},
+ match(l){const re=CFG.engine==="microsoft"?/microsoft/i:/google/i;return this.all(l).filter(v=>re.test(v.name))},
+ list(l){const m=this.match(l);return m.length?m:this.all(l)},
+ // 화자(profile)·성별에 맞는 음성 선택. 해당 성별 음성이 없으면 음높이를 조정해 근사(완전하지 않음). 음성이 1개뿐이면 음높이·속도 차이를 크게 줌
+ pick(prof,g,l){const L=this.list(l),i=Math.max(0,L.findIndex(v=>v.voiceURI===CFG["v_"+l])),o=[...L.slice(i),...L.slice(0,i)];let pool=o,sh=1;
+  if(g){const x=o.filter(v=>vGender(v)===g);if(x.length)pool=x;else sh=g==="f"?1.25:.75}
+  const pmT=pool.length<2?[1,.78,1.28,.62,1.45]:[1,.9,1.1,.82,1.18],rmT=[1,.96,1.05,.92,1.08],k=Math.floor(prof/Math.max(1,pool.length))%5;
+  return{v:pool[prof%Math.max(1,pool.length)],pm:pmT[k]*sh,rm:rmT[k]}},
+ cloudVoice(prof,g,l){const c=CLOUD[l],a=g?c[g]:c.f.flatMap((x,i)=>[x,c.m[i]]).filter(Boolean);return a[prof%a.length]},
  norm(s){return s.replace(/[\u{1F000}-\u{1FFFF}\u2600-\u27BF]/gu,"").replace(/[ㅋㅎ]{2,}/g,"크크").replace(/[ㅠㅜ]+/g,"").replace(/\.{2,}|…/g,", ").replace(/\s+/g," ").trim()},
- // 실제로 재생/대기 중인 것이 있을 때만 cancel() (불필요한 cancel 방지)
- stop(){this.q=[];this.id++;this.busy=false;clearTimeout(this.timer);this.timer=0;this.cur=null;
-  if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending)){speechSynthesis.cancel();this.cancelAt=this.now();this.log("cancel")}
-  if(this.el&&!this.el.paused){try{this.el.pause()}catch(e){}}},
- // "1번 답장. 내용"은 하나의 발화로 유지(짧은 첫 발화가 따로 잘리는 것 방지). 매우 긴 글만 문장 단위로 나눔(Chrome 장문 끊김 대비)
- speak(text,prof=0){if(!CFG.ttsOn||!this.unlocked)return;const s=this.norm(String(text));if(!s)return;(s.length>110?s.split(/(?<=[.!?])\s+/):[s]).filter(Boolean).forEach(x=>this.q.push({s:x,prof}));this.prefetch();this.next()},
- // 재생 순서 보장: 이전 발화가 끝나야만(done) 다음 발화 시작. 아래 조건에서만 잠시 대기
- //  ① 알림음(Sfx)이 끝날 때까지(hold) ② cancel() 직후 브라우저가 정리될 때까지 ③ 첫 호출 시 음성 목록이 로드될 때까지
+ diag(){return`${IS_IOS?"iOS":IS_ANDROID?"Android":"Desktop"}${IN_APP?" (in-app browser)":""} · speech:${this.supported()?"yes":"NO"} · voices ko:${this.all("ko").length} en:${this.all("en").length} · started:${this.stat.started} ended:${this.stat.ended} failed:${this.stat.failed} retried:${this.stat.retried} · last error: ${this.lastErr||"none"}`},
+ // 실제로 재생/대기 중인 것이 있을 때만 cancel() (불필요한 cancel 방지). 대기 중인 모든 발화의 Promise는 "aborted"로 종료
+ stop(){const items=[...this.q,this.curItem];this.q=[];this.curItem=null;this.id++;this.busy=false;clearTimeout(this.timer);clearTimeout(this.wd);clearTimeout(this.wd2);this.timer=this.wd=this.wd2=0;this.cur=null;
+  if(this.supported()&&(speechSynthesis.speaking||speechSynthesis.pending)){speechSynthesis.cancel();this.cancelAt=this.now();this.log("cancel")}
+  if(this.el&&!this.el.paused){try{this.el.pause()}catch(e){}}
+  items.forEach(it=>it&&it.cb&&it.cb("aborted"))},
+ // 발화 한 건을 큐에 넣고, 끝났을 때 "ended"/"failed"/"skipped"/"aborted"로 resolve 되는 Promise 반환. 재생 불가 환경에서도 즉시 "skipped"로 끝나 흐름이 멈추지 않음
+ speakP(text,prof=0,g=null,lang=CFG.ttsLang){return new Promise(res=>{if(!CFG.ttsOn||!this.unlocked||!this.usable())return res("skipped");const s=this.norm(String(text));if(!s)return res("skipped");
+  const parts=(s.length>110?s.split(/(?<=[.!?])\s+/):[s]).filter(Boolean);parts.forEach((x,i)=>this.q.push({s:x,prof,g,lang,attempt:0,cb:i===parts.length-1?res:null}));this.prefetch();this.next()})},
+ speak(...a){this.speakP(...a)},
+ // 재생 순서 보장: 이전 발화가 끝나야만(done) 다음 발화 시작. 대기 조건: ① 알림음(hold) ② cancel 직후 정리 ③ 첫 호출 시 음성 목록 로딩
  next(){if(this.busy||this.timer||!this.q.length)return;
-  const cloud=CFG.engine==="google"&&!!TTS_PROXY_URL;
-  if(!this.vDone&&!cloud&&window.speechSynthesis&&!this.all().length){if(!this.vWait)this.vWait=setTimeout(()=>{this.vDone=true;this.next()},700);return}
+  const cloud=this.cloudOn();
+  if(!this.vDone&&!cloud&&this.supported()&&!this.all(this.q[0].lang).length){if(!this.vWait)this.vWait=setTimeout(()=>{this.vDone=true;this.next()},700);return}
   this.vDone=true;const n=this.now();let w=Math.max(this.hold-n,this.cancelAt+60-n);
-  if(w<=0&&n-this.cancelAt<400&&window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))w=20;
+  if(w<=0&&n-this.cancelAt<400&&this.supported()&&(speechSynthesis.speaking||speechSynthesis.pending))w=20;
   if(w>0){this.timer=setTimeout(()=>{this.timer=0;this.next()},Math.ceil(w));return}
-  const{s,prof}=this.q.shift(),id=++this.id;this.busy=true;
-  const done=()=>{if(id!==this.id)return;this.busy=false;this.log("end",s);this.next()};
-  const browser=()=>{if(!window.speechSynthesis)return done();const u=new SpeechSynthesisUtterance(s),{v,pm}=this.pick(prof);if(v){u.voice=v;u.lang=v.lang}else u.lang="ko-KR";
-   u.rate=CFG.rate/100;u.pitch=Math.min(2,CFG.pitch/100*pm);u.volume=CFG.tvol/100;u.onstart=()=>this.log("start",s);u.onend=done;u.onerror=done;
-   this.cur=u;// 참조를 유지하지 않으면 Chrome이 발화 객체를 GC해 onend가 오지 않을 수 있음
-   try{speechSynthesis.resume()}catch(e){}speechSynthesis.speak(u)};
-  if(cloud)this.cloud(s,prof,id,done).catch(()=>{if(id===this.id)browser()});else browser()},
- key(s,prof){return prof+"|"+s+"|"+CFG.rate+"|"+CFG.pitch},
- fetchUrl(s,prof){const k=this.key(s,prof);if(!this.cache.has(k)){this.log("fetch",s);const p=fetch(TTS_PROXY_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:s,voice:CLOUD_VOICES[prof%CLOUD_VOICES.length],rate:CFG.rate/100,pitch:(CFG.pitch/100-1)*10})}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b));p.catch(()=>this.cache.delete(k));this.cache.set(k,p)}return this.cache.get(k)},
- prefetch(){if(CFG.engine==="google"&&TTS_PROXY_URL)this.q.slice(0,2).forEach(x=>this.fetchUrl(x.s,x.prof).catch(()=>{}))},// 재생 중에 다음 문장을 미리 받아 둠
- async cloud(s,prof,id,done){const url=await this.fetchUrl(s,prof);if(id!==this.id)return;const a=this.el;a.onended=a.onerror=null;a.src=url;a.volume=CFG.tvol/100;if(a.load)a.load();
-  // 오디오 버퍼링/디코딩이 끝나(canplaythrough) 첫 소리부터 온전히 낼 수 있을 때만 play()
+  const it=this.q.shift(),id=++this.id;this.busy=true;this.curItem=it;let over=false,hadVoice=false;
+  const alive=()=>!over&&id===this.id;
+  const done=res=>{if(over||id!==this.id)return;over=true;clearTimeout(this.wd);clearTimeout(this.wd2);this.busy=false;this.curItem=null;this.log(res,it.s);if(res==="ended")this.stat.ended++;if(res==="failed")this.stat.failed++;if(it.cb)it.cb(res);this.next()};
+  // 실패 시: ① 음성 객체를 지정하지 않고(언어만 지정) 1회 재시도 → ② 건너뜀(failed)
+  const fail=why=>{if(!alive())return;this.lastErr=why;this.log("err",why);if(it.attempt===0&&hadVoice){it.attempt=1;this.stat.retried++;try{speechSynthesis.cancel()}catch(e){}setTimeout(()=>alive()&&browser(false),80)}else done("failed")};
+  const browser=useVoice=>{if(!this.supported())return done("failed");
+   const u=new SpeechSynthesisUtterance(it.s),{v,pm,rm}=this.pick(it.prof,it.g,it.lang);hadVoice=!!v;
+   u.lang=v&&v.lang?v.lang.replace("_","-"):(it.lang==="en"?"en-US":"ko-KR");// Android는 "ko_KR" 형태로 주는 경우가 있어 정규화
+   if(v&&useVoice)u.voice=v;u.rate=Math.min(2,Math.max(.5,CFG.rate/100*rm));u.pitch=Math.min(2,Math.max(.2,CFG.pitch/100*pm));u.volume=CFG.tvol/100;
+   let started=false;u.onstart=()=>{started=true;clearTimeout(this.wd);this.stat.started++;this.log("start",it.s)};u.onend=()=>done("ended");
+   u.onerror=e=>{if(!alive())return;const er=(e&&e.error)||"error";if(er==="canceled"||er==="interrupted")return;fail(er)};
+   this.cur=u;// 참조 유지(GC로 onend가 사라지는 문제 방지)
+   clearTimeout(this.wd);this.wd=setTimeout(()=>{if(!alive()||started)return;if(speechSynthesis.speaking){started=true;return}fail("no-start")},3500);// 시작 이벤트가 없으면 실패 처리
+   clearTimeout(this.wd2);this.wd2=setTimeout(()=>{if(!alive())return;try{speechSynthesis.cancel()}catch(e){}done("ended")},Math.max(7000,it.s.length*450/Math.max(.5,u.rate)));// 종료 이벤트 유실 대비
+   try{speechSynthesis.resume()}catch(e){}try{speechSynthesis.speak(u)}catch(e){fail("speak-throw")}};
+  if(cloud)this.cloud(it,id,alive,done).catch(()=>{if(alive()){this.lastErr="cloud";this.log("cloud-fail");browser(true)}});else browser(true)},
+ key(it){return[it.lang,it.g,it.prof,it.s,CFG.rate,CFG.pitch].join("|")},
+ fetchUrl(it){const k=this.key(it);if(!this.cache.has(k)){this.log("fetch",it.s);const p=fetch(TTS_PROXY_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:it.s,voice:this.cloudVoice(it.prof,it.g,it.lang),rate:CFG.rate/100,pitch:(CFG.pitch/100-1)*10})}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b));p.catch(()=>this.cache.delete(k));this.cache.set(k,p)}return this.cache.get(k)},
+ prefetch(){if(this.cloudOn())this.q.slice(0,2).forEach(x=>this.fetchUrl(x).catch(()=>{}))},
+ async cloud(it,id,alive,done){const url=await this.fetchUrl(it);if(!alive())return;const a=this.el;if(!a)throw 0;a.onended=a.onerror=null;a.src=url;a.volume=CFG.tvol/100;if(a.load)a.load();
   await new Promise((ok,no)=>{if(a.readyState>=4)return ok();const to=setTimeout(ok,4000);a.oncanplaythrough=()=>{clearTimeout(to);ok()};a.onerror=()=>{clearTimeout(to);no(0)}});
-  if(id!==this.id)return;a.oncanplaythrough=null;this.log("ready",s);a.onended=()=>{this.cache.delete(this.key(s,prof));try{URL.revokeObjectURL(url)}catch(e){}done()};a.onerror=done;await a.play();this.log("play",s)}};
+  if(!alive())return;a.oncanplaythrough=null;this.log("ready",it.s);a.onended=()=>{this.cache.delete(this.key(it));try{URL.revokeObjectURL(url)}catch(e){}done("ended")};a.onerror=()=>done("failed");this.stat.started++;await a.play();this.log("play",it.s)}};
+// ===== 화면 언어(i18n) · TTS 문구 · 음성 성별 판별 =====
+// 화면 언어(CFG.uiLang)와 음성 언어(CFG.ttsLang)는 서로 독립. 한국어 원문은 그대로 두고, 영어 화면일 때만 표시 단계에서 번역한다.
+const UI_EN={
+"New Phone, Who Dis? (한국어 파티 카드게임)":"New Phone, Who Dis? (Party Card Game)",
+"시작하기":"Start","도움말":"Help","설정":"Settings","나가기":"Exit","⚙️ 설정":"⚙️ Settings","닫기":"Close","뒤로":"Back","참가":"Join",
+"닉네임":"Nickname","닉네임을 입력하세요":"Enter a nickname","방 코드 입력":"Enter room code","방 만들기":"Create Room","방 참가하기":"Join Room",
+"게임 모드":"Game mode","온라인 멀티플레이":"Online multiplayer","혼자 플레이 (가상 플레이어 2명)":"Solo (2 virtual players)","혼자 플레이 시작":"Start solo game",
+"목표 점수":"Target score","5점":"5 points","10점":"10 points","받은 메시지 카드 선택 방식":"How the received text is chosen","무작위":"Random","심판이 선택":"Judge picks",
+"이건 웹 게임입니다. 직접 종료하세요.":"This is a web game. Please close it yourself.",
+"대기실":"Waiting Room","방 코드 (친구에게 공유):":"Room code (share with friends):","목표 점수 (방장 설정)":"Target score (set by host)","출제 방식 (방장 설정)":"Prompt selection (set by host)",
+"무작위 출제":"Random prompt","출제자(심판)가 후보 중 직접 선택":"Judge picks from candidates","게임 시작":"Start game","인원이 3명 미만이 되어 대기실로 돌아왔습니다.":"Fewer than 3 players remain, so we returned to the waiting room.",
+"2명: 점수·심판 없이 서로의 카드를 구경하는 2인 모드 / 3명 이상: 심판이 고르는 점수 대결":"2 players: a casual 2-player mode with no judge or score, just enjoy each other’s cards / 3+ players: a scored battle where the judge picks the winner",
+"2인 모드 시작 (승패 없음)":"Start 2-player mode (no winner)","방장이 시작하길 기다리는 중":"Waiting for the host to start",
+"기본 규칙":"Basic Rules","진행 방식":"How a Round Works","카드 제출과 심판 판정":"Submitting Cards & Judging","2인 모드와 3인 이상 모드":"2-Player Mode vs. 3+ Players","기타":"Other",
+"황당한 문자(상황 카드)가 도착하면, 손패 7장 중 가장 웃긴 답장 카드를 골라 보내는 파티 게임입니다.":"When an absurd text (the prompt) arrives, pick the funniest reply card from your hand of 7 and send it.",
+"문자가 도착합니다. 무작위로 나오거나, 방 설정에 따라 심판이 후보 5장 중 하나를 골라 출제합니다.":"A text arrives. It is drawn at random or, depending on the room setting, the judge picks one of 5 candidates.",
+"심판을 뺀 모두가 답장 카드를 하나씩 제출합니다.":"Everyone except the judge submits one reply card.",
+"모두 제출하면 이름 없이 한 장씩 차례로 공개되고, 음성으로 읽은 뒤 다음 답장이 나옵니다.":"Once everyone has submitted, the replies are revealed anonymously, one by one, and read aloud.",
+"심판이 가장 웃긴 답장을 고르면 그 작성자가 1점을 얻습니다.":"The judge picks the funniest reply, and its author scores 1 point.",
+"다음 라운드에서는 심판이 교대하고, 목표 점수(5점/10점)에 먼저 도달하면 게임이 끝납니다.":"Next round the judge rotates, and the game ends when someone reaches the target score (5 or 10 points).",
+"카드를 클릭하면 선택되고 위쪽에 내용이 크게 표시됩니다. [이 답장 보내기]를 누르면 제출되며, 제출 후에는 바꿀 수 없습니다.":"Tap a card to select it; its text is shown large near your hand. Press [Send this reply] to submit. You can’t change it afterwards.",
+"심판은 카드를 내지 않습니다. 공개된 말풍선을 눌러 고른 뒤 [이 답장 선택]으로 확정합니다.":"The judge doesn’t play a card. Tap a revealed bubble to pick it, then confirm with [Pick this reply].",
+"2명":"2 players","3명 이상":"3+ players","혼자 플레이":"Solo Play",
+": 심판도 점수도 없습니다. 둘 다 답장하면 이름과 함께 공개되고, 서로의 카드를 구경하며 방장이 다음 문자로 넘깁니다.":": No judge, no score. Once both players reply, the replies are revealed with names, and the host moves on to the next text.",
+": 심판이 돌아가며 판정하는 점수 대결입니다. 답장 작성자는 판정이 끝날 때까지 공개되지 않습니다.":": A scored battle with a rotating judge. Reply authors stay hidden until judging is over.",
+": 가상 플레이어 2명과 진행합니다. 가상 플레이어는 AI가 아니라 규칙 기반 봇입니다.":": Play with 2 virtual players. They are rule-based bots, not AI.",
+"상단 ⚙️ 설정에서 효과음, 음성 읽기(TTS) 엔진·속도·음량, 화면 언어와 음성 언어를 바꿀 수 있습니다.":"Use ⚙️ Settings at the top to change sound effects, text-to-speech (TTS) engine, speed and volume, plus the display language and the voice language.",
+"화면 언어":"Display language","음성 언어(TTS)":"Voice language (TTS)","효과음 켜기":"Sound effects","효과음 음량":"Sound effects volume","TTS 켜기":"Enable TTS","TTS 엔진":"TTS engine","기본 음성":"Base voice","읽기 속도":"Reading speed","음높이":"Pitch","TTS 음량":"TTS volume","🔈 미리듣기":"🔈 Preview voice",
+"한국어 음성 없음":"No Korean voice","영어 음성 없음":"No English voice","참여자":"Players","가상 플레이어 A":"Bot A","가상 플레이어 B":"Bot B","방장":"Host","플레이어":"Player","나":"Me","혼자 테스트":"Solo test","모르는 번호":"Unknown Number","익명":"Anonymous",
+"✅ 제출 완료":"✅ Submitted","✍️ 답장 작성 중…":"✍️ Writing a reply…","제출함":"Submitted","고르는 중…":"Choosing…","심판 대기":"Waiting for judge","출제 대기":"Waiting for prompt","📝 출제 중":"📝 Picking a text","🏆 이번 라운드 승리":"🏆 Won this round",
+"새 문자 수신":"New message","라운드 종료":"Round over",
+"📤 이 답장 보내기":"📤 Send this reply","📝 이 문자로 출제":"📝 Use this text","👑 이 답장 선택":"👑 Pick this reply","다음 라운드 ▶":"Next round ▶","🔁 다시 하기":"🔁 Play again","로비로":"Back to lobby",
+"가장 웃긴 답장을 누르세요":"Tap the funniest reply","답장 공개 중…":"Revealing replies…","답장 전송 완료! 다른 플레이어를 기다리는 중…":"Reply sent! Waiting for the other players…",
+"방장이 다음 라운드를 시작할 때까지 대기":"Waiting for the host to start the next round","방장이 다음 판을 시작할 때까지 대기":"Waiting for the host to start the next game",
+"심판이 고르는 중…":"The judge is choosing…","출제자가 문자를 고르는 중…":"The judge is picking a text…","출제자가 상황 문자를 고르는 중…":"The judge is picking a text…",
+"👑 심판입니다. 모두가 답장할 때까지 기다려 주세요.":"👑 You’re the judge. Wait until everyone has replied.",
+"답장을 보냈습니다. 다음 라운드에 새 카드가 채워져요.":"Reply sent. Your hand refills next round.","심판은 카드를 내지 않습니다. 답장을 평가해 주세요 👑":"The judge doesn’t play a card. Judge the replies! 👑",
+"출제자(심판)입니다. 보낼 문자를 하나 고르세요. 고른 문자만 모두에게 공개됩니다.":"You’re the judge. Pick a text to send; only the one you pick is shown to everyone.",
+"서로의 답장이 공개됐어요! 승패 없이 카드 구경을 즐겨 보세요 😄":"Both replies are revealed! No winner here, just enjoy each other’s cards 😄",
+"혼자 테스트: 가상 플레이어는 문장을 생성하지 않고, 가진 카드 중 문자와 글자가 많이 겹치는 카드를 고르는 규칙 기반 봇입니다.":"Solo test: the virtual players don’t generate text. They are rule-based bots that pick the card sharing the most characters with the message.",
+"방 코드를 입력해 주세요.":"Please enter a room code.","방에 연결하지 못했습니다. 방 코드를 확인해 주세요.":"Couldn’t connect to the room. Check the room code.",
+"방을 만들지 못했습니다. 인터넷 연결(PeerJS 서버)을 확인해 주세요.":"Couldn’t create the room. Check your internet connection (PeerJS server).","방이 가득 찼습니다.":"The room is full.","이미 게임이 진행 중입니다.":"The game is already in progress.",
+"온라인 연결을 시작하지 못했습니다. 인터넷 연결을 확인해 주세요.":"Couldn’t start the online connection. Check your internet connection.","방 연결이 끊어졌습니다. 로비로 돌아갑니다.":"Disconnected from the room. Returning to the lobby.",
+"Google Cloud TTS(백엔드) 사용 중. 연결 실패 시 브라우저 음성으로 대체됩니다.":"Using Google Cloud TTS (backend). Falls back to browser voices if the connection fails.",
+"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다. 카카오톡·네이버 등 앱 안의 브라우저라면 Chrome이나 Samsung Internet, Safari에서 열어 보세요.":"This browser doesn’t support speech synthesis (Web Speech), so read-aloud won’t work. If you opened this inside an app’s built-in browser (KakaoTalk, Naver, etc.), open it in Chrome, Samsung Internet or Safari instead.",
+"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다.":"This browser doesn’t support speech synthesis (Web Speech), so read-aloud won’t work."
+};
+const NOTE_TPL=[ // [한국어 템플릿, 영어 템플릿]  ({LN}=음성 언어, {NM}=엔진, {N}=개수)
+["{LN} 음성이 없어 읽어주기가 작동하지 않습니다. OS 설정에서 {LN} 음성을 설치해 보세요.","No {LN} voice was found, so read-aloud won’t work. Install a {LN} voice in your OS settings."],
+["{NM} {LN} 음성 {N}개 (브라우저 내장). 실제 품질은 미리듣기로 확인하세요.","{NM}: {N} {LN} voice(s) built into the browser. Check the actual quality with the preview."],
+["이 브라우저에는 {NM} {LN} 음성이 없어 다른 {LN} 음성으로 대체합니다. (Google: Chrome, Microsoft: Edge에서 주로 제공)","This browser has no {NM} {LN} voice, so another {LN} voice is used instead. (Google voices mostly come with Chrome, Microsoft voices with Edge.)"],
+["iOS: Safari의 시스템 음성을 사용합니다. 엔진(Google/Microsoft) 선택은 적용되지 않으며, 설치된 {LN} 음성 {N}개 중에서 고릅니다. 음성이 적으면 음높이와 속도 차이로 화자를 구분합니다.","iOS: uses Safari’s system voices. The engine choice (Google/Microsoft) does not apply; voices come from the {N} installed {LN} voice(s). With few voices, speakers are told apart by pitch and speed."],
+["Android: 기기의 시스템 TTS(Google TTS 또는 삼성 TTS)를 사용합니다. 엔진(Google/Microsoft) 선택은 적용되지 않을 수 있으며, 감지된 {LN} 음성은 {N}개입니다.","Android: uses the device’s system TTS (Google TTS or Samsung TTS). The engine choice (Google/Microsoft) may not apply; {N} {LN} voice(s) detected."]
+];
+const LNEN=x=>x==="영어"?"English":"Korean";
+function tplRule(ko,en){const ks=[];const src=ko.replace(/[.*+?^${}()|[\]\\]/g,"\\$&").replace(/\\\{(LN|NM|N)\\\}/g,(_,k)=>{ks.push(k);return k==="LN"?"(한국어|영어)":k==="NM"?"(Google|Microsoft)":"(\\d+)"});
+ return[new RegExp("^"+src+"$"),m=>en.replace(/\{(LN|NM|N)\}/g,(_,k)=>{const x=m[ks.indexOf(k)+1];return k==="LN"?LNEN(x):x})]}
+const ord=n=>{const s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])};
+const RULES=[
+ [/^“([\s\S]*)”$/,m=>"“"+lookup(m[1])+"”"],
+ [/^([\s\S]*) \((나|가상)\)$/,m=>lookup(m[1])+" ("+(m[2]==="나"?"you":"bot")+")"],
+ [/^👑 ([\s\S]+)$/,m=>"👑 "+lookup(m[1])],[/^([\s\S]*) 🏆$/,m=>lookup(m[1])+" 🏆"],
+ [/^🏆 ([\s\S]*)님 \+1점!$/,m=>"🏆 "+lookup(m[1])+" +1 point!"],[/^🎉 우승: ([\s\S]*)$/,m=>"🎉 Winner: "+lookup(m[1])],
+ [/^(\d+)위 ([\s\S]*)$/,m=>ord(+m[1])+" "+lookup(m[2])],[/^(\d+)점$/,m=>m[1]+(m[1]==="1"?" pt":" pts")],
+ [/^익명 (\d+)$/,m=>"Anonymous "+m[1]],[/^후보 (\d+)$/,m=>"Option "+m[1]],
+ [/^답장 (\d+)\/(\d+)명 제출$/,m=>`Replies submitted: ${m[1]}/${m[2]}`],
+ [/^당신은 심판입니다\. 답장 도착 (\d+)\/(\d+)$/,m=>`You’re the judge. Replies in: ${m[1]}/${m[2]}`],
+ [/^답장 공개 중 \((\d+)\/(\d+)\)$/,m=>`Revealing replies (${m[1]}/${m[2]})`],
+ [/^답장 (\d+)개 도착$/,m=>`${m[1]} replies received`],
+ [/^목표 (\d+)점 · (\d+)라운드 · (출제자 선택|무작위 출제)$/,m=>`Goal: ${m[1]} pts · Round ${m[2]} · ${m[3]==="출제자 선택"?"Judge picks":"Random prompt"}`],
+ [/^2인 모드 · 승패 없음 · (\d+)라운드$/,m=>`2-player mode · No winner · Round ${m[1]}`],
+ [/^인원 부족 \((\d+)\/2\)$/,m=>`Need more players (${m[1]}/2)`],[/^([\d.]+)배$/,m=>m[1]+"×"],
+ [/^([\s\S]*) \((기기 내장|온라인)\)$/,m=>m[1]+" ("+(m[2]==="온라인"?"online":"built-in")+")"],
+ ...NOTE_TPL.map(t=>tplRule(t[0],t[1]))
+];
+function lookup(k){if(UI_EN[k]!==undefined)return UI_EN[k];if(CARD_EN[k]!==undefined)return CARD_EN[k];for(const[re,fn]of RULES){const m=k.match(re);if(m)return fn(m)}return k}
+function trUI(s){if(CFG.uiLang!=="en"||!/[가-힣]/.test(s))return s;const k=s.trim();return s.replace(k,lookup(k))}
+const dn=(ko,en)=>CFG.uiLang==="en"?en:ko;               // 기본 닉네임
+const spName=n=>CFG.ttsLang==="en"?lookup(n):n;          // 음성으로 읽을 때의 이름(봇 이름 등 영어화)
+// 화면 번역: 한국어 원문 텍스트 노드/속성을 보존(ORIG)해 두고, 영어 화면일 때만 번역해 표시. 한국어로 되돌리면 원문 복원.
+const ORIG=new WeakMap();let langObs=null,wasEn=false;
+function applyLang(){const en=CFG.uiLang==="en";if(!en&&!wasEn)return;if(langObs)langObs.disconnect();
+ const wk=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+ for(let n;n=wk.nextNode();){if(!ORIG.has(n))ORIG.set(n,n.nodeValue);const o=ORIG.get(n),r=en?trUI(o):o;if(n.nodeValue!==r)n.nodeValue=r}
+ document.querySelectorAll("[placeholder],[title]").forEach(e=>{for(const a of["placeholder","title"]){if(!e.hasAttribute(a))continue;const k="_o"+a;if(e[k]===undefined)e[k]=e.getAttribute(a);const r=en?trUI(e[k]):e[k];if(e.getAttribute(a)!==r)e.setAttribute(a,r)}});
+ if(!document.documentElement._t)document.documentElement._t=document.title;document.title=en?trUI(document.documentElement._t):document.documentElement._t;document.documentElement.lang=en?"en":"ko";
+ wasEn=en;if(langObs)langObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["placeholder","title"]})}
+function initLang(){langObs=new MutationObserver(()=>applyLang());langObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["placeholder","title"]});applyLang()}
+// ===== TTS 문구 (음성 언어별) =====
+const TT={ko:{replyNo:n=>`${n}번 답장. `,casual:n=>`${n}님의 답장. `,winner:n=>`${n}님의 답장이 선택되었습니다`,over:n=>`게임 종료! 우승자는 ${n}님입니다`,test1:"안녕하세요. 새로운 문자가 도착했습니다.",test2:"저는 답장하는 사람입니다. 목소리가 구분되나요?"},
+ en:{replyNo:n=>`Reply number ${n}. `,casual:n=>`${n}'s reply. `,winner:n=>`${n}'s reply was chosen!`,over:n=>`Game over! The winner is ${n}.`,test1:"Hello. You have a new message.",test2:"I'm the one replying. Can you tell our voices apart?"}};
+// ===== 내용에 맞는 목소리(성별) — 화자가 분명히 드러나는 문장만 지정, 애매하면 null(아무 목소리) =====
+const G_M=/아들아|아빠가 네 검색|현 남편|내 아내|제 아내|제 와이프/,G_F=/임신|임테기|입덧|출산|오빠|남편이 다|남편 이름|우리 남편|제 전 남자친구/;
+const genderOf=ko=>G_M.test(ko)?"m":G_F.test(ko)?"f":null;
+// 카드(한국어 원문)를 음성 언어에 맞게 읽기: 영어면 영어 번역을 읽음. 번역이 없으면 한국어 음성으로 읽음(한글을 영어 발음으로 읽지 않음)
+function say(card,prof,pre){let lang=CFG.ttsLang,txt=card;if(lang==="en"){const e=CARD_EN[card];if(e)txt=e;else lang="ko"}return Voice.speakP((pre?pre(lang):"")+txt,prof,genderOf(card),lang)}
 // ===== 상태 =====
 let handSig="",mode=null,peer=null,conn=null,conns={},S=null,V=null,myId="",myName="",roomId="",sel=null,seen=new Set(),times={},botKey="";
 const show=(id,on)=>$(id).classList.toggle("hidden",!on),msg=s=>{$("connectMsg").textContent=s;show("connectMsg",!!s)};
@@ -389,26 +725,38 @@ const ov=(a,b)=>{const s=new Set(b.replace(/\s/g,""));return[...new Set(a.replac
 function botTick(){if(mode!=="solo"||!S)return;const key=S.round+S.phase+S.judgeId;if(key===botKey)return;botKey=key;const r=S.round,ph=S.phase;
  if(ph==="playing")S.players.filter(p=>p.bot&&p.id!==S.judgeId).forEach((b,k)=>setTimeout(()=>{if(S&&S.round===r&&S.phase==="playing"){const best=[...b.hand].sort((x,y)=>ov(y,S.prompt)-ov(x,S.prompt))[0];hostAct(b.id,"play",{text:best})}},1100+k*1300+Math.random()*900));
  if(ph==="choosing"&&S.players.find(p=>p.id===S.judgeId).bot)setTimeout(()=>{if(S&&S.round===r&&S.phase==="choosing")hostAct(S.judgeId,"choose",{i:Math.random()*S.options.length|0})},1800);
- if(ph==="judging"&&S.players.find(p=>p.id===S.judgeId).bot)setTimeout(()=>{if(S&&S.round===r&&S.phase==="judging"){let bi=0,bs=-1;S.subs.forEach((s,i)=>{const v=ov(s.text,S.prompt);if(v>bs){bs=v;bi=i}});hostAct(S.judgeId,"judge",{i:bi})}},3500)}
+ if(ph==="judging"&&S.players.find(p=>p.id===S.judgeId).bot)whenRevealed(r,()=>{if(S&&S.round===r&&S.phase==="judging"){let bi=0,bs=-1;S.subs.forEach((s,i)=>{const v=ov(s.text,S.prompt);if(v>bs){bs=v;bi=i}});hostAct(S.judgeId,"judge",{i:bi})}})}
 // ===== 네트워크 (PeerJS: 외부 서비스 의존 — unpkg CDN + PeerJS 공용 시그널링 서버) =====
 function act(a,d){if(mode==="client")conn&&conn.open&&conn.send({type:"act",a,d});else hostAct(myId,a,d)}
 function initPeer(){return new Promise((ok,no)=>{if(typeof Peer==="undefined")return no(new Error("peerjs"));peer=new Peer(undefined,PEER_CONFIG);peer.on("open",ok);peer.on("error",no);
  peer.on("connection",c=>{if(mode!=="host")return;c.on("open",()=>{if(!S||S.players.length>=MAXP||S.phase!=="lobby"){c.send({type:"error",message:S&&S.phase!=="lobby"?"이미 게임이 진행 중입니다.":"방이 가득 찼습니다."});setTimeout(()=>c.close(),300);return}conns[c.peer]=c});
   c.on("data",d=>{if(!d||typeof d!=="object")return;if(d.type==="join"&&S&&!S.players.some(p=>p.id===c.peer)&&S.phase==="lobby"&&conns[c.peer]){S.players.push(P(c.peer,String(d.name||"플레이어").slice(0,10)));push()}else if(d.type==="act"&&typeof d.a==="string")hostAct(c.peer,d.a,d.d)});
   c.on("close",()=>{delete conns[c.peer];leave(c.peer)})})})}
-async function hostRoom(){Sfx.init();Voice.unlocked=true;myName=$("name").value.trim()||"방장";mode="host";try{await initPeer();myId=roomId=peer.id;S={hostId:myId,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,round:0,subs:[],players:[P(myId,myName)]};push()}catch(e){mode=null;msg("방을 만들지 못했습니다. 인터넷 연결(PeerJS 서버)을 확인해 주세요.")}}
-async function joinRoom(){Sfx.init();Voice.unlocked=true;myName=$("name").value.trim()||"플레이어";const id=$("roomInput").value.trim();if(!id)return msg("방 코드를 입력해 주세요.");mode="client";try{await initPeer();myId=peer.id;roomId=id;conn=peer.connect(id,{reliable:true});
+async function hostRoom(){Sfx.init();Voice.unlock();myName=$("name").value.trim()||dn("방장","Host");mode="host";try{await initPeer();myId=roomId=peer.id;S={hostId:myId,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,round:0,subs:[],players:[P(myId,myName)]};push()}catch(e){mode=null;msg("방을 만들지 못했습니다. 인터넷 연결(PeerJS 서버)을 확인해 주세요.")}}
+async function joinRoom(){Sfx.init();Voice.unlock();myName=$("name").value.trim()||dn("플레이어","Player");const id=$("roomInput").value.trim();if(!id)return msg("방 코드를 입력해 주세요.");mode="client";try{await initPeer();myId=peer.id;roomId=id;conn=peer.connect(id,{reliable:true});
  conn.on("open",()=>conn.send({type:"join",name:myName}));conn.on("data",d=>{if(d.type==="view"){sel=null;onView(d.v)}if(d.type==="error")msg(d.message)});
- conn.on("error",()=>msg("방에 연결하지 못했습니다. 방 코드를 확인해 주세요."));conn.on("close",()=>{if(V)alert("방 연결이 끊어졌습니다. 로비로 돌아갑니다.");location.reload()})}catch(e){mode=null;msg("온라인 연결을 시작하지 못했습니다. 인터넷 연결을 확인해 주세요.")}}
-function soloStart(){Sfx.init();Voice.unlocked=true;mode="solo";myId="human";roomId="혼자 테스트";S={hostId:myId,solo:true,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,subs:[],players:[P(myId,$("name").value.trim()||"나"),P("bot1","가상 플레이어 A",1),P("bot2","가상 플레이어 B",1)]};startGame();push()}
+ conn.on("error",()=>msg("방에 연결하지 못했습니다. 방 코드를 확인해 주세요."));conn.on("close",()=>{if(V)alert(trUI("방 연결이 끊어졌습니다. 로비로 돌아갑니다."));location.reload()})}catch(e){mode=null;msg("온라인 연결을 시작하지 못했습니다. 인터넷 연결을 확인해 주세요.")}}
+function soloStart(){Sfx.init();Voice.unlock();mode="solo";myId="human";roomId="혼자 테스트";S={hostId:myId,solo:true,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,subs:[],players:[P(myId,$("name").value.trim()||dn("나","Me")),P("bot1","가상 플레이어 A",1),P("bot2","가상 플레이어 B",1)]};startGame();push()}
 // ===== 화면 =====
-function onView(v){const o=V;V=v;if(!o||o.round!==v.round||o.phase!==v.phase)sel=null;
+const RV={tok:0,round:-1,phase:"",n:0,done:false},sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// 답장 순차 공개: 한 장 공개 → 음성 재생 → 음성이 "끝난 뒤(완료 이벤트)" 다음 답장 공개. 음성이 꺼져 있거나 실패/미지원이면 글자 수에 비례한 간격으로 넘어감
+const revActive=v=>v.phase==="judging"||(v.casual&&v.phase==="result");
+const revDone=v=>!revActive(v)||(RV.round===v.round&&RV.phase===v.phase?RV.done:true);
+const shownSubs=v=>revDone(v)?v.subs:v.subs.slice(0,RV.n);
+function whenRevealed(r,fn){const w=()=>{if(!S||S.round!==r||S.phase!=="judging")return;if(V&&V.round===r&&revDone(V))setTimeout(fn,1200);else setTimeout(w,400)};w()}
+async function startReveal(v){const tok=++RV.tok;Voice.stop();Object.assign(RV,{round:v.round,phase:v.phase,n:0,done:false});render();
+ for(let i=0;i<v.subs.length;i++){if(tok!==RV.tok)return;const s=v.subs[i];RV.n=i+1;Sfx.recv();render();
+  const pre=v.casual?(l=>TT[l].casual(spName(nm(v,s.id)))):(l=>TT[l].replyNo(s.i+1)),prof=v.casual?2+Math.max(0,v.players.findIndex(p=>p.id===s.id)):2+((s.i*3+v.round)%5);
+  const t0=Date.now(),r=await say(s.text,prof,pre);if(tok!==RV.tok)return;
+  if(r==="ended")await sleep(450);else{const pace=Math.min(4500,1400+s.text.length*40),el=Date.now()-t0;if(el<pace)await sleep(pace-el)}}
+ if(tok===RV.tok){RV.done=true;render()}}
+function onView(v){const o=V;V=v;if(!o||o.round!==v.round||o.phase!==v.phase){sel=null;RV.tok++}
  if(v.phase==="choosing"&&(!o||o.phase!=="choosing"||o.round!==v.round)){Voice.stop();Sfx.recv()}
- if(v.phase==="playing"&&(!o||o.phase!=="playing"||o.round!==v.round)){Voice.stop();Sfx.recv();Voice.speak(v.prompt,0)}
- if(v.phase==="judging"&&(!o||o.phase!=="judging")){Voice.stop();Sfx.recv();v.subs.forEach(s=>Voice.speak((s.i+1)+"번 답장. "+s.text,2+((s.i*3+v.round)%5)))}
- if((v.phase==="result"||v.phase==="ended")&&(!o||o.phase==="judging")){Sfx.win();const w=v.players.find(p=>p.id===v.winnerId);Voice.stop();Voice.speak((w?w.name:"")+"님의 답장이 선택되었습니다",1);const ws=v.subs.find(s=>s.id===v.winnerId);if(ws)Voice.speak(ws.text,2+Math.max(0,v.players.findIndex(p=>p.id===v.winnerId)))}
- if(v.phase==="ended"&&(!o||o.phase!=="ended"))setTimeout(()=>Voice.speak("게임 종료! 우승자는 "+v.players.slice().sort((a,b)=>b.score-a.score)[0].name+"님입니다",1),1800);
- if(v.casual&&v.phase==="result"&&o&&o.phase==="playing"){Voice.stop();Sfx.recv();v.subs.forEach(s=>Voice.speak(nm(v,s.id)+"님의 답장. "+s.text,2+Math.max(0,v.players.findIndex(p=>p.id===s.id))))}
+ if(v.phase==="playing"&&(!o||o.phase!=="playing"||o.round!==v.round)){Voice.stop();Sfx.recv();say(v.prompt,0)}
+ if(v.phase==="judging"&&(!o||o.phase!=="judging"))startReveal(v);
+ if((v.phase==="result"||v.phase==="ended")&&(!o||o.phase==="judging")){Sfx.win();const w=v.players.find(p=>p.id===v.winnerId);Voice.stop();Voice.speak(TT[CFG.ttsLang].winner(spName(w?w.name:"")),1);const ws=v.subs.find(s=>s.id===v.winnerId);if(ws)say(ws.text,2+Math.max(0,v.players.findIndex(p=>p.id===v.winnerId)))}
+ if(v.phase==="ended"&&(!o||o.phase!=="ended"))setTimeout(()=>Voice.speak(TT[CFG.ttsLang].over(spName(v.players.slice().sort((a,b)=>b.score-a.score)[0].name)),1),1800);
+ if(v.casual&&v.phase==="result"&&o&&o.phase==="playing")startReveal(v);
  render()}
 const nm=(v,id)=>(v.players.find(p=>p.id===id)||{}).name||"?";
 function render(){const v=V;if(!v)return;show("lobby",false);show("room",v.phase==="lobby");show("game",v.phase!=="lobby");const host=v.hostId===v.you;
@@ -421,15 +769,16 @@ function render(){const v=V;if(!v)return;show("lobby",false);show("room",v.phase
  const m=[];if(v.prompt)m.push({k:"p"+v.round,c:"in",w:"모르는 번호",t:v.prompt});
  if(v.phase==="choosing"){if(judge)v.options.forEach((o,i)=>m.push({k:"o"+v.round+"_"+i,c:"in pick"+(sel===i?" sel":""),w:"후보 "+(i+1),t:o,i}));m.push({s:1,k:"c"+v.round,t:judge?"출제자(심판)입니다. 보낼 문자를 하나 고르세요. 고른 문자만 모두에게 공개됩니다.":"출제자가 상황 문자를 고르는 중…"})}
  if(v.phase==="playing"){const n=v.players.filter(p=>p.done).length,tot=v.players.length-(v.casual?0:1);if(v.mine)m.push({k:"m"+v.round,c:"out",w:"나",t:v.mine});m.push({s:1,k:"w"+v.round+n,t:judge?`당신은 심판입니다. 답장 도착 ${n}/${tot}`:`답장 ${n}/${tot}명 제출`})}
- else{v.subs.forEach(s=>{const win=v.winnerId&&s.id===v.winnerId;m.push({k:"s"+v.round+"_"+s.i,c:"out"+(win?" win":"")+(judge&&v.phase==="judging"?" pick":"")+(sel===s.i?" sel":""),w:s.id?nm(v,s.id)+(win?" 🏆":""):"익명 "+(s.i+1),t:s.text,i:s.i})});
-  if(v.phase==="result")m.push({s:1,k:"r"+v.round,t:v.casual?"서로의 답장이 공개됐어요! 승패 없이 카드 구경을 즐겨 보세요 😄":`🏆 ${nm(v,v.winnerId)}님 +1점!`});
+ else{shownSubs(v).forEach(s=>{const win=v.winnerId&&s.id===v.winnerId;m.push({k:"s"+v.round+"_"+s.i,c:"out"+(win?" win":"")+(judge&&v.phase==="judging"&&revDone(v)?" pick":"")+(sel===s.i?" sel":""),w:s.id?nm(v,s.id)+(win?" 🏆":""):"익명 "+(s.i+1),t:s.text,i:s.i})});
+  if(!revDone(v))m.push({s:1,k:"rv"+v.round+"_"+RV.n,t:`답장 공개 중 (${RV.n}/${v.subs.length})`});
+  if(v.phase==="result"&&revDone(v))m.push({s:1,k:"r"+v.round,t:v.casual?"서로의 답장이 공개됐어요! 승패 없이 카드 구경을 즐겨 보세요 😄":`🏆 ${nm(v,v.winnerId)}님 +1점!`});
   if(v.phase==="ended"){const r=v.players.slice().sort((a,b)=>b.score-a.score);m.push({s:1,k:"e",t:`<div class="rank"><b>🎉 우승: ${esc(r[0].name)}</b>${r.map((p,i)=>`<div><span>${i+1}위 ${esc(p.name)}</span><b>${p.score}점</b></div>`).join("")}</div>`,raw:1})}}
- $("chat").innerHTML=m.map(x=>{const nw=!seen.has(x.k);if(!times[x.k])times[x.k]=hhmm();return x.s?`<div class="sys ${nw?"new":""}">${x.raw?x.t:esc(x.t)}</div>`:`<div class="msg ${x.c} ${nw?"new":""}" ${x.i!==undefined?`data-i="${x.i}"`:""}><div class="who">${esc(x.w)}</div><div class="b">${esc(x.t)}</div><div class="tm">${times[x.k]}</div></div>`}).join("");m.forEach(x=>seen.add(x.k));$("chat").scrollTop=1e9;
+ $("chat").innerHTML=m.map(x=>{const nw=!seen.has(x.k);if(!times[x.k])times[x.k]=Date.now();return x.s?`<div class="sys ${nw?"new":""}">${x.raw?x.t:esc(x.t)}</div>`:`<div class="msg ${x.c} ${nw?"new":""}" ${x.i!==undefined?`data-i="${x.i}"`:""}><div class="who">${esc(x.w)}</div><div class="b">${esc(x.t)}</div><div class="tm">${hhmm(times[x.k])}</div></div>`}).join("");m.forEach(x=>seen.add(x.k));$("chat").scrollTop=1e9;
  $("chat").querySelectorAll(".pick").forEach(e=>e.onclick=()=>{sel=+e.dataset.i;Sfx.select();render()});
  let b="";if(v.phase==="choosing")b=judge?`<button class="btn" id="chooseB" ${sel===null?"disabled":""}>📝 이 문자로 출제</button>`:`<span class="t">출제자가 문자를 고르는 중…</span>`;else if(v.phase==="playing"&&!judge)b=v.mine?`<span class="t">답장 전송 완료! 다른 플레이어를 기다리는 중…</span>`:`<button class="btn" id="sendB" ${sel===null?"disabled":""}>📤 이 답장 보내기</button>`;
  else if(v.phase==="playing")b=`<span class="t">👑 심판입니다. 모두가 답장할 때까지 기다려 주세요.</span>`;
- else if(v.phase==="judging")b=judge?`<span class="t">가장 웃긴 답장을 누르세요</span><button class="btn" id="judgeB" ${sel===null?"disabled":""}>👑 이 답장 선택</button>`:`<span class="t">심판이 고르는 중…</span>`;
- else if(v.phase==="result")b=host?`<button class="btn" id="nextB">다음 라운드 ▶</button>`:`<span class="t">방장이 다음 라운드를 시작할 때까지 대기</span>`;
+ else if(v.phase==="judging")b=!revDone(v)?`<span class="t">답장 공개 중…</span>`:judge?`<span class="t">가장 웃긴 답장을 누르세요</span><button class="btn" id="judgeB" ${sel===null?"disabled":""}>👑 이 답장 선택</button>`:`<span class="t">심판이 고르는 중…</span>`;
+ else if(v.phase==="result")b=!revDone(v)?`<span class="t">답장 공개 중…</span>`:host?`<button class="btn" id="nextB">다음 라운드 ▶</button>`:`<span class="t">방장이 다음 라운드를 시작할 때까지 대기</span>`;
  else b=host?`<button class="btn" id="againB">🔁 다시 하기</button><button class="btn g" id="lobbyB">로비로</button>`:`<span class="t">방장이 다음 판을 시작할 때까지 대기</span>`;
  $("bar").innerHTML=b;const g=id=>$(id);
  if(g("chooseB"))g("chooseB").onclick=()=>{act("choose",{i:sel});sel=null};
@@ -441,16 +790,22 @@ function render(){const v=V;if(!v)return;show("lobby",false);show("room",v.phase
  $("hand").querySelectorAll(".card").forEach(c=>{c.onclick=()=>{sel=+c.dataset.i;Sfx.select();render()};c.onmouseenter=()=>{if(can)$("preview").textContent=`“${hs[+c.dataset.i]}”`};c.onmouseleave=()=>{$("preview").textContent=can&&sel!==null&&hs[sel]?`“${hs[sel]}”`:""}})}}
 // ===== 상단 바 / 설정 =====
 let bat=87;function tick(){$("clock").textContent=hhmm();}tick();setInterval(tick,15000);setInterval(()=>{bat=Math.max(5,bat-1);$("batT").textContent=bat+"%";$("batB").style.width=bat+"%"},120000);
-const SET=[["sfxOn","효과음 켜기","chk"],["sfxVol","효과음 음량","rng",0,100],["ttsOn","TTS 켜기","chk"],["engine","TTS 엔진","sel"],["voice","기본 음성","sel"],["rate","읽기 속도","rng",50,150],["pitch","음높이","rng",50,150],["tvol","TTS 음량","rng",0,100]];
-function syncSet(){SET.forEach(([k,l,t])=>{const e=$("s_"+k);if(t==="chk")e.checked=CFG[k];else if(t==="rng"){e.value=CFG[k];e.style.setProperty("--p",(CFG[k]-e.min)/(e.max-e.min)*100+"%");$("v_"+k).textContent=k==="rate"?(CFG[k]/100).toFixed(2)+"배":CFG[k]+"%"}else e.value=CFG[k]})}
-function syncVoices(){const l=Voice.list(),m=Voice.match(),s=$("s_voice"),en=$("s_engine");en.innerHTML='<option value="google">Google</option><option value="microsoft">Microsoft</option>';en.value=CFG.engine;s.innerHTML=l.length?l.map(v=>`<option value="${esc(v.voiceURI)}">${esc(v.name)} (${v.localService?"기기 내장":"온라인"})</option>`).join(""):`<option value="">한국어 음성 없음</option>`;if(!l.some(v=>v.voiceURI===CFG.voice))CFG.voice=l[0]?l[0].voiceURI:"";s.value=CFG.voice;const nm=CFG.engine==="microsoft"?"Microsoft":"Google";
- $("voiceNote").textContent=!l.length?"한국어 음성이 없어 읽어주기가 작동하지 않습니다. OS 설정에서 한국어 음성을 설치해 보세요.":CFG.engine==="google"&&TTS_PROXY_URL?"Google Cloud TTS(백엔드) 사용 중. 연결 실패 시 브라우저 음성으로 대체됩니다.":m.length?`${nm} 한국어 음성 ${m.length}개 (브라우저 내장). 실제 품질은 미리듣기로 확인하세요.`:`이 브라우저에는 ${nm} 한국어 음성이 없어 다른 한국어 음성으로 대체합니다. (Google: Chrome, Microsoft: Edge에서 주로 제공)`}
-$("setRows").innerHTML=SET.map(([k,l,t,a,b])=>`<div class="set"><label for="s_${k}">${l}</label>`+(t==="chk"?`<input type="checkbox" id="s_${k}"><span></span>`:t==="sel"?`<select id="s_${k}"></select><span></span>`:`<input type="range" id="s_${k}" min="${a}" max="${b}" step="1"><span id="v_${k}"></span>`)+`</div>`).join("")+`<p class="muted" id="voiceNote"></p>`;
-SET.forEach(([k,l,t])=>{const e=$("s_"+k);e.oninput=e.onchange=()=>{CFG[k]=t==="chk"?e.checked:t==="sel"?e.value:+e.value;if(k==="ttsOn"&&!CFG.ttsOn)Voice.stop();if(k==="engine"){CFG.voice="";Voice.stop();syncVoices()}syncSet();save()}});
+const SET=[["uiLang","화면 언어","sel"],["ttsLang","음성 언어(TTS)","sel"],["sfxOn","효과음 켜기","chk"],["sfxVol","효과음 음량","rng",0,100],["ttsOn","TTS 켜기","chk"],["engine","TTS 엔진","sel"],["voice","기본 음성","sel"],["rate","읽기 속도","rng",50,150],["pitch","음높이","rng",50,150],["tvol","TTS 음량","rng",0,100]];
+function syncSet(){SET.forEach(([k,l,t])=>{const e=$("s_"+k);if(t==="chk")e.checked=CFG[k];else if(t==="rng"){e.value=CFG[k];e.style.setProperty("--p",(CFG[k]-e.min)/(e.max-e.min)*100+"%");$("v_"+k).textContent=k==="rate"?(CFG[k]/100).toFixed(2)+"배":CFG[k]+"%"}else e.value=k==="voice"?CFG["v_"+CFG.ttsLang]:CFG[k]})}
+function syncVoices(){const lang=CFG.ttsLang,l=Voice.list(lang),m=Voice.match(lang),s=$("s_voice"),LN=lang==="en"?"영어":"한국어",NM=CFG.engine==="microsoft"?"Microsoft":"Google";
+ for(const k of["uiLang","ttsLang"]){const e=$("s_"+k);e.innerHTML='<option value="ko">한국어</option><option value="en">English</option>';e.value=CFG[k]}
+ $("s_engine").innerHTML='<option value="google">Google</option><option value="microsoft">Microsoft</option>';$("s_engine").value=CFG.engine;
+ s.innerHTML=l.length?l.map(v=>`<option value="${esc(v.voiceURI)}">${esc(v.name)} (${v.localService?"기기 내장":"온라인"})</option>`).join(""):`<option value="">${LN} 음성 없음</option>`;
+ const vk="v_"+lang;if(!l.some(v=>v.voiceURI===CFG[vk]))CFG[vk]=l[0]?l[0].voiceURI:"";s.value=CFG[vk];
+ const fill=(i,n)=>NOTE_TPL[i][0].replace(/\{LN\}/g,LN).replace("{NM}",NM).replace("{N}",String(n));
+ $("voiceNote").textContent=!Voice.usable()?(IN_APP?"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다. 카카오톡·네이버 등 앱 안의 브라우저라면 Chrome이나 Samsung Internet, Safari에서 열어 보세요.":"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다."):Voice.cloudOn()?"Google Cloud TTS(백엔드) 사용 중. 연결 실패 시 브라우저 음성으로 대체됩니다.":!l.length?fill(0,0):IS_IOS?fill(3,l.length):IS_ANDROID?fill(4,l.length):m.length?fill(1,m.length):fill(2,0);
+ $("ttsDiag").textContent=Voice.diag()}
+$("setRows").innerHTML=SET.map(([k,l,t,a,b])=>`<div class="set"><label for="s_${k}">${l}</label>`+(t==="chk"?`<input type="checkbox" id="s_${k}"><span></span>`:t==="sel"?`<select id="s_${k}"></select><span></span>`:`<input type="range" id="s_${k}" min="${a}" max="${b}" step="1"><span id="v_${k}"></span>`)+`</div>`).join("")+`<p class="muted" id="voiceNote"></p><p class="muted" id="ttsDiag" style="font-size:11px;word-break:break-all"></p>`;
+SET.forEach(([k,l,t])=>{const e=$("s_"+k);e.oninput=e.onchange=()=>{CFG[k==="voice"?"v_"+CFG.ttsLang:k]=t==="chk"?e.checked:t==="sel"?e.value:+e.value;if(k==="ttsOn"&&!CFG.ttsOn)Voice.stop();if(k==="engine"||k==="ttsLang"){Voice.stop();syncVoices()}if(k==="uiLang"){applyLang();tick()}syncSet();save()}});
 $("s_sfxVol").addEventListener("change",()=>{Sfx.init();Sfx.select()});$("s_sfxOn").addEventListener("change",()=>{Sfx.init();Sfx.select()});
 syncVoices();syncSet();if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{syncVoices();syncSet();Voice.vDone=true;clearTimeout(Voice.vWait);Voice.next()};
-$("setB").onclick=()=>{Sfx.init();Voice.unlocked=true;syncVoices();syncSet();$("setModalHost").appendChild($("setRows"));show("settings",true)};$("setClose").onclick=()=>show("settings",false);$("settings").onclick=e=>{if(e.target.id==="settings")show("settings",false)};
-$("testB").onclick=()=>{Voice.unlocked=true;Voice.stop();Voice.speak("안녕하세요. 새로운 문자가 도착했습니다.",0);Voice.speak("저는 답장하는 사람입니다. 목소리가 구분되나요?",2)};$("pickMode").onchange=e=>act("pick",{m:e.target.value});
+$("setB").onclick=()=>{Sfx.init();Voice.unlock();syncVoices();syncSet();$("setModalHost").appendChild($("setRows"));show("settings",true)};$("setClose").onclick=()=>show("settings",false);$("settings").onclick=e=>{if(e.target.id==="settings")show("settings",false)};
+$("testB").onclick=()=>{Voice.unlock();Voice.stop();Voice.speakP(TT[CFG.ttsLang].test1,0).then(r=>{$("ttsDiag").textContent=Voice.diag()+" · preview:"+r});Voice.speakP(TT[CFG.ttsLang].test2,2)};$("pickMode").onchange=e=>act("pick",{m:e.target.value});
 $("joinB").onclick=joinRoom;$("startB").onclick=()=>act("start");$("target").onchange=e=>act("target",{n:+e.target.value});$("leaveB").onclick=$("quitB").onclick=()=>location.reload();
 function go(n){document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",p.id==="pn-"+n));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("act",b.dataset.go===n||(n==="create"&&b.dataset.go==="start")));if(n==="settings"){$("setHost").appendChild($("setRows"));syncVoices();syncSet()}msg("")}
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
@@ -458,4 +813,5 @@ $("joinToggle").onclick=()=>show("joinRow",$("joinRow").classList.contains("hidd
 $("createB").onclick=()=>$("cMode").value==="solo"?soloStart():hostRoom();
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.classList.contains("card")||b.id==="sendB")return;Sfx.init();b.closest("#nav")?Sfx.nav():Sfx.click()},true);
 document.addEventListener("click",()=>{Sfx.init();Voice.unlock()},{once:true});
+initLang();
 </script></body></html>
