@@ -60,12 +60,12 @@ input[type=range]{padding:0;border:0;background:none;margin:6px 0;accent-color:#
 #hand{height:234px;padding-top:62px;flex:none}
 
 .bgscreen{background:linear-gradient(rgba(6,8,16,.32),rgba(6,8,16,.62)),var(--lobby-bg) center/cover no-repeat,radial-gradient(circle at 30% 20%,#2a3563,#12141c 70%)}
-.menu{display:flex;gap:28px;width:min(920px,94vw);align-items:stretch}
+.menu{display:flex;gap:28px;width:min(940px,92vw);margin:0 auto 0 6vw;align-items:stretch}
 #nav{width:270px;flex:none;display:flex;flex-direction:column;justify-content:center}
 #nav h1{font-size:30px;line-height:1.2;margin:0 0 22px;text-shadow:0 2px 14px #000}
 #nav button{width:100%;text-align:left;font-size:20px;font-weight:700;padding:16px 20px;margin:7px 0;border:1px solid #ffffff26;border-radius:14px;background:rgba(20,24,40,.62);color:#fff;backdrop-filter:blur(6px);transition:transform .2s,background .2s}
 #nav button:hover{transform:translateX(8px);background:rgba(76,141,255,.55)}#nav button.act{background:#4c8dff;transform:translateX(8px)}
-.stage{flex:1;position:relative;min-height:440px;background:rgba(14,18,32,.84);border-radius:22px;border:1px solid #ffffff22;backdrop-filter:blur(10px);overflow:hidden}
+.stage{flex:0 1 580px;position:relative;min-height:460px}
 .stage h2{margin:0 0 12px}.stage label{display:block;margin-top:10px}
 .pn{position:absolute;inset:0;padding:26px 26px 44px;overflow:auto;opacity:0;visibility:hidden;transform:translateX(28px);transition:opacity .28s,transform .28s,visibility 0s .28s}
 .pn.on{opacity:1;visibility:visible;transform:none;transition:opacity .28s .06s,transform .28s .06s,visibility 0s}
@@ -80,6 +80,9 @@ input[type=range]::-moz-range-track{height:16px;border-radius:9px;background:#ff
 input[type=checkbox]{-webkit-appearance:none;appearance:none;width:50px;height:30px;padding:0;margin:0;border:0;border-radius:15px;background:#4a5070;position:relative;transition:background .2s;cursor:pointer}
 input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0006;transition:left .2s}input[type=checkbox]:checked:after{left:23px}
 .set{background:#ffffff12;border-radius:14px;padding:8px 14px;margin:8px 0}
+.pn{background:rgba(14,18,32,.88);border-radius:22px;border:1px solid #ffffff22;backdrop-filter:blur(10px)}
+.help h3{margin:14px 0 4px;color:#ffd24c;font-size:15px}.help p,.help li{font-size:14px;line-height:1.6;color:#d6dbec;margin:0 0 4px}.help ul{margin:0;padding-left:18px}
+@media(max-width:760px){.menu{margin:0 auto}}
 </style></head><body>
 <div id="status"><span id="clock">--:--</span><span class="sp"></span>
 <button id="setB" title="설정">⚙️ 설정</button>
@@ -87,11 +90,16 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
 <span class="bat"><span id="batT">87%</span><i><b id="batB" style="width:87%"></b></i></span></div>
 
 <div id="lobby" class="screen bgscreen"><div class="menu">
-<nav id="nav"><h1>📱 New Phone,<br>Who Dis?</h1><button data-go="start">시작하기</button><button data-go="settings">설정</button><button data-go="exit">나가기</button></nav>
+<nav id="nav"><h1>📱 New Phone,<br>Who Dis?</h1><button data-go="start">시작하기</button><button data-go="help">도움말</button><button data-go="settings">설정</button><button data-go="exit">나가기</button></nav>
 <section class="stage">
-<div class="pn on" id="pn-home"><h2>환영합니다</h2><p class="muted">왼쪽 메뉴에서 선택하세요.<br>황당한 문자에 가장 웃긴 답장을 보내는 3인 이상 파티 게임입니다. (성인용 유머 포함)</p></div>
 <div class="pn" id="pn-start"><h2>시작하기</h2><label class="muted">닉네임</label><input id="name" maxlength="10" placeholder="닉네임을 입력하세요"><div class="row"><button class="btn" data-go="create">방 만들기</button><button class="btn g" id="joinToggle">방 참가하기</button></div><div id="joinRow" class="row hidden"><input id="roomInput" placeholder="방 코드 입력"><button class="btn" id="joinB">참가</button></div></div>
 <div class="pn" id="pn-create"><h2>방 만들기</h2><label class="muted">게임 모드</label><select id="cMode"><option value="online">온라인 멀티플레이</option><option value="solo">혼자 플레이 (가상 플레이어 2명)</option></select><label class="muted">목표 점수</label><select id="cTarget"><option value="5">5점</option><option value="10">10점</option></select><label class="muted">받은 메시지 카드 선택 방식</label><select id="cPick"><option value="random">무작위</option><option value="choose">심판이 선택</option></select><div class="row"><button class="btn g" data-go="start">뒤로</button><button class="btn" id="createB">방 만들기</button></div></div>
+<div class="pn help" id="pn-help"><h2>도움말</h2>
+<h3>기본 규칙</h3><p>황당한 문자(상황 카드)가 도착하면, 손패 7장 중 가장 웃긴 답장 카드를 골라 보내는 파티 게임입니다.</p>
+<h3>진행 방식</h3><ul><li>문자가 도착합니다. 무작위로 나오거나, 방 설정에 따라 심판이 후보 5장 중 하나를 골라 출제합니다.</li><li>심판을 뺀 모두가 답장 카드를 하나씩 제출합니다.</li><li>모두 제출하면 이름 없이 공개되고 음성으로 읽어 줍니다.</li><li>심판이 가장 웃긴 답장을 고르면 그 작성자가 1점을 얻습니다.</li><li>다음 라운드에서는 심판이 교대하고, 목표 점수(5점/10점)에 먼저 도달하면 게임이 끝납니다.</li></ul>
+<h3>카드 제출과 심판 판정</h3><ul><li>카드를 클릭하면 선택되고 위쪽에 내용이 크게 표시됩니다. [이 답장 보내기]를 누르면 제출되며, 제출 후에는 바꿀 수 없습니다.</li><li>심판은 카드를 내지 않습니다. 공개된 말풍선을 눌러 고른 뒤 [이 답장 선택]으로 확정합니다.</li></ul>
+<h3>2인 모드와 3인 이상 모드</h3><ul><li><b>2명</b>: 심판도 점수도 없습니다. 둘 다 답장하면 이름과 함께 공개되고, 서로의 카드를 구경하며 방장이 다음 문자로 넘깁니다.</li><li><b>3명 이상</b>: 심판이 돌아가며 판정하는 점수 대결입니다. 답장 작성자는 판정이 끝날 때까지 공개되지 않습니다.</li><li><b>혼자 플레이</b>: 가상 플레이어 2명과 진행합니다. 가상 플레이어는 AI가 아니라 규칙 기반 봇입니다.</li></ul>
+<h3>기타</h3><p>상단 ⚙️ 설정에서 효과음, 음성 읽기(TTS) 엔진·속도·음량을 바꿀 수 있습니다.</p></div>
 <div class="pn" id="pn-settings"><h2>설정</h2><div id="setHost"></div></div>
 <div class="pn" id="pn-exit"><h2>나가기</h2><p style="font-size:22px;font-weight:700">이건 웹 게임입니다. 직접 종료하세요.</p></div>
 <p id="connectMsg" class="muted hidden" style="position:absolute;left:26px;right:26px;bottom:10px;margin:0;color:#ff8a8a"></p>
@@ -308,22 +316,47 @@ const save=()=>{try{localStorage.setItem("npwd-cfg",JSON.stringify(CFG))}catch(e
 // ===== 효과음 (WebAudio) =====
 const Sfx={ctx:null,init(){try{this.ctx=this.ctx||new(window.AudioContext||window.webkitAudioContext)();this.ctx.resume()}catch(e){}},
  tone(f,t,d,type="sine",g=.3,to){const vol=CFG.sfxVol/100;if(!this.ctx||!CFG.sfxOn||!vol)return;const o=this.ctx.createOscillator(),v=this.ctx.createGain(),s=this.ctx.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,s);if(to)o.frequency.exponentialRampToValueAtTime(to,s+d);v.gain.setValueAtTime(Math.max(.0002,g*vol),s);v.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(v);v.connect(this.ctx.destination);o.start(s);o.stop(s+d+.02)},
- select(){this.tone(660,0,.08,"triangle")},click(){this.tone(620,0,.05,"triangle",.1)},nav(){this.tone(420,0,.08,"sine",.14);this.tone(630,.05,.1,"sine",.12)},send(){this.tone(250,0,.28,"sawtooth",.12,1600)},recv(){this.tone(880,0,.12);this.tone(1175,.13,.2)},win(){[523,659,784,1047].forEach((f,i)=>this.tone(f,i*.13,.28,"square",.14))}};
+ select(){this.tone(660,0,.08,"triangle")},click(){this.tone(620,0,.05,"triangle",.1)},nav(){this.tone(420,0,.08,"sine",.14);this.tone(630,.05,.1,"sine",.12)},send(){this.tone(250,0,.28,"sawtooth",.12,1600)},recv(){if(CFG.sfxOn&&this.ctx)Voice.hold=Voice.now()+360;this.tone(880,0,.12);this.tone(1175,.13,.2)},win(){if(CFG.sfxOn&&this.ctx)Voice.hold=Voice.now()+720;[523,659,784,1047].forEach((f,i)=>this.tone(f,i*.13,.28,"square",.14))}};
 // ===== TTS: Web Speech API 어댑터 (외부 AI TTS로 바꾸려면 speak()/next() 내부만 교체) =====
 // 한국어 음성만 사용, 속도·음높이·음량은 설정값 하나로 모든 문장에 동일 적용, 문장 단위 큐로 겹침 방지
-const Voice={q:[],id:0,unlocked:false,busy:false,audio:null,
+const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1e9,vDone:false,vWait:0,timer:0,cur:null,cache:new Map(),trace:[],el:typeof Audio!=="undefined"?new Audio():null,
+ now(){return performance.now()},
+ log(e,x){this.trace.push({e,t:Math.round(this.now()),x});if(this.trace.length>300)this.trace.shift()},// 콘솔에서 Voice.trace 로 발화 시작/종료 시점 확인
+ // 첫 사용자 조작 때 하나뿐인 <audio>를 무음으로 "예열"해 두면 이후 Cloud 음성 재생이 모바일/Safari 자동재생 제한에 걸리지 않음
+ unlock(){this.unlocked=true;if(this.primed||!this.el)return;this.primed=true;try{this.el.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";const p=this.el.play();p&&p.catch&&p.catch(()=>{})}catch(e){}},
  all(){return window.speechSynthesis?speechSynthesis.getVoices().filter(v=>/^ko/i.test((v.lang||"").replace("_","-"))):[]},
  match(){const re=CFG.engine==="microsoft"?/microsoft/i:/google/i;return this.all().filter(v=>re.test(v.name))},
  list(){const m=this.match();return m.length?m:this.all()},
  pick(p){const l=this.list(),i=Math.max(0,l.findIndex(v=>v.voiceURI===CFG.voice)),o=[...l.slice(i),...l.slice(0,i)];return{v:o[p%o.length],pm:[1,.88,1.12,.8,1.2][Math.floor(p/o.length)%5]}},
  norm(s){return s.replace(/[\u{1F000}-\u{1FFFF}\u2600-\u27BF]/gu,"").replace(/[ㅋㅎ]{2,}/g,"크크").replace(/[ㅠㅜ]+/g,"").replace(/\.{2,}|…/g,", ").replace(/\s+/g," ").trim()},
- stop(){this.q=[];this.id++;this.busy=false;try{speechSynthesis.cancel()}catch(e){}try{this.audio&&this.audio.pause()}catch(e){}this.audio=null},
- // prof: 음성 프로필 번호. 0=발신자, 1=진행/발표, 2~=답장자(플레이어별 또는 익명 순번)
- speak(text,prof=0){if(!CFG.ttsOn||!this.unlocked)return;this.norm(String(text)).split(/(?<=[.!?])\s+/).filter(Boolean).forEach(s=>this.q.push({s,prof}));this.next()},
- next(){if(this.busy||!this.q.length)return;const{s,prof}=this.q.shift(),id=++this.id;this.busy=true;const done=()=>{if(id!==this.id)return;this.busy=false;this.next()};
-  const browser=()=>{if(!window.speechSynthesis)return done();const u=new SpeechSynthesisUtterance(s),{v,pm}=this.pick(prof);if(v){u.voice=v;u.lang=v.lang}else u.lang="ko-KR";u.rate=CFG.rate/100;u.pitch=Math.min(2,CFG.pitch/100*pm);u.volume=CFG.tvol/100;u.onend=done;u.onerror=done;speechSynthesis.speak(u)};
-  if(CFG.engine==="google"&&TTS_PROXY_URL)this.cloud(s,prof,id,done).catch(()=>{if(id===this.id)browser()});else browser()},
- async cloud(s,prof,id,done){const r=await fetch(TTS_PROXY_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:s,voice:CLOUD_VOICES[prof%CLOUD_VOICES.length],rate:CFG.rate/100,pitch:(CFG.pitch/100-1)*10})});if(!r.ok)throw 0;const a=new Audio(URL.createObjectURL(await r.blob()));a.volume=CFG.tvol/100;a.onended=a.onerror=done;if(id!==this.id)return;this.audio=a;await a.play()}};
+ // 실제로 재생/대기 중인 것이 있을 때만 cancel() (불필요한 cancel 방지)
+ stop(){this.q=[];this.id++;this.busy=false;clearTimeout(this.timer);this.timer=0;this.cur=null;
+  if(window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending)){speechSynthesis.cancel();this.cancelAt=this.now();this.log("cancel")}
+  if(this.el&&!this.el.paused){try{this.el.pause()}catch(e){}}},
+ // "1번 답장. 내용"은 하나의 발화로 유지(짧은 첫 발화가 따로 잘리는 것 방지). 매우 긴 글만 문장 단위로 나눔(Chrome 장문 끊김 대비)
+ speak(text,prof=0){if(!CFG.ttsOn||!this.unlocked)return;const s=this.norm(String(text));if(!s)return;(s.length>110?s.split(/(?<=[.!?])\s+/):[s]).filter(Boolean).forEach(x=>this.q.push({s:x,prof}));this.prefetch();this.next()},
+ // 재생 순서 보장: 이전 발화가 끝나야만(done) 다음 발화 시작. 아래 조건에서만 잠시 대기
+ //  ① 알림음(Sfx)이 끝날 때까지(hold) ② cancel() 직후 브라우저가 정리될 때까지 ③ 첫 호출 시 음성 목록이 로드될 때까지
+ next(){if(this.busy||this.timer||!this.q.length)return;
+  const cloud=CFG.engine==="google"&&!!TTS_PROXY_URL;
+  if(!this.vDone&&!cloud&&window.speechSynthesis&&!this.all().length){if(!this.vWait)this.vWait=setTimeout(()=>{this.vDone=true;this.next()},700);return}
+  this.vDone=true;const n=this.now();let w=Math.max(this.hold-n,this.cancelAt+60-n);
+  if(w<=0&&n-this.cancelAt<400&&window.speechSynthesis&&(speechSynthesis.speaking||speechSynthesis.pending))w=20;
+  if(w>0){this.timer=setTimeout(()=>{this.timer=0;this.next()},Math.ceil(w));return}
+  const{s,prof}=this.q.shift(),id=++this.id;this.busy=true;
+  const done=()=>{if(id!==this.id)return;this.busy=false;this.log("end",s);this.next()};
+  const browser=()=>{if(!window.speechSynthesis)return done();const u=new SpeechSynthesisUtterance(s),{v,pm}=this.pick(prof);if(v){u.voice=v;u.lang=v.lang}else u.lang="ko-KR";
+   u.rate=CFG.rate/100;u.pitch=Math.min(2,CFG.pitch/100*pm);u.volume=CFG.tvol/100;u.onstart=()=>this.log("start",s);u.onend=done;u.onerror=done;
+   this.cur=u;// 참조를 유지하지 않으면 Chrome이 발화 객체를 GC해 onend가 오지 않을 수 있음
+   try{speechSynthesis.resume()}catch(e){}speechSynthesis.speak(u)};
+  if(cloud)this.cloud(s,prof,id,done).catch(()=>{if(id===this.id)browser()});else browser()},
+ key(s,prof){return prof+"|"+s+"|"+CFG.rate+"|"+CFG.pitch},
+ fetchUrl(s,prof){const k=this.key(s,prof);if(!this.cache.has(k)){this.log("fetch",s);const p=fetch(TTS_PROXY_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:s,voice:CLOUD_VOICES[prof%CLOUD_VOICES.length],rate:CFG.rate/100,pitch:(CFG.pitch/100-1)*10})}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b));p.catch(()=>this.cache.delete(k));this.cache.set(k,p)}return this.cache.get(k)},
+ prefetch(){if(CFG.engine==="google"&&TTS_PROXY_URL)this.q.slice(0,2).forEach(x=>this.fetchUrl(x.s,x.prof).catch(()=>{}))},// 재생 중에 다음 문장을 미리 받아 둠
+ async cloud(s,prof,id,done){const url=await this.fetchUrl(s,prof);if(id!==this.id)return;const a=this.el;a.onended=a.onerror=null;a.src=url;a.volume=CFG.tvol/100;if(a.load)a.load();
+  // 오디오 버퍼링/디코딩이 끝나(canplaythrough) 첫 소리부터 온전히 낼 수 있을 때만 play()
+  await new Promise((ok,no)=>{if(a.readyState>=4)return ok();const to=setTimeout(ok,4000);a.oncanplaythrough=()=>{clearTimeout(to);ok()};a.onerror=()=>{clearTimeout(to);no(0)}});
+  if(id!==this.id)return;a.oncanplaythrough=null;this.log("ready",s);a.onended=()=>{this.cache.delete(this.key(s,prof));try{URL.revokeObjectURL(url)}catch(e){}done()};a.onerror=done;await a.play();this.log("play",s)}};
 // ===== 상태 =====
 let handSig="",mode=null,peer=null,conn=null,conns={},S=null,V=null,myId="",myName="",roomId="",sel=null,seen=new Set(),times={},botKey="";
 const show=(id,on)=>$(id).classList.toggle("hidden",!on),msg=s=>{$("connectMsg").textContent=s;show("connectMsg",!!s)};
@@ -375,7 +408,7 @@ function onView(v){const o=V;V=v;if(!o||o.round!==v.round||o.phase!==v.phase)sel
  if(v.phase==="judging"&&(!o||o.phase!=="judging")){Voice.stop();Sfx.recv();v.subs.forEach(s=>Voice.speak((s.i+1)+"번 답장. "+s.text,2+((s.i*3+v.round)%5)))}
  if((v.phase==="result"||v.phase==="ended")&&(!o||o.phase==="judging")){Sfx.win();const w=v.players.find(p=>p.id===v.winnerId);Voice.stop();Voice.speak((w?w.name:"")+"님의 답장이 선택되었습니다",1);const ws=v.subs.find(s=>s.id===v.winnerId);if(ws)Voice.speak(ws.text,2+Math.max(0,v.players.findIndex(p=>p.id===v.winnerId)))}
  if(v.phase==="ended"&&(!o||o.phase!=="ended"))setTimeout(()=>Voice.speak("게임 종료! 우승자는 "+v.players.slice().sort((a,b)=>b.score-a.score)[0].name+"님입니다",1),1800);
- if(v.casual&&v.phase==="result"&&o&&o.phase==="playing"){Voice.stop();Sfx.recv();v.subs.forEach(s=>Voice.speak(nm(v,s.id)+": "+s.text,2+Math.max(0,v.players.findIndex(p=>p.id===s.id))))}
+ if(v.casual&&v.phase==="result"&&o&&o.phase==="playing"){Voice.stop();Sfx.recv();v.subs.forEach(s=>Voice.speak(nm(v,s.id)+"님의 답장. "+s.text,2+Math.max(0,v.players.findIndex(p=>p.id===s.id))))}
  render()}
 const nm=(v,id)=>(v.players.find(p=>p.id===id)||{}).name||"?";
 function render(){const v=V;if(!v)return;show("lobby",false);show("room",v.phase==="lobby");show("game",v.phase!=="lobby");const host=v.hostId===v.you;
@@ -415,7 +448,7 @@ function syncVoices(){const l=Voice.list(),m=Voice.match(),s=$("s_voice"),en=$("
 $("setRows").innerHTML=SET.map(([k,l,t,a,b])=>`<div class="set"><label for="s_${k}">${l}</label>`+(t==="chk"?`<input type="checkbox" id="s_${k}"><span></span>`:t==="sel"?`<select id="s_${k}"></select><span></span>`:`<input type="range" id="s_${k}" min="${a}" max="${b}" step="1"><span id="v_${k}"></span>`)+`</div>`).join("")+`<p class="muted" id="voiceNote"></p>`;
 SET.forEach(([k,l,t])=>{const e=$("s_"+k);e.oninput=e.onchange=()=>{CFG[k]=t==="chk"?e.checked:t==="sel"?e.value:+e.value;if(k==="ttsOn"&&!CFG.ttsOn)Voice.stop();if(k==="engine"){CFG.voice="";Voice.stop();syncVoices()}syncSet();save()}});
 $("s_sfxVol").addEventListener("change",()=>{Sfx.init();Sfx.select()});$("s_sfxOn").addEventListener("change",()=>{Sfx.init();Sfx.select()});
-syncVoices();syncSet();if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{syncVoices();syncSet()};
+syncVoices();syncSet();if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{syncVoices();syncSet();Voice.vDone=true;clearTimeout(Voice.vWait);Voice.next()};
 $("setB").onclick=()=>{Sfx.init();Voice.unlocked=true;syncVoices();syncSet();$("setModalHost").appendChild($("setRows"));show("settings",true)};$("setClose").onclick=()=>show("settings",false);$("settings").onclick=e=>{if(e.target.id==="settings")show("settings",false)};
 $("testB").onclick=()=>{Voice.unlocked=true;Voice.stop();Voice.speak("안녕하세요. 새로운 문자가 도착했습니다.",0);Voice.speak("저는 답장하는 사람입니다. 목소리가 구분되나요?",2)};$("pickMode").onchange=e=>act("pick",{m:e.target.value});
 $("joinB").onclick=joinRoom;$("startB").onclick=()=>act("start");$("target").onchange=e=>act("target",{n:+e.target.value});$("leaveB").onclick=$("quitB").onclick=()=>location.reload();
@@ -424,5 +457,5 @@ document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go)
 $("joinToggle").onclick=()=>show("joinRow",$("joinRow").classList.contains("hidden"));$("cMode").onchange=()=>{$("createB").textContent=$("cMode").value==="solo"?"혼자 플레이 시작":"방 만들기"};
 $("createB").onclick=()=>$("cMode").value==="solo"?soloStart():hostRoom();
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.classList.contains("card")||b.id==="sendB")return;Sfx.init();b.closest("#nav")?Sfx.nav():Sfx.click()},true);
-document.addEventListener("click",()=>{Sfx.init();Voice.unlocked=true},{once:true});
+document.addEventListener("click",()=>{Sfx.init();Voice.unlock()},{once:true});
 </script></body></html>
