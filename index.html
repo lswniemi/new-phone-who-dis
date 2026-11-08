@@ -128,6 +128,7 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
 @media (min-width:701px) and (max-width:1000px) and (min-height:521px){
  .card{width:126px;height:158px;margin-left:-38px}.card b{font-size:12.5px;max-height:112px}#hand{max-width:100%}
 }
+.inv{font-size:10.5px;border-collapse:collapse;width:100%}.inv th,.inv td{padding:3px 5px;border-bottom:1px solid #ffffff22;text-align:left;vertical-align:top;word-break:break-all}.invwrap{max-height:230px;overflow:auto;margin:6px 0}
 </style></head><body>
 <div id="status"><span id="clock">--:--</span><span class="sp"></span>
 <button id="setB" title="설정">⚙️ 설정</button>
@@ -519,8 +520,8 @@ const shuffle=a=>{a=[...a];for(let i=a.length;i>1;){const j=Math.random()*i--|0;
 const hhmm=d=>new Date(d||Date.now()).toLocaleTimeString(CFG.uiLang==="en"?"en-US":"ko-KR",{hour:"numeric",minute:"2-digit"});
 const MAXP=8,HAND=7;
 const PEER_CONFIG={};// 엄격한 NAT 환경용 TURN 서버가 있다면 {config:{iceServers:[...]}} 형태로 지정
-const TTS_PROXY_URL="";// Google Cloud TTS를 중계하는 백엔드 주소(예: Cloudflare Worker). 비워 두면 브라우저 내장 음성 사용. API 키는 절대 여기에 넣지 마세요.
-const DEF={engine:"google",sfxOn:true,sfxVol:60,ttsOn:true,voice:"",uiLang:"ko",ttsLang:"en",v_ko:"",v_en:"",rate:100,pitch:100,tvol:100};let CFG={...DEF};try{Object.assign(CFG,JSON.parse(localStorage.getItem("npwd-cfg")||"{}"))}catch(e){}
+const TTS_PROXY_URL="";// Cloudflare Worker 주소(예: https://npwd-tts.내계정.workers.dev). 비워 두면 클라우드 음성은 "연결 안 됨"으로 표시되고 기기 음성만 사용합니다. API 키는 절대 여기에 넣지 마세요(Worker Secret에만 보관).
+const DEF={engine:"google",sfxOn:true,sfxVol:60,ttsOn:true,voice:"",uiLang:"ko",ttsLang:"en",showAll:false,v_ko:"",v_en:"",rate:100,pitch:100,tvol:100};let CFG={...DEF};try{Object.assign(CFG,JSON.parse(localStorage.getItem("npwd-cfg")||"{}"))}catch(e){}
 const save=()=>{try{localStorage.setItem("npwd-cfg",JSON.stringify(CFG))}catch(e){}};
 // ===== 효과음 (WebAudio) =====
 const Sfx={ctx:null,init(){try{this.ctx=this.ctx||new(window.AudioContext||window.webkitAudioContext)();this.ctx.resume()}catch(e){}},
@@ -528,49 +529,78 @@ const Sfx={ctx:null,init(){try{this.ctx=this.ctx||new(window.AudioContext||windo
  select(){this.tone(660,0,.08,"triangle")},click(){this.tone(620,0,.05,"triangle",.1)},nav(){this.tone(420,0,.08,"sine",.14);this.tone(630,.05,.1,"sine",.12)},send(){this.tone(250,0,.28,"sawtooth",.12,1600)},recv(){if(CFG.sfxOn&&this.ctx)Voice.hold=Voice.now()+360;this.tone(880,0,.12);this.tone(1175,.13,.2)},win(){if(CFG.sfxOn&&this.ctx)Voice.hold=Voice.now()+720;[523,659,784,1047].forEach((f,i)=>this.tone(f,i*.13,.28,"square",.14))}};
 // ===== TTS: Web Speech API 어댑터 (외부 AI TTS로 바꾸려면 speak()/next() 내부만 교체) =====
 // 한국어 음성만 사용, 속도·음높이·음량은 설정값 하나로 모든 문장에 동일 적용, 문장 단위 큐로 겹침 방지
-// ===== TTS: 기기별 경로 점검 + 안정화 =====
-// 경로: ① (Google 엔진 + TTS_PROXY_URL 설정 시) Google Cloud TTS(백엔드) → ② 브라우저 Web Speech → ③ 재생 불가 시 건너뜀(공개 순서는 멈추지 않음)
-//  · Android Chrome: Web Speech가 기기의 시스템 TTS(Google TTS/삼성 TTS)를 호출. 음성 이름에 "Google/Microsoft"가 없어 엔진 선택은 적용되지 않음
-//  · iOS Safari: WebKit 시스템 음성만 사용(한국어는 보통 1~2개). 엔진 선택 적용 안 됨 → 음높이·속도 차이로 화자 구분
-//  · 카카오톡·네이버 등 인앱 브라우저는 Web Speech가 없는 경우가 많음 → 감지하여 안내
+// ===== TTS v3: 음성 출처 분류 · 엔진 연결 상태 · 클라우드(Google/Microsoft) =====
+// 원칙: ① 확인할 수 있는 정보(voiceURI 패턴, 공급자가 붙인 이름 접두어, 실행 환경)만으로 출처를 표시하고 근거를 함께 보여 준다.
+//       ② 확인 불가한 정보는 "확인 불가"로 표시한다(추측 금지). ③ 선택한 엔진이 연결되지 않으면 대체 재생임을 명시한다.
+//  경로: Google/Microsoft 선택 → (TTS_PROXY_URL 서버가 연결되고 해당 공급자 인증이 있으면) 클라우드 음성 → 아니면 기기 음성(출처 표시) → 그것도 불가하면 건너뜀(게임은 멈추지 않음)
 const UA=navigator.userAgent||"",IS_IOS=/iPad|iPhone|iPod/.test(UA)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),IS_ANDROID=/Android/i.test(UA),IN_APP=/KAKAOTALK|NAVER|Instagram|FBAN|FBAV|DaumApps|Line\/|; wv\)/i.test(UA);
-const CLOUD={ko:{f:["ko-KR-Neural2-A","ko-KR-Neural2-B","ko-KR-Wavenet-A"],m:["ko-KR-Neural2-C","ko-KR-Wavenet-D","ko-KR-Wavenet-C"]},en:{f:["en-US-Neural2-C","en-US-Neural2-E","en-US-Neural2-F","en-US-Neural2-H"],m:["en-US-Neural2-D","en-US-Neural2-A","en-US-Neural2-I","en-US-Neural2-J"]}};
-const F_NAME=/sunhi|jimin|seohyeon|soonbok|yujin|yuna|sora|jenny|aria|jane|sara|nancy|michelle|emma|ava|ana|libby|sonia|mia|natasha|clara|heera|samantha|karen|moira|tessa|victoria|allison|susan|zira|hazel|catherine|zoe|serena|kate|fiona|joanna|ivy|kendra|kimberly|salli|amy|emily|nicky|google us english|google 한국/;
-const M_NAME=/injoon|bongjin|gookmin|hyunsu|guy|davis|jason|tony|brandon|christopher|eric|roger|steffan|andrew|brian|ryan|william|liam|alex|daniel|fred|tom|aaron|nathan|evan|david|mark|george|james|thomas|oliver|arthur|rishi/;
-const vGender=v=>{const n=(v.name||"").toLowerCase();if(/female|woman/.test(n))return"f";if(/(^|[^a-z])(male|man)([^a-z]|$)/.test(n))return"m";if(F_NAME.test(n))return"f";if(M_NAME.test(n))return"m";return null};
-const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1e9,vDone:false,vWait:0,timer:0,wd:0,wd2:0,cur:null,curItem:null,cache:new Map(),trace:[],stat:{started:0,ended:0,failed:0,retried:0},lastErr:"",el:typeof Audio!=="undefined"?new Audio():null,
+// 클라우드 음성 카탈로그 (tts-worker.js의 허용 목록과 동일해야 함)
+const CLOUD={google:{ko:{f:["ko-KR-Neural2-A","ko-KR-Neural2-B"],m:["ko-KR-Neural2-C","ko-KR-Wavenet-D"]},en:{f:["en-US-Neural2-C","en-US-Neural2-E","en-US-Neural2-F","en-US-Neural2-H"],m:["en-US-Neural2-D","en-US-Neural2-A","en-US-Neural2-I","en-US-Neural2-J"]}},
+ microsoft:{ko:{f:["ko-KR-SunHiNeural","ko-KR-JiMinNeural","ko-KR-SeoHyeonNeural","ko-KR-YuJinNeural"],m:["ko-KR-InJoonNeural","ko-KR-BongJinNeural","ko-KR-GookMinNeural","ko-KR-HyunsuNeural"]},en:{f:["en-US-JennyNeural","en-US-AriaNeural","en-US-SaraNeural","en-US-NancyNeural"],m:["en-US-GuyNeural","en-US-DavisNeural","en-US-JasonNeural","en-US-TonyNeural"]}}};
+const PROV={google:"Google",microsoft:"Microsoft"},CLOUD_LABEL={google:"Google Cloud",microsoft:"Microsoft Azure"};
+const cloudAll=(p,l)=>{const c=CLOUD[p][l];return c.f.flatMap((x,i)=>[x,c.m[i]]).filter(Boolean)};
+// ---- 음성 출처 분류 ----
+const PV_ANDROID="Android 시스템 TTS(엔진 확인 불가)",PV_UNKNOWN="확인 불가";
+const NOVELTY=/^(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox)$/,LEGACY=/^(fred|ralph|junior|kathy|princess|agnes)$/;
+// 성별: 이름/URI에 female·male이 명시됐거나, 벤더 공개 목록에 있는 "정확한 이름 토큰"일 때만 지정(부분 일치 금지). 그 외는 확인 불가(null)
+const KG={f:["yuna","sunhi","jimin","seohyeon","soonbok","yujin","samantha","karen","moira","tessa","victoria","allison","ava","susan","zoe","nicky","martha","kate","serena","fiona","jenny","aria","sara","nancy","jane","ana","michelle","emma","libby","sonia","mia","natasha","clara","heera","amber"],
+ m:["injoon","bongjin","gookmin","hyunsu","alex","daniel","aaron","evan","nathan","tom","oliver","arthur","rishi","guy","davis","jason","tony","christopher","eric","roger","steffan","brian","andrew","ryan","william","liam"]};
+function genderOfVoice(v){const n=(v.name||"").toLowerCase(),s=n+" "+(v.voiceURI||"").toLowerCase();
+ if(/(^|[^a-z])female([^a-z]|$)/.test(s))return["f","이름/URI에 명시"];if(/(^|[^a-z])male([^a-z]|$)/.test(s))return["m","이름/URI에 명시"];
+ for(const t of n.split(/[^a-z]+/).filter(Boolean)){if(KG.f.includes(t))return["f","알려진 이름"];if(KG.m.includes(t))return["m","알려진 이름"]}return[null,"확인 불가"]}
+function classify(v){const n=v.name||"",u=v.voiceURI||"",base=n.toLowerCase().replace(/\s*\(.*$/,"").trim();
+ let provider=PV_UNKNOWN,basis="확인 불가",kind="확인 불가",rank=2;
+ if(/^com\.apple\./i.test(u)){provider="Apple";basis="voiceURI 패턴";
+  if(/\.eloquence\./i.test(u)){kind="Eloquence";rank=0}
+  else if(/speech\.synthesis\.voice\./i.test(u)){if(NOVELTY.test(base)){kind="효과음성";rank=0}else{kind="구형 합성음";rank=1}}
+  else if(/\.(premium|enhanced)\./i.test(u)||/siri/i.test(u)){kind="고품질";rank=3}
+  else if(/compact/i.test(u)){kind="표준";rank=2}}
+ else if(/^microsoft /i.test(n)){provider="Microsoft";basis="이름 접두어";kind=/online|natural/i.test(n)?"신경망":"표준";rank=kind==="신경망"?3:2}
+ else if(/^google /i.test(n)){provider="Google";basis="이름 접두어";kind="네트워크 음성";rank=3}
+ else if(IS_ANDROID){provider=PV_ANDROID;basis="실행 환경"}
+ const[gender,gbasis]=genderOfVoice(v);
+ return{provider,basis,kind,rank,gender,gbasis,loc:v.localService?"내장":"네트워크",use:rank>=2?"사용":kind==="효과음성"?"제외: 효과음성":kind==="Eloquence"?"제외: Eloquence":"제외: 구형 합성음"}}
+const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1e9,vDone:false,vWait:0,timer:0,wd:0,wd2:0,cur:null,curItem:null,cache:new Map(),trace:[],stat:{started:0,ended:0,failed:0,retried:0},lastErr:"",lastUsed:null,onCloud:null,
+ cloud:{state:"unset",providers:{google:false,microsoft:false},fails:0},el:typeof Audio!=="undefined"?new Audio():null,
  now(){return performance.now()},
- log(e,x){this.trace.push({e,t:Math.round(this.now()),x});if(this.trace.length>300)this.trace.shift()},// 콘솔에서 Voice.trace 로 발화 시작/종료 시점 확인
+ log(e,x){this.trace.push({e,t:Math.round(this.now()),x});if(this.trace.length>300)this.trace.shift()},
  supported(){return !!window.speechSynthesis&&typeof SpeechSynthesisUtterance!=="undefined"},
- cloudOn(){return CFG.engine==="google"&&!!TTS_PROXY_URL},
- usable(){return this.supported()||this.cloudOn()},
- // 첫 사용자 조작(탭) 안에서 한 번 "예열": iOS/Android는 사용자 제스처 없이 시작한 음성/오디오를 막을 수 있음
+ base(){return String(TTS_PROXY_URL||"").replace(/\/+$/,"")},
+ // 클라우드 서버 연결 확인: GET {서버}/health → 어떤 공급자의 인증 정보가 서버에 설정돼 있는지(키 자체는 반환하지 않음)
+ async checkCloud(){if(!this.base()){this.cloud.state="unset";this.onCloud&&this.onCloud();return}this.cloud.state="checking";this.onCloud&&this.onCloud();
+  try{const r=await fetch(this.base()+"/health",{cache:"no-store"}),j=await r.json();if(r.ok&&j&&j.providers){this.cloud.providers={google:!!j.providers.google,microsoft:!!j.providers.microsoft};this.cloud.state="ok";this.cloud.fails=0}else this.cloud.state="unreachable"}catch(e){this.cloud.state="unreachable"}
+  this.onCloud&&this.onCloud()},
+ // 현재 선택한 엔진으로 실제 재생 가능한 경로
+ route(){const eng=CFG.engine;if(this.base()&&this.cloud.state==="ok"&&this.cloud.providers[eng])return{kind:"cloud",eng};
+  const why=!this.base()?"unset":this.cloud.state==="checking"?"checking":this.cloud.state!=="ok"?"unreachable":"nocred";return{kind:"device",eng,why}},
+ usable(){return this.supported()||this.route().kind==="cloud"},
  unlock(){this.unlocked=true;if(this.primed)return;this.primed=true;
   if(this.supported()){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}catch(e){}}
   if(this.el){try{this.el.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";const p=this.el.play();p&&p.catch&&p.catch(()=>{})}catch(e){}}},
- all(l=CFG.ttsLang){if(!this.supported())return[];const re=l==="en"?/^en/i:/^ko/i;return speechSynthesis.getVoices().filter(v=>re.test((v.lang||"").replace("_","-"))).sort((a,b)=>(/^en-us/i.test(b.lang)?1:0)-(/^en-us/i.test(a.lang)?1:0))},
- match(l){const re=CFG.engine==="microsoft"?/microsoft/i:/google/i;return this.all(l).filter(v=>re.test(v.name))},
- list(l){const m=this.match(l);return m.length?m:this.all(l)},
- // 화자(profile)·성별에 맞는 음성 선택. 해당 성별 음성이 없으면 음높이를 조정해 근사(완전하지 않음). 음성이 1개뿐이면 음높이·속도 차이를 크게 줌
- pick(prof,g,l){const L=this.list(l),i=Math.max(0,L.findIndex(v=>v.voiceURI===CFG["v_"+l])),o=[...L.slice(i),...L.slice(0,i)];let pool=o,sh=1;
-  if(g){const x=o.filter(v=>vGender(v)===g);if(x.length)pool=x;else sh=g==="f"?1.25:.75}
-  const pmT=pool.length<2?[1,.78,1.28,.62,1.45]:[1,.9,1.1,.82,1.18],rmT=[1,.96,1.05,.92,1.08],k=Math.floor(prof/Math.max(1,pool.length))%5;
-  return{v:pool[prof%Math.max(1,pool.length)],pm:pmT[k]*sh,rm:rmT[k]}},
- cloudVoice(prof,g,l){const c=CLOUD[l],a=g?c[g]:c.f.flatMap((x,i)=>[x,c.m[i]]).filter(Boolean);return a[prof%a.length]},
+ // ---- 기기 음성 ----
+ all(l=CFG.ttsLang){if(!this.supported())return[];const re=l==="en"?/^en/i:/^ko/i;return speechSynthesis.getVoices().filter(v=>re.test((v.lang||"").replace("_","-")))},
+ inventory(){return this.supported()?speechSynthesis.getVoices().map(v=>({v,name:v.name,lang:v.lang,voiceURI:v.voiceURI,local:v.localService,def:v.default,c:classify(v)})):[]},
+ // 자동 화자 배정에 쓰는 음성: 품질 등급 2 이상(효과음성·Eloquence·구형 합성음 제외), 고품질 우선. 엔진이 Google/Microsoft이면 같은 공급자의 브라우저 내장 음성을 우선
+ deviceList(l=CFG.ttsLang){const ok=this.all(l).map(v=>({v,c:classify(v)})).filter(x=>x.c.rank>=2).sort((a,b)=>b.c.rank-a.c.rank),want=PROV[CFG.engine],m=ok.filter(x=>x.c.provider===want);
+  return m.length?{list:m,native:true,provider:want}:{list:ok,native:false,provider:[...new Set(ok.map(x=>x.c.provider))].join(" / ")}},
+ shownVoices(l=CFG.ttsLang){return CFG.showAll?this.all(l).map(v=>({v,c:classify(v)})).sort((a,b)=>b.c.rank-a.c.rank):this.deviceList(l).list},
+ // 화자(prof)·성별(g)별 기기 음성 선택. 음높이/속도로 억지 화자를 만들지 않음(음성이 1개면 모두 같은 목소리)
+ pick(prof,g,l){const U=this.deviceList(l).list;if(!U.length)return{v:undefined};const bi=U.findIndex(x=>x.v.voiceURI===CFG["v_"+l]),ord=bi>0?[U[bi],...U.filter((_,i)=>i!==bi)]:U;
+  let pool=ord;if(g){const gp=ord.filter(x=>x.c.gender===g);if(gp.length)pool=gp}return{v:pool[prof%pool.length].v}},
+ // ---- 클라우드 음성 ----
+ cloudList(p,l,g){const c=CLOUD[p][l];let a=g?c[g]:cloudAll(p,l);const b=CFG["cv_"+p+"_"+l];if(!g&&b&&a.includes(b))a=[b,...a.filter(x=>x!==b)];return a},
+ cloudVoice(prof,g,l){const a=this.cloudList(CFG.engine,l,g);return a[prof%a.length]},
  norm(s){return s.replace(/[\u{1F000}-\u{1FFFF}\u2600-\u27BF]/gu,"").replace(/[ㅋㅎ]{2,}/g,"크크").replace(/[ㅠㅜ]+/g,"").replace(/\.{2,}|…/g,", ").replace(/\s+/g," ").trim()},
- diag(){return`${IS_IOS?"iOS":IS_ANDROID?"Android":"Desktop"}${IN_APP?" (in-app browser)":""} · speech:${this.supported()?"yes":"NO"} · voices ko:${this.all("ko").length} en:${this.all("en").length} · started:${this.stat.started} ended:${this.stat.ended} failed:${this.stat.failed} retried:${this.stat.retried} · last error: ${this.lastErr||"none"}`},
- // 실제로 재생/대기 중인 것이 있을 때만 cancel() (불필요한 cancel 방지). 대기 중인 모든 발화의 Promise는 "aborted"로 종료
+ diag(){const r=this.route(),u=this.lastUsed;return`${IS_IOS?"iOS":IS_ANDROID?"Android":"Desktop"}${IN_APP?" (in-app browser)":""} · speech:${this.supported()?"yes":"NO"} · device voices ko:${this.all("ko").length} en:${this.all("en").length} · engine:${CFG.engine} route:${r.kind}${r.why?"("+r.why+")":""} · last:${u?u.kind+"/"+u.provider+"/"+u.voice+(u.fallback?" (fallback)":""):"none"} · started:${this.stat.started} ended:${this.stat.ended} failed:${this.stat.failed} retried:${this.stat.retried} · last error: ${this.lastErr||"none"}`},
  stop(){const items=[...this.q,this.curItem];this.q=[];this.curItem=null;this.id++;this.busy=false;clearTimeout(this.timer);clearTimeout(this.wd);clearTimeout(this.wd2);this.timer=this.wd=this.wd2=0;this.cur=null;
   if(this.supported()&&(speechSynthesis.speaking||speechSynthesis.pending)){speechSynthesis.cancel();this.cancelAt=this.now();this.log("cancel")}
   if(this.el&&!this.el.paused){try{this.el.pause()}catch(e){}}
   items.forEach(it=>it&&it.cb&&it.cb("aborted"))},
- // 발화 한 건을 큐에 넣고, 끝났을 때 "ended"/"failed"/"skipped"/"aborted"로 resolve 되는 Promise 반환. 재생 불가 환경에서도 즉시 "skipped"로 끝나 흐름이 멈추지 않음
  speakP(text,prof=0,g=null,lang=CFG.ttsLang){return new Promise(res=>{if(!CFG.ttsOn||!this.unlocked||!this.usable())return res("skipped");const s=this.norm(String(text));if(!s)return res("skipped");
   const parts=(s.length>110?s.split(/(?<=[.!?])\s+/):[s]).filter(Boolean);parts.forEach((x,i)=>this.q.push({s:x,prof,g,lang,attempt:0,cb:i===parts.length-1?res:null}));this.prefetch();this.next()})},
  speak(...a){this.speakP(...a)},
- // 재생 순서 보장: 이전 발화가 끝나야만(done) 다음 발화 시작. 대기 조건: ① 알림음(hold) ② cancel 직후 정리 ③ 첫 호출 시 음성 목록 로딩
  next(){if(this.busy||this.timer||!this.q.length)return;
-  const cloud=this.cloudOn();
+  const R=this.route(),cloud=R.kind==="cloud";
   if(!this.vDone&&!cloud&&this.supported()&&!this.all(this.q[0].lang).length){if(!this.vWait)this.vWait=setTimeout(()=>{this.vDone=true;this.next()},700);return}
   this.vDone=true;const n=this.now();let w=Math.max(this.hold-n,this.cancelAt+60-n);
   if(w<=0&&n-this.cancelAt<400&&this.supported()&&(speechSynthesis.speaking||speechSynthesis.pending))w=20;
@@ -578,25 +608,28 @@ const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1
   const it=this.q.shift(),id=++this.id;this.busy=true;this.curItem=it;let over=false,hadVoice=false;
   const alive=()=>!over&&id===this.id;
   const done=res=>{if(over||id!==this.id)return;over=true;clearTimeout(this.wd);clearTimeout(this.wd2);this.busy=false;this.curItem=null;this.log(res,it.s);if(res==="ended")this.stat.ended++;if(res==="failed")this.stat.failed++;if(it.cb)it.cb(res);this.next()};
-  // 실패 시: ① 음성 객체를 지정하지 않고(언어만 지정) 1회 재시도 → ② 건너뜀(failed)
   const fail=why=>{if(!alive())return;this.lastErr=why;this.log("err",why);if(it.attempt===0&&hadVoice){it.attempt=1;this.stat.retried++;try{speechSynthesis.cancel()}catch(e){}setTimeout(()=>alive()&&browser(false),80)}else done("failed")};
   const browser=useVoice=>{if(!this.supported())return done("failed");
-   const u=new SpeechSynthesisUtterance(it.s),{v,pm,rm}=this.pick(it.prof,it.g,it.lang);hadVoice=!!v;
-   u.lang=v&&v.lang?v.lang.replace("_","-"):(it.lang==="en"?"en-US":"ko-KR");// Android는 "ko_KR" 형태로 주는 경우가 있어 정규화
-   if(v&&useVoice)u.voice=v;u.rate=Math.min(2,Math.max(.5,CFG.rate/100*rm));u.pitch=Math.min(2,Math.max(.2,CFG.pitch/100*pm));u.volume=CFG.tvol/100;
-   let started=false;u.onstart=()=>{started=true;clearTimeout(this.wd);this.stat.started++;this.log("start",it.s)};u.onend=()=>done("ended");
-   u.onerror=e=>{if(!alive())return;const er=(e&&e.error)||"error";if(er==="canceled"||er==="interrupted")return;fail(er)};
-   this.cur=u;// 참조 유지(GC로 onend가 사라지는 문제 방지)
-   clearTimeout(this.wd);this.wd=setTimeout(()=>{if(!alive()||started)return;if(speechSynthesis.speaking){started=true;return}fail("no-start")},3500);// 시작 이벤트가 없으면 실패 처리
-   clearTimeout(this.wd2);this.wd2=setTimeout(()=>{if(!alive())return;try{speechSynthesis.cancel()}catch(e){}done("ended")},Math.max(7000,it.s.length*450/Math.max(.5,u.rate)));// 종료 이벤트 유실 대비
+   const u=new SpeechSynthesisUtterance(it.s),{v}=this.pick(it.prof,it.g,it.lang);hadVoice=!!v;
+   u.lang=v&&v.lang?v.lang.replace("_","-"):(it.lang==="en"?"en-US":"ko-KR");
+   if(v&&useVoice)u.voice=v;u.rate=Math.min(2,Math.max(.5,CFG.rate/100));u.pitch=Math.min(2,Math.max(.2,CFG.pitch/100));u.volume=CFG.tvol/100;
+   let started=false;u.onstart=()=>{started=true;clearTimeout(this.wd);this.stat.started++;this.lastUsed={kind:"device",provider:v?classify(v).provider:PV_UNKNOWN,voice:v?v.name:"(system default)",fallback:cloudTried||!this.deviceList(it.lang).native};this.log("start",it.s)};
+   u.onend=()=>done("ended");u.onerror=e=>{if(!alive())return;const er=(e&&e.error)||"error";if(er==="canceled"||er==="interrupted")return;fail(er)};
+   this.cur=u;
+   clearTimeout(this.wd);this.wd=setTimeout(()=>{if(!alive()||started)return;if(speechSynthesis.speaking){started=true;return}fail("no-start")},3500);
+   // 종료 이벤트가 유실될 때를 대비한 상한(예상 낭독 시간 기준)
+   clearTimeout(this.wd2);this.wd2=setTimeout(()=>{if(!alive())return;try{speechSynthesis.cancel()}catch(e){}done("ended")},Math.max(5000,3000+it.s.length*(it.lang==="en"?85:150)/Math.max(.5,u.rate)));
    try{speechSynthesis.resume()}catch(e){}try{speechSynthesis.speak(u)}catch(e){fail("speak-throw")}};
-  if(cloud)this.cloud(it,id,alive,done).catch(()=>{if(alive()){this.lastErr="cloud";this.log("cloud-fail");browser(true)}});else browser(true)},
- key(it){return[it.lang,it.g,it.prof,it.s,CFG.rate,CFG.pitch].join("|")},
- fetchUrl(it){const k=this.key(it);if(!this.cache.has(k)){this.log("fetch",it.s);const p=fetch(TTS_PROXY_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:it.s,voice:this.cloudVoice(it.prof,it.g,it.lang),rate:CFG.rate/100,pitch:(CFG.pitch/100-1)*10})}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b));p.catch(()=>this.cache.delete(k));this.cache.set(k,p)}return this.cache.get(k)},
- prefetch(){if(this.cloudOn())this.q.slice(0,2).forEach(x=>this.fetchUrl(x).catch(()=>{}))},
- async cloud(it,id,alive,done){const url=await this.fetchUrl(it);if(!alive())return;const a=this.el;if(!a)throw 0;a.onended=a.onerror=null;a.src=url;a.volume=CFG.tvol/100;if(a.load)a.load();
+  let cloudTried=false;
+  if(cloud){cloudTried=true;this.cloudPlay(it,id,alive,done).catch(()=>{if(!alive())return;this.lastErr="cloud";this.log("cloud-fail");if(++this.cloud.fails>=2){this.cloud.state="unreachable";this.onCloud&&this.onCloud();setTimeout(()=>this.checkCloud(),30000)}browser(true)})}else browser(true)},
+ key(it){return[CFG.engine,it.lang,it.g,it.prof,it.s,CFG.rate,CFG.pitch].join("|")},
+ fetchUrl(it){const k=this.key(it);if(!this.cache.has(k)){this.log("fetch",it.s);const p=fetch(this.base()+"/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider:CFG.engine,text:it.s,voice:this.cloudVoice(it.prof,it.g,it.lang),rate:CFG.rate/100,pitch:(CFG.pitch/100-1)*10})}).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b));p.catch(()=>this.cache.delete(k));this.cache.set(k,p)}return this.cache.get(k)},
+ prefetch(){if(this.route().kind==="cloud")this.q.slice(0,2).forEach(x=>this.fetchUrl(x).catch(()=>{}))},
+ async cloudPlay(it,id,alive,done){const url=await this.fetchUrl(it);if(!alive())return;const a=this.el;if(!a)throw 0;a.onended=a.onerror=null;a.src=url;a.volume=CFG.tvol/100;if(a.load)a.load();
   await new Promise((ok,no)=>{if(a.readyState>=4)return ok();const to=setTimeout(ok,4000);a.oncanplaythrough=()=>{clearTimeout(to);ok()};a.onerror=()=>{clearTimeout(to);no(0)}});
-  if(!alive())return;a.oncanplaythrough=null;this.log("ready",it.s);a.onended=()=>{this.cache.delete(this.key(it));try{URL.revokeObjectURL(url)}catch(e){}done("ended")};a.onerror=()=>done("failed");this.stat.started++;await a.play();this.log("play",it.s)}};
+  if(!alive())return;a.oncanplaythrough=null;this.log("ready",it.s);a.onended=()=>{this.cache.delete(this.key(it));try{URL.revokeObjectURL(url)}catch(e){}done("ended")};a.onerror=()=>done("failed");
+  this.stat.started++;this.lastUsed={kind:"cloud",provider:PROV[CFG.engine],voice:this.cloudVoice(it.prof,it.g,it.lang),fallback:false};this.cloud.fails=0;await a.play();this.log("play",it.s)}};
+const vKey=()=>Voice.route().kind==="cloud"?"cv_"+CFG.engine+"_"+CFG.ttsLang:"v_"+CFG.ttsLang;
 // ===== 화면 언어(i18n) · TTS 문구 · 음성 성별 판별 =====
 // 화면 언어(CFG.uiLang)와 음성 언어(CFG.ttsLang)는 서로 독립. 한국어 원문은 그대로 두고, 영어 화면일 때만 표시 단계에서 번역한다.
 const UI_EN={
@@ -642,20 +675,37 @@ const UI_EN={
 "온라인 연결을 시작하지 못했습니다. 인터넷 연결을 확인해 주세요.":"Couldn’t start the online connection. Check your internet connection.","방 연결이 끊어졌습니다. 로비로 돌아갑니다.":"Disconnected from the room. Returning to the lobby.",
 "Google Cloud TTS(백엔드) 사용 중. 연결 실패 시 브라우저 음성으로 대체됩니다.":"Using Google Cloud TTS (backend). Falls back to browser voices if the connection fails.",
 "이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다. 카카오톡·네이버 등 앱 안의 브라우저라면 Chrome이나 Samsung Internet, Safari에서 열어 보세요.":"This browser doesn’t support speech synthesis (Web Speech), so read-aloud won’t work. If you opened this inside an app’s built-in browser (KakaoTalk, Naver, etc.), open it in Chrome, Samsung Internet or Safari instead.",
-"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다.":"This browser doesn’t support speech synthesis (Web Speech), so read-aloud won’t work."
+"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다.":"This browser doesn’t support speech synthesis (Web Speech), so read-aloud won’t work.",
+"연결 확인":"Check connection","음성 목록 보기":"Show voice list","음성 목록 숨기기":"Hide voice list","목록 복사":"Copy list","복사됨":"Copied","목록을 복사하세요":"Copy the list below",
+"부자연스러운 음성도 목록에 표시":"Also list unnatural voices (novelty, Eloquence…)",
+"이름":"Name","언어":"Language","제공자":"Provider","판별 근거":"Basis","위치":"Location","유형":"Type","성별":"Gender","자동 배정":"Auto-assign",
+"내장":"On-device","네트워크":"Network","클라우드":"Cloud","확인 불가":"Unknown","voiceURI 패턴":"voiceURI pattern","이름 접두어":"Name prefix","실행 환경":"Runtime","알려진 이름":"Known name","이름/URI에 명시":"Stated in name/URI",
+"고품질":"High quality","표준":"Standard","신경망":"Neural","네트워크 음성":"Network voice","효과음성":"Novelty voice","구형 합성음":"Legacy synth",
+"여성":"Female","남성":"Male","사용":"Yes","제외: 효과음성":"No: novelty voice","제외: Eloquence":"No: Eloquence","제외: 구형 합성음":"No: legacy synth",
+"Android 시스템 TTS(엔진 확인 불가)":"Android system TTS (engine unknown)","기기에서 읽을 수 있는 음성 목록이 비어 있습니다":"The device reports no voices"
 };
-const NOTE_TPL=[ // [한국어 템플릿, 영어 템플릿]  ({LN}=음성 언어, {NM}=엔진, {N}=개수)
+const NOTE_TPL=[ // [한국어 템플릿, 영어 템플릿]  ({LN}=음성 언어, {NM}=엔진, {PV}=기기 음성 제공자, {N}=개수)
 ["{LN} 음성이 없어 읽어주기가 작동하지 않습니다. OS 설정에서 {LN} 음성을 설치해 보세요.","No {LN} voice was found, so read-aloud won’t work. Install a {LN} voice in your OS settings."],
-["{NM} {LN} 음성 {N}개 (브라우저 내장). 실제 품질은 미리듣기로 확인하세요.","{NM}: {N} {LN} voice(s) built into the browser. Check the actual quality with the preview."],
-["이 브라우저에는 {NM} {LN} 음성이 없어 다른 {LN} 음성으로 대체합니다. (Google: Chrome, Microsoft: Edge에서 주로 제공)","This browser has no {NM} {LN} voice, so another {LN} voice is used instead. (Google voices mostly come with Chrome, Microsoft voices with Edge.)"],
-["iOS: Safari의 시스템 음성을 사용합니다. 엔진(Google/Microsoft) 선택은 적용되지 않으며, 설치된 {LN} 음성 {N}개 중에서 고릅니다. 음성이 적으면 음높이와 속도 차이로 화자를 구분합니다.","iOS: uses Safari’s system voices. The engine choice (Google/Microsoft) does not apply; voices come from the {N} installed {LN} voice(s). With few voices, speakers are told apart by pitch and speed."],
-["Android: 기기의 시스템 TTS(Google TTS 또는 삼성 TTS)를 사용합니다. 엔진(Google/Microsoft) 선택은 적용되지 않을 수 있으며, 감지된 {LN} 음성은 {N}개입니다.","Android: uses the device’s system TTS (Google TTS or Samsung TTS). The engine choice (Google/Microsoft) may not apply; {N} {LN} voice(s) detected."]
+["iOS: Safari는 Apple 기기 음성만 제공합니다. Google/Microsoft 음성은 클라우드 TTS 서버가 연결돼야 쓸 수 있습니다.","iOS: Safari only provides Apple’s on-device voices. Google/Microsoft voices need a connected cloud TTS server."],
+["Android: 기기의 시스템 TTS 음성을 사용합니다(어떤 엔진인지는 브라우저가 알려주지 않아 확인할 수 없음). Google/Microsoft 음성은 클라우드 TTS 서버가 연결돼야 쓸 수 있습니다.","Android: uses the device’s system TTS voices (the browser doesn’t say which engine it is, so it can’t be confirmed). Google/Microsoft voices need a connected cloud TTS server."],
+["화자 배정에 쓰는 {LN} 음성: {N}개 (효과음성 등 제외)","{N} {LN} voice(s) used for speaker assignment (novelty voices etc. excluded)"],
+["화자 배정에 쓸 수 있는 {LN} 음성이 1개뿐이라 모든 화자가 같은 목소리로 읽힙니다.","Only one usable {LN} voice is available, so all speakers share the same voice."],
+["{NM} 클라우드 TTS: 연결됨 (서버 경유)","{NM} cloud TTS: connected (via server)"],
+["{NM} 클라우드 TTS: 연결 안 됨 (TTS 서버 주소 미설정)","{NM} cloud TTS: not connected (TTS server URL not set)"],
+["{NM} 클라우드 TTS: 연결 안 됨 (서버 확인 중)","{NM} cloud TTS: not connected (checking server)"],
+["{NM} 클라우드 TTS: 연결 안 됨 (서버 응답 없음)","{NM} cloud TTS: not connected (server not responding)"],
+["{NM} 클라우드 TTS: 연결 안 됨 (서버에 {NM} 인증 정보 미설정)","{NM} cloud TTS: not connected (no {NM} credentials on the server)"],
+["현재 재생 경로: {NM} 클라우드 음성","Playback: {NM} cloud voices"],
+["현재 재생 경로: {NM} 음성 (브라우저 내장). 클라우드 서버는 쓰지 않음","Playback: {NM} voices built into the browser (cloud server not used)"],
+["현재 재생 경로: {PV} 기기 음성 사용 중 ({NM} 음성은 사용 불가)","Playback: using {PV} device voices ({NM} voices are unavailable)"],
+["현재 재생 경로: 사용 가능한 음성 없음","Playback: no usable voice"]
 ];
 const LNEN=x=>x==="영어"?"English":"Korean";
-function tplRule(ko,en){const ks=[];const src=ko.replace(/[.*+?^${}()|[\]\\]/g,"\\$&").replace(/\\\{(LN|NM|N)\\\}/g,(_,k)=>{ks.push(k);return k==="LN"?"(한국어|영어)":k==="NM"?"(Google|Microsoft)":"(\\d+)"});
- return[new RegExp("^"+src+"$"),m=>en.replace(/\{(LN|NM|N)\}/g,(_,k)=>{const x=m[ks.indexOf(k)+1];return k==="LN"?LNEN(x):x})]}
+function tplRule(ko,en){const ks=[];const src=ko.replace(/[.*+?^${}()|[\]\\]/g,"\\$&").replace(/\\\{(LN|NM|PV|N)\\\}/g,(_,k)=>{ks.push(k);return k==="LN"?"(한국어|영어)":k==="NM"?"(Google|Microsoft)":k==="PV"?"(.+?)":"(\\d+)"});
+ return[new RegExp("^"+src+"$"),m=>en.replace(/\{(LN|NM|PV|N)\}/g,(_,k)=>{const x=m[ks.indexOf(k)+1];return k==="LN"?LNEN(x):k==="PV"?x.split(" / ").map(p=>lookup(p)).join(" / "):x})]}
 const ord=n=>{const s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])};
 const RULES=[
+ [/^([\s\S]*) — ([\s\S]*) · ([\s\S]*) · ([\s\S]*)$/,m=>m[1]+" — "+lookup(m[2])+" · "+lookup(m[3])+" · "+lookup(m[4])],
  [/^“([\s\S]*)”$/,m=>"“"+lookup(m[1])+"”"],
  [/^([\s\S]*) \((나|가상)\)$/,m=>lookup(m[1])+" ("+(m[2]==="나"?"you":"bot")+")"],
  [/^👑 ([\s\S]+)$/,m=>"👑 "+lookup(m[1])],[/^([\s\S]*) 🏆$/,m=>lookup(m[1])+" 🏆"],
@@ -790,28 +840,38 @@ function render(){const v=V;if(!v)return;show("lobby",false);show("room",v.phase
  $("hand").querySelectorAll(".card").forEach(c=>{c.onclick=()=>{sel=+c.dataset.i;Sfx.select();render()};c.onmouseenter=()=>{if(can)$("preview").textContent=`“${hs[+c.dataset.i]}”`};c.onmouseleave=()=>{$("preview").textContent=can&&sel!==null&&hs[sel]?`“${hs[sel]}”`:""}})}}
 // ===== 상단 바 / 설정 =====
 let bat=87;function tick(){$("clock").textContent=hhmm();}tick();setInterval(tick,15000);setInterval(()=>{bat=Math.max(5,bat-1);$("batT").textContent=bat+"%";$("batB").style.width=bat+"%"},120000);
-const SET=[["uiLang","화면 언어","sel"],["ttsLang","음성 언어(TTS)","sel"],["sfxOn","효과음 켜기","chk"],["sfxVol","효과음 음량","rng",0,100],["ttsOn","TTS 켜기","chk"],["engine","TTS 엔진","sel"],["voice","기본 음성","sel"],["rate","읽기 속도","rng",50,150],["pitch","음높이","rng",50,150],["tvol","TTS 음량","rng",0,100]];
-function syncSet(){SET.forEach(([k,l,t])=>{const e=$("s_"+k);if(t==="chk")e.checked=CFG[k];else if(t==="rng"){e.value=CFG[k];e.style.setProperty("--p",(CFG[k]-e.min)/(e.max-e.min)*100+"%");$("v_"+k).textContent=k==="rate"?(CFG[k]/100).toFixed(2)+"배":CFG[k]+"%"}else e.value=k==="voice"?CFG["v_"+CFG.ttsLang]:CFG[k]})}
-function syncVoices(){const lang=CFG.ttsLang,l=Voice.list(lang),m=Voice.match(lang),s=$("s_voice"),LN=lang==="en"?"영어":"한국어",NM=CFG.engine==="microsoft"?"Microsoft":"Google";
+const SET=[["uiLang","화면 언어","sel"],["ttsLang","음성 언어(TTS)","sel"],["sfxOn","효과음 켜기","chk"],["sfxVol","효과음 음량","rng",0,100],["ttsOn","TTS 켜기","chk"],["engine","TTS 엔진","sel"],["voice","기본 음성","sel"],["showAll","부자연스러운 음성도 목록에 표시","chk"],["rate","읽기 속도","rng",50,150],["pitch","음높이","rng",50,150],["tvol","TTS 음량","rng",0,100]];
+function syncSet(){SET.forEach(([k,l,t])=>{const e=$("s_"+k);if(t==="chk")e.checked=CFG[k];else if(t==="rng"){e.value=CFG[k];e.style.setProperty("--p",(CFG[k]-e.min)/(e.max-e.min)*100+"%");$("v_"+k).textContent=k==="rate"?(CFG[k]/100).toFixed(2)+"배":CFG[k]+"%"}else e.value=k==="voice"?CFG[vKey()]:CFG[k]})}
+function fillT(i,o){return NOTE_TPL[i][0].replace(/\{LN\}/g,o.LN||"").replace(/\{NM\}/g,o.NM||"").replace(/\{PV\}/g,o.PV||"").replace(/\{N\}/g,String(o.N||0))}
+function syncVoices(){const lang=CFG.ttsLang,LN=lang==="en"?"영어":"한국어",NM=PROV[CFG.engine],R=Voice.route(),D=Voice.deviceList(lang),s=$("s_voice");
  for(const k of["uiLang","ttsLang"]){const e=$("s_"+k);e.innerHTML='<option value="ko">한국어</option><option value="en">English</option>';e.value=CFG[k]}
  $("s_engine").innerHTML='<option value="google">Google</option><option value="microsoft">Microsoft</option>';$("s_engine").value=CFG.engine;
- s.innerHTML=l.length?l.map(v=>`<option value="${esc(v.voiceURI)}">${esc(v.name)} (${v.localService?"기기 내장":"온라인"})</option>`).join(""):`<option value="">${LN} 음성 없음</option>`;
- const vk="v_"+lang;if(!l.some(v=>v.voiceURI===CFG[vk]))CFG[vk]=l[0]?l[0].voiceURI:"";s.value=CFG[vk];
- const fill=(i,n)=>NOTE_TPL[i][0].replace(/\{LN\}/g,LN).replace("{NM}",NM).replace("{N}",String(n));
- $("voiceNote").textContent=!Voice.usable()?(IN_APP?"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다. 카카오톡·네이버 등 앱 안의 브라우저라면 Chrome이나 Samsung Internet, Safari에서 열어 보세요.":"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다."):Voice.cloudOn()?"Google Cloud TTS(백엔드) 사용 중. 연결 실패 시 브라우저 음성으로 대체됩니다.":!l.length?fill(0,0):IS_IOS?fill(3,l.length):IS_ANDROID?fill(4,l.length):m.length?fill(1,m.length):fill(2,0);
- $("ttsDiag").textContent=Voice.diag()}
-$("setRows").innerHTML=SET.map(([k,l,t,a,b])=>`<div class="set"><label for="s_${k}">${l}</label>`+(t==="chk"?`<input type="checkbox" id="s_${k}"><span></span>`:t==="sel"?`<select id="s_${k}"></select><span></span>`:`<input type="range" id="s_${k}" min="${a}" max="${b}" step="1"><span id="v_${k}"></span>`)+`</div>`).join("")+`<p class="muted" id="voiceNote"></p><p class="muted" id="ttsDiag" style="font-size:11px;word-break:break-all"></p>`;
-SET.forEach(([k,l,t])=>{const e=$("s_"+k);e.oninput=e.onchange=()=>{CFG[k==="voice"?"v_"+CFG.ttsLang:k]=t==="chk"?e.checked:t==="sel"?e.value:+e.value;if(k==="ttsOn"&&!CFG.ttsOn)Voice.stop();if(k==="engine"||k==="ttsLang"){Voice.stop();syncVoices()}if(k==="uiLang"){applyLang();tick()}syncSet();save()}});
+ if(R.kind==="cloud"){const list=cloudAll(CFG.engine,lang),k="cv_"+CFG.engine+"_"+lang;s.innerHTML=list.map(n=>`<option value="${n}">${n} — ${CLOUD_LABEL[CFG.engine]} · 클라우드 · 신경망</option>`).join("");if(!list.includes(CFG[k]))CFG[k]=list[0];s.value=CFG[k]}
+ else{const sv=Voice.shownVoices(lang),k="v_"+lang;s.innerHTML=sv.length?sv.map(x=>`<option value="${esc(x.v.voiceURI)}">${esc(x.v.name)} — ${x.c.provider} · ${x.c.loc} · ${x.c.rank<2?x.c.use:x.c.kind}</option>`).join(""):`<option value="">${LN} 음성 없음</option>`;if(!sv.some(x=>x.v.voiceURI===CFG[k]))CFG[k]=sv[0]?sv[0].v.voiceURI:"";s.value=CFG[k]}
+ // 엔진 연결 상태(1줄)와 실제 재생 경로(2줄): 선택한 엔진이 연결되지 않았다면 그 사실과 대체 재생 중인 기기 음성의 제공자를 그대로 표시
+ $("engLine1").textContent=fillT(R.kind==="cloud"?5:R.why==="unset"?6:R.why==="checking"?7:R.why==="unreachable"?8:9,{NM});
+ const none=!Voice.usable()||(R.kind!=="cloud"&&!D.list.length);
+ $("engLine2").textContent=none?fillT(13,{}):R.kind==="cloud"?fillT(10,{NM}):D.native?fillT(11,{NM}):fillT(12,{NM,PV:D.provider||PV_UNKNOWN});
+ $("voiceNote").textContent=!Voice.supported()&&R.kind!=="cloud"?(IN_APP?"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다. 카카오톡·네이버 등 앱 안의 브라우저라면 Chrome이나 Samsung Internet, Safari에서 열어 보세요.":"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다."):!D.list.length&&R.kind!=="cloud"?fillT(0,{LN}):IS_IOS?fillT(1,{}):IS_ANDROID?fillT(2,{}):"";
+ $("poolNote").textContent=R.kind==="cloud"?"":D.list.length?(D.list.length>1?fillT(3,{LN,N:D.list.length}):fillT(4,{LN})):"";
+ $("ttsDiag").textContent=Voice.diag();renderInv()}
+function renderInv(){const rows=Voice.inventory();$("invBody").innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.lang)}</td><td>${esc(r.voiceURI)}</td><td>${r.c.provider}</td><td>${r.c.basis}</td><td>${r.c.loc}</td><td>${r.c.kind}</td><td>${r.c.gender==="f"?"여성":r.c.gender==="m"?"남성":"확인 불가"}</td><td>${r.c.use}</td></tr>`).join(""):`<tr><td colspan="9">기기에서 읽을 수 있는 음성 목록이 비어 있습니다</td></tr>`}
+$("setRows").innerHTML=SET.map(([k,l,t,a,b])=>`<div class="set"><label for="s_${k}">${l}</label>`+(t==="chk"?`<input type="checkbox" id="s_${k}"><span></span>`:t==="sel"?`<select id="s_${k}"></select><span></span>`:`<input type="range" id="s_${k}" min="${a}" max="${b}" step="1"><span id="v_${k}"></span>`)+`</div>`).join("")+`<p class="muted" id="engLine1" style="margin:6px 0 2px;color:#ffd24c"></p><p class="muted" id="engLine2" style="margin:2px 0 6px"></p><p class="muted" id="voiceNote"></p><p class="muted" id="poolNote"></p><div class="row"><button class="btn g" id="btnRecheck">연결 확인</button><button class="btn g" id="btnVoices">음성 목록 보기</button></div><div id="voiceInv" class="hidden"><div class="invwrap"><table class="inv"><thead><tr><th>이름</th><th>언어</th><th>voiceURI</th><th>제공자</th><th>판별 근거</th><th>위치</th><th>유형</th><th>성별</th><th>자동 배정</th></tr></thead><tbody id="invBody"></tbody></table></div><div class="row"><button class="btn g" id="btnCopy">목록 복사</button></div></div><p class="muted" id="ttsDiag" style="font-size:11px;word-break:break-all"></p>`;
+SET.forEach(([k,l,t])=>{const e=$("s_"+k);e.oninput=e.onchange=()=>{CFG[k==="voice"?vKey():k]=t==="chk"?e.checked:t==="sel"?e.value:+e.value;if(k==="ttsOn"&&!CFG.ttsOn)Voice.stop();if(k==="engine"||k==="ttsLang"||k==="showAll"){Voice.stop();syncVoices()}if(k==="uiLang"){applyLang();tick()}syncSet();save()}});
 $("s_sfxVol").addEventListener("change",()=>{Sfx.init();Sfx.select()});$("s_sfxOn").addEventListener("change",()=>{Sfx.init();Sfx.select()});
+$("btnRecheck").onclick=()=>Voice.checkCloud();
+$("btnVoices").onclick=()=>{const h=$("voiceInv").classList.toggle("hidden");$("btnVoices").textContent=h?"음성 목록 보기":"음성 목록 숨기기";renderInv()};
+$("btnCopy").onclick=async()=>{const rows=Voice.inventory().map(r=>({name:r.name,lang:r.lang,voiceURI:r.voiceURI,localService:r.local,default:r.def,provider:r.c.provider,providerBasis:r.c.basis,kind:r.c.kind,gender:r.c.gender,genderBasis:r.c.gbasis,autoAssign:r.c.use})),txt=JSON.stringify({userAgent:UA,platform:navigator.platform,voices:rows},null,1);try{await navigator.clipboard.writeText(txt);$("btnCopy").textContent="복사됨"}catch(e){window.prompt(trUI("목록을 복사하세요"),txt)}};
+Voice.onCloud=()=>{try{syncVoices();syncSet()}catch(e){}};
 syncVoices();syncSet();if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{syncVoices();syncSet();Voice.vDone=true;clearTimeout(Voice.vWait);Voice.next()};
 $("setB").onclick=()=>{Sfx.init();Voice.unlock();syncVoices();syncSet();$("setModalHost").appendChild($("setRows"));show("settings",true)};$("setClose").onclick=()=>show("settings",false);$("settings").onclick=e=>{if(e.target.id==="settings")show("settings",false)};
 $("testB").onclick=()=>{Voice.unlock();Voice.stop();Voice.speakP(TT[CFG.ttsLang].test1,0).then(r=>{$("ttsDiag").textContent=Voice.diag()+" · preview:"+r});Voice.speakP(TT[CFG.ttsLang].test2,2)};$("pickMode").onchange=e=>act("pick",{m:e.target.value});
 $("joinB").onclick=joinRoom;$("startB").onclick=()=>act("start");$("target").onchange=e=>act("target",{n:+e.target.value});$("leaveB").onclick=$("quitB").onclick=()=>location.reload();
-function go(n){document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",p.id==="pn-"+n));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("act",b.dataset.go===n||(n==="create"&&b.dataset.go==="start")));if(n==="settings"){$("setHost").appendChild($("setRows"));syncVoices();syncSet()}msg("")}
+function go(n){document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",p.id==="pn-"+n));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("act",b.dataset.go===n||(n==="create"&&b.dataset.go==="start")));if(n==="settings"){$("setHost").appendChild($("setRows"));syncVoices();syncSet();Voice.checkCloud()}msg("")}
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
 $("joinToggle").onclick=()=>show("joinRow",$("joinRow").classList.contains("hidden"));$("cMode").onchange=()=>{$("createB").textContent=$("cMode").value==="solo"?"혼자 플레이 시작":"방 만들기"};
 $("createB").onclick=()=>$("cMode").value==="solo"?soloStart():hostRoom();
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.classList.contains("card")||b.id==="sendB")return;Sfx.init();b.closest("#nav")?Sfx.nav():Sfx.click()},true);
 document.addEventListener("click",()=>{Sfx.init();Voice.unlock()},{once:true});
-initLang();
+initLang();Voice.checkCloud();
 </script></body></html>
