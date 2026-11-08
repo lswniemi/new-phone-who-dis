@@ -129,6 +129,31 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
  .card{width:126px;height:158px;margin-left:-38px}.card b{font-size:12.5px;max-height:112px}#hand{max-width:100%}
 }
 .inv{font-size:10.5px;border-collapse:collapse;width:100%}.inv th,.inv td{padding:3px 5px;border-bottom:1px solid #ffffff22;text-align:left;vertical-align:top;word-break:break-all}.invwrap{max-height:230px;overflow:auto;margin:6px 0}
+
+/* ===== 자유 채팅창 (#cw*): 기존 UI와 분리된 떠 있는 패널. 세로 폰=하단 시트 / 가로 폰=오른쪽 패널 / PC=오른쪽 아래 ===== */
+#cwBtn{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:500;padding:10px 16px;border:1px solid #ffffff40;border-radius:999px;background:#4c8dff;color:#fff;font-weight:800;font-size:15px;box-shadow:0 6px 20px #0008}
+#cwBtn i{font-style:normal;margin-left:8px;background:#ff453a;border-radius:999px;padding:1px 7px;font-size:12px}
+#cw{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:500;width:min(340px,calc(100vw - 28px));height:min(440px,60vh);display:flex;flex-direction:column;background:#10141f;border:1px solid #ffffff2e;border-radius:18px;box-shadow:0 10px 36px #000c;overflow:hidden}
+#cw header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:#4c8dff22;border-bottom:1px solid #ffffff22}
+#cw header b{display:block;font-size:15px}#cw header small{display:block;color:#aab3d0;font-size:11px;margin-top:1px}
+#cw header button{background:#ffffff1a;border:0;color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px}
+#cwLog{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch}
+#cwLog .cmu{max-width:86%;align-self:flex-start;background:#2a3050;border-radius:12px 12px 12px 3px;padding:6px 10px;font-size:14px;line-height:1.35;word-break:break-word;white-space:pre-wrap}
+#cwLog .cmu.me{align-self:flex-end;background:#3a6fd8;border-radius:12px 12px 3px 12px}
+#cwLog .cmu small{display:block;font-size:11px;font-weight:700;color:#ffd24c;margin-bottom:1px}#cwLog .cmu.me small{color:#d6e4ff}
+#cwLog .cms{align-self:stretch;text-align:center;font-size:12.5px;line-height:1.4;color:#ffe9a8;background:#ffd24c1f;border:1px dashed #ffd24c66;border-radius:10px;padding:5px 8px}
+#cwLog .cms em{display:block;font-style:normal;color:#cfd6ee;font-size:11.5px;margin-top:2px}
+#cwForm{display:flex;gap:6px;padding:8px;border-top:1px solid #ffffff22;background:#0d1020}
+#cwForm input{flex:1;min-width:0;font-size:16px;padding:9px 12px;border-radius:12px;border:1px solid #ffffff2e;background:#1b2036;color:#fff}
+#cwForm button{flex:none;border:0;border-radius:12px;background:#4c8dff;color:#fff;font-weight:800;padding:0 16px;font-size:15px}
+@media (max-width:700px) and (orientation:portrait){
+ #cw{left:0;right:0;bottom:0;width:auto;height:min(52vh,420px);border-radius:18px 18px 0 0;border-left:0;border-right:0;border-bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+ #cwBtn{bottom:auto;top:calc(var(--sb,32px) + 8px + env(safe-area-inset-top,0px));padding:7px 12px;font-size:14px}
+}
+@media (max-height:520px) and (orientation:landscape){
+ #cw{top:calc(var(--sb,32px) + 4px);bottom:4px;right:max(6px,env(safe-area-inset-right,0px));height:auto;width:min(300px,42vw)}
+ #cwBtn{bottom:auto;top:calc(var(--sb,32px) + 6px);padding:6px 12px;font-size:13px}
+}
 </style></head><body>
 <div id="status"><span id="clock">--:--</span><span class="sp"></span>
 <button id="setB" title="설정">⚙️ 설정</button>
@@ -161,6 +186,11 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
 <footer id="handWrap"><div id="preview"></div><div id="hand"></div></footer></div>
 
 <div id="settings" class="hidden"><div class="box"><h2 style="margin:0 0 8px">⚙️ 설정</h2><div id="setModalHost"><div id="setRows"></div></div><div class="row"><button class="btn g" id="testB">🔈 미리듣기</button><button class="btn" id="setClose">닫기</button></div></div></div>
+<!-- 자유 채팅창 (대기실·게임 진행 중에만 표시. 기존 문자 UI #phone 과는 별개) -->
+<button id="cwBtn" class="hidden" type="button" aria-label="채팅 열기">💬 채팅<i id="cwBadge" class="hidden">0</i></button>
+<section id="cw" class="hidden" aria-label="채팅"><header><div><b>💬 채팅</b><small>플레이어 대화 · 게임 알림</small></div><button id="cwX" type="button" aria-label="채팅 닫기">✕</button></header>
+<div id="cwLog" class="nolang" role="log" aria-live="polite"></div>
+<form id="cwForm" autocomplete="off"><input id="cwIn" maxlength="200" placeholder="메시지 입력" enterkeyhint="send" autocomplete="off"><button id="cwSend" type="submit">전송</button></form></section>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 const INBOX=[
@@ -684,6 +714,7 @@ const UI_EN={
 "여성":"Female","남성":"Male","사용":"Yes","제외: 효과음성":"No: novelty voice","제외: Eloquence":"No: Eloquence","제외: 구형 합성음":"No: legacy synth",
 "Android 시스템 TTS(엔진 확인 불가)":"Android system TTS (engine unknown)","기기에서 읽을 수 있는 음성 목록이 비어 있습니다":"The device reports no voices"
 };
+Object.assign(UI_EN,{"💬 채팅":"💬 Chat","채팅":"Chat","플레이어 대화 · 게임 알림":"Player chat · game updates","메시지 입력":"Type a message","전송":"Send","채팅 열기":"Open chat","채팅 닫기":"Close chat"});
 const NOTE_TPL=[ // [한국어 템플릿, 영어 템플릿]  ({LN}=음성 언어, {NM}=엔진, {PV}=기기 음성 제공자, {N}=개수)
 ["{LN} 음성이 없어 읽어주기가 작동하지 않습니다. OS 설정에서 {LN} 음성을 설치해 보세요.","No {LN} voice was found, so read-aloud won’t work. Install a {LN} voice in your OS settings."],
 ["iOS: Safari는 Apple 기기 음성만 제공합니다. Google/Microsoft 음성은 클라우드 TTS 서버가 연결돼야 쓸 수 있습니다.","iOS: Safari only provides Apple’s on-device voices. Google/Microsoft voices need a connected cloud TTS server."],
@@ -729,7 +760,7 @@ const spName=n=>CFG.ttsLang==="en"?lookup(n):n;          // 음성으로 읽을 
 // 화면 번역: 한국어 원문 텍스트 노드/속성을 보존(ORIG)해 두고, 영어 화면일 때만 번역해 표시. 한국어로 되돌리면 원문 복원.
 const ORIG=new WeakMap();let langObs=null,wasEn=false;
 function applyLang(){const en=CFG.uiLang==="en";if(!en&&!wasEn)return;if(langObs)langObs.disconnect();
- const wk=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+ const wk=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>(/^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)||(n.parentNode.closest&&n.parentNode.closest(".nolang")))?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
  for(let n;n=wk.nextNode();){if(!ORIG.has(n))ORIG.set(n,n.nodeValue);const o=ORIG.get(n),r=en?trUI(o):o;if(n.nodeValue!==r)n.nodeValue=r}
  document.querySelectorAll("[placeholder],[title]").forEach(e=>{for(const a of["placeholder","title"]){if(!e.hasAttribute(a))continue;const k="_o"+a;if(e[k]===undefined)e[k]=e.getAttribute(a);const r=en?trUI(e[k]):e[k];if(e.getAttribute(a)!==r)e.setAttribute(a,r)}});
  if(!document.documentElement._t)document.documentElement._t=document.title;document.title=en?trUI(document.documentElement._t):document.documentElement._t;document.documentElement.lang=en?"en":"ko";
@@ -769,7 +800,7 @@ function view(pid){const j=S.phase;const me=S.players.find(p=>p.id===pid),rev=j=
  return{phase:j,you:pid,hostId:S.hostId,round:S.round,target:S.target,judgeId:S.judgeId,prompt:S.prompt,note:S.note,solo:S.solo,pick:S.pick,casual:S.casual,options:(S.phase==="choosing"&&pid===S.judgeId)?S.options:[],
  players:S.players.map(p=>({id:p.id,name:p.name,bot:p.bot,score:p.score,done:S.subs.some(s=>s.id===p.id)})),hand:me?me.hand:[],
  mine:(S.subs.find(s=>s.id===pid)||{}).text,subs:(j==="judging"||rev)?S.subs.map((s,i)=>({i,text:s.text,id:rev?s.id:undefined})):[],winnerId:rev?S.winnerId:null}}
-function push(){Object.entries(conns).forEach(([id,c])=>{if(c.open&&S.players.some(p=>p.id===id))c.send({type:"view",v:view(id)})});onView(view(myId));botTick()}
+function push(){sysScan();Object.entries(conns).forEach(([id,c])=>{if(c.open&&S.players.some(p=>p.id===id))c.send({type:"view",v:view(id)})});onView(view(myId));botTick()}
 // ===== 규칙 기반 가상 플레이어 (생성형 AI 아님: 프롬프트와 겹치는 글자 수 + 무작위) =====
 const ov=(a,b)=>{const s=new Set(b.replace(/\s/g,""));return[...new Set(a.replace(/\s/g,""))].filter(c=>s.has(c)).length+Math.random()*2.5};
 function botTick(){if(mode!=="solo"||!S)return;const key=S.round+S.phase+S.judgeId;if(key===botKey)return;botKey=key;const r=S.round,ph=S.phase;
@@ -780,13 +811,61 @@ function botTick(){if(mode!=="solo"||!S)return;const key=S.round+S.phase+S.judge
 function act(a,d){if(mode==="client")conn&&conn.open&&conn.send({type:"act",a,d});else hostAct(myId,a,d)}
 function initPeer(){return new Promise((ok,no)=>{if(typeof Peer==="undefined")return no(new Error("peerjs"));peer=new Peer(undefined,PEER_CONFIG);peer.on("open",ok);peer.on("error",no);
  peer.on("connection",c=>{if(mode!=="host")return;c.on("open",()=>{if(!S||S.players.length>=MAXP||S.phase!=="lobby"){c.send({type:"error",message:S&&S.phase!=="lobby"?"이미 게임이 진행 중입니다.":"방이 가득 찼습니다."});setTimeout(()=>c.close(),300);return}conns[c.peer]=c});
-  c.on("data",d=>{if(!d||typeof d!=="object")return;if(d.type==="join"&&S&&!S.players.some(p=>p.id===c.peer)&&S.phase==="lobby"&&conns[c.peer]){S.players.push(P(c.peer,String(d.name||"플레이어").slice(0,10)));push()}else if(d.type==="act"&&typeof d.a==="string")hostAct(c.peer,d.a,d.d)});
+  c.on("data",d=>{if(!d||typeof d!=="object")return;if(d.type==="join"&&S&&!S.players.some(p=>p.id===c.peer)&&S.phase==="lobby"&&conns[c.peer]){S.players.push(P(c.peer,String(d.name||"플레이어").slice(0,10)));push();try{c.send({type:"chatlog",log:CH.log.slice(-60)})}catch(e){}}else if(d.type==="chat")hostChat(c.peer,d.t);else if(d.type==="act"&&typeof d.a==="string")hostAct(c.peer,d.a,d.d)});
   c.on("close",()=>{delete conns[c.peer];leave(c.peer)})})})}
-async function hostRoom(){Sfx.init();Voice.unlock();myName=$("name").value.trim()||dn("방장","Host");mode="host";try{await initPeer();myId=roomId=peer.id;S={hostId:myId,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,round:0,subs:[],players:[P(myId,myName)]};push()}catch(e){mode=null;msg("방을 만들지 못했습니다. 인터넷 연결(PeerJS 서버)을 확인해 주세요.")}}
-async function joinRoom(){Sfx.init();Voice.unlock();myName=$("name").value.trim()||dn("플레이어","Player");const id=$("roomInput").value.trim();if(!id)return msg("방 코드를 입력해 주세요.");mode="client";try{await initPeer();myId=peer.id;roomId=id;conn=peer.connect(id,{reliable:true});
- conn.on("open",()=>conn.send({type:"join",name:myName}));conn.on("data",d=>{if(d.type==="view"){sel=null;onView(d.v)}if(d.type==="error")msg(d.message)});
+async function hostRoom(){chatReset();Sfx.init();Voice.unlock();myName=$("name").value.trim()||dn("방장","Host");mode="host";try{await initPeer();myId=roomId=peer.id;S={hostId:myId,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,round:0,subs:[],players:[P(myId,myName)]};push()}catch(e){mode=null;msg("방을 만들지 못했습니다. 인터넷 연결(PeerJS 서버)을 확인해 주세요.")}}
+async function joinRoom(){chatReset();Sfx.init();Voice.unlock();myName=$("name").value.trim()||dn("플레이어","Player");const id=$("roomInput").value.trim();if(!id)return msg("방 코드를 입력해 주세요.");mode="client";try{await initPeer();myId=peer.id;roomId=id;conn=peer.connect(id,{reliable:true});
+ conn.on("open",()=>conn.send({type:"join",name:myName}));conn.on("data",d=>{if(d.type==="view"){sel=null;onView(d.v)}if(d.type==="chat")chatRecv(d.m);else if(d.type==="chatlog")chatLoad(d.log);if(d.type==="error")msg(d.message)});
  conn.on("error",()=>msg("방에 연결하지 못했습니다. 방 코드를 확인해 주세요."));conn.on("close",()=>{if(V)alert(trUI("방 연결이 끊어졌습니다. 로비로 돌아갑니다."));location.reload()})}catch(e){mode=null;msg("온라인 연결을 시작하지 못했습니다. 인터넷 연결을 확인해 주세요.")}}
-function soloStart(){Sfx.init();Voice.unlock();mode="solo";myId="human";roomId="혼자 테스트";S={hostId:myId,solo:true,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,subs:[],players:[P(myId,$("name").value.trim()||dn("나","Me")),P("bot1","가상 플레이어 A",1),P("bot2","가상 플레이어 B",1)]};startGame();push()}
+function soloStart(){chatReset();Sfx.init();Voice.unlock();mode="solo";myId="human";roomId="혼자 테스트";S={hostId:myId,solo:true,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,subs:[],players:[P(myId,$("name").value.trim()||dn("나","Me")),P("bot1","가상 플레이어 A",1),P("bot2","가상 플레이어 B",1)]};startGame();push()}
+// ===== 자유 채팅 (기존 문자 UI/게임 로직과 별개) =====
+// 구조: 방장이 채팅 로그의 기준(CH.log). 참가자는 {type:"chat",t} 를 방장에게 보내고, 방장이 검증·번호(id) 부여 후 전원에게 {type:"chat",m} 로 중계.
+//  · view 메시지에 싣지 않고 별도 메시지로 보냄 → 채팅이 와도 카드 선택(sel)·화면 상태에 영향 없음
+//  · 시스템 메시지(게임 시작/라운드/승자·점수/종료)는 방장의 sysScan()이 상태 "전환" 시점에만 1회 생성 → 모든 플레이어가 같은 내용을 한 번씩 봄 (id 로 중복 제거)
+//  · 표시 조건: 대기실 + 게임 진행 중(choosing/playing/judging/result). 종료 화면(ended)에서는 숨김
+const CH={log:[],ids:new Set(),seq:0,unread:0,open:false,room:null,sys:null,rl:{}};
+const chatVisible=()=>!!V&&V.phase!=="ended";
+function chatReset(){Object.assign(CH,{log:[],ids:new Set(),seq:0,unread:0,open:false,room:null,sys:null,rl:{}});renderChat();chatSync()}
+function chatPush(m){m.id=++CH.seq;m.ts=Date.now();chatStore(m);Object.entries(conns).forEach(([id,c])=>{if(c.open&&S&&S.players.some(p=>p.id===id)){try{c.send({type:"chat",m})}catch(e){}}})}
+function chatStore(m){if(CH.ids.has(m.id))return false;CH.ids.add(m.id);const i=CH.log.findIndex(x=>x.id>m.id);if(i<0)CH.log.push(m);else CH.log.splice(i,0,m);if(CH.log.length>100)CH.log.shift();
+ if(!(CH.open&&chatVisible())&&!(m.k==="u"&&m.f===myId)){CH.unread++}renderChat();return true}
+function chatClean(m){if(!m||typeof m!=="object"||!Number.isFinite(m.id))return null;
+ if(m.k==="u"&&typeof m.t==="string"&&typeof m.f==="string")return{id:m.id,ts:+m.ts||0,k:"u",f:m.f.slice(0,80),n:String(m.n||"?").slice(0,20),t:m.t.slice(0,200)};
+ if(m.k==="s"&&["start","round","end","over"].includes(m.c))return{id:m.id,ts:+m.ts||0,k:"s",c:m.c,a:(m.a&&typeof m.a==="object")?m.a:{}};return null}
+function chatRecv(m){const x=chatClean(m);if(x)chatStore(x)}
+function chatLoad(log){if(Array.isArray(log))log.forEach(chatRecv)}
+function hostChat(pid,t){if(!S||S.phase==="ended")return;const p=S.players.find(x=>x.id===pid);if(!p||typeof t!=="string")return;t=t.replace(/\s+/g," ").trim().slice(0,200);if(!t)return;
+ const now=Date.now(),r=(CH.rl[pid]=(CH.rl[pid]||[]).filter(x=>now-x<5000));if(r.length>=6)return;r.push(now);chatPush({k:"u",f:pid,n:p.name,t})}
+function chatSend(t){t=String(t||"").trim();if(!t||!chatVisible())return false;if(mode==="client"){if(!(conn&&conn.open))return false;conn.send({type:"chat",t})}else hostChat(myId,t);return true}
+function chatSys(c,a){chatPush({k:"s",c,a})}
+// 방장 전용: 상태 전환을 감지해 시스템 메시지를 한 번씩 만든다 (push() 때마다 호출되지만 phase/라운드가 실제로 바뀔 때만 발생)
+function sysScan(){if(!S)return;const L=CH.sys||(CH.sys={phase:"lobby",game:0,key:""}),ph=S.phase,prev=L.phase,run=ph==="choosing"||ph==="playing";
+ if(run&&(prev==="lobby"||prev==="ended")){L.game++;L.key="";chatSys("start",{n:S.players.length,t:S.target,c:!!S.casual})}
+ if(run){const key=L.game+":"+S.round+":"+S.judgeId;if(key!==L.key){L.key=key;const j=S.casual?null:S.players.find(p=>p.id===S.judgeId);chatSys("round",{r:S.round,j:j?j.name:null})}}
+ if((ph==="result"||ph==="ended")&&(prev==="judging"||prev==="playing")){
+  if(S.casual)chatSys("end",{r:S.round,c:1});
+  else{const w=S.players.find(p=>p.id===S.winnerId),b=S.players.slice().sort((x,y)=>y.score-x.score).map(p=>[p.name,p.score]);chatSys("end",{r:S.round,w:w?w.name:"?",s:w?w.score:0,b});if(ph==="ended")chatSys("over",{w:w?w.name:"?",s:w?w.score:0})}}
+ L.phase=ph}
+const nmL=n=>CFG.uiLang==="en"&&UI_EN[n]!==undefined?UI_EN[n]:n;
+function sysText(m){const a=m.a||{},en=CFG.uiLang==="en";
+ if(m.c==="start")return[en?`🎮 Game start! ${a.n} players · ${a.c?"2-player mode (no scoring)":"first to "+a.t}`:`🎮 게임 시작! ${a.n}명 · ${a.c?"2인 모드 (승패 없음)":"목표 "+a.t+"점"}`];
+ if(m.c==="round")return[en?`📨 Round ${a.r} begins${a.j?" · Judge: "+nmL(a.j):""}`:`📨 ${a.r}라운드 시작${a.j?" · 심판: "+nmL(a.j):""}`];
+ if(m.c==="end"){if(a.c)return[en?`📬 Round ${a.r} over — both replies revealed`:`📬 ${a.r}라운드 종료 — 두 사람의 답장이 공개되었습니다`];
+  const bd=(Array.isArray(a.b)?a.b:[]).map(x=>nmL(String(x[0]))+" "+x[1]).join(" · ");
+  return[en?`🏆 Round ${a.r} over — Winner: ${nmL(a.w)} (+1 pt, ${a.s} total)`:`🏆 ${a.r}라운드 종료 — 승자: ${nmL(a.w)} (+1점, 총 ${a.s}점)`,(en?"Scores: ":"점수: ")+bd]}
+ if(m.c==="over")return[en?`🏁 Game over — Winner: ${nmL(a.w)} (${a.s} pts)`:`🏁 게임 종료 — 우승: ${nmL(a.w)} (${a.s}점)`];return[""]}
+function renderChat(){const el=$("cwLog");if(!el)return;const stick=el.scrollHeight-el.scrollTop-el.clientHeight<48;
+ el.innerHTML=CH.log.map(m=>{if(m.k==="s"){const t=sysText(m);return`<div class="cms">${esc(t[0])}${t[1]?`<em>${esc(t[1])}</em>`:""}</div>`}
+  const me=m.f===myId;return`<div class="cmu${me?" me":""}">${me?"":`<small>${esc(m.n)}</small>`}${esc(m.t)}</div>`}).join("");
+ if(stick||CH.log.length&&CH.log[CH.log.length-1].f===myId)el.scrollTop=el.scrollHeight;
+ const b=$("cwBadge");b.textContent=CH.unread>99?"99+":CH.unread;show("cwBadge",CH.unread>0&&!CH.open)}
+function chatOpen(on){CH.open=on;if(on)CH.unread=0;chatSync();if(on){const el=$("cwLog");el.scrollTop=el.scrollHeight;if(!matchMedia("(pointer:coarse)").matches)$("cwIn").focus()}}
+// 화면 동기화: 대기실은 처음부터 열림, 게임 시작 시 접힘(안내 뱃지만), 종료 화면에서는 완전히 숨김
+function chatSync(){const vis=chatVisible(),kind=!V?null:V.phase==="lobby"?"room":V.phase==="ended"?"end":"game";
+ if(kind!==CH.room){CH.room=kind;if(kind==="room")CH.open=true;else if(kind==="game")CH.open=false}
+ if(CH.open)CH.unread=0;show("cw",vis&&CH.open);show("cwBtn",vis&&!CH.open);renderChat()}
+$("cwBtn").onclick=()=>chatOpen(true);$("cwX").onclick=()=>chatOpen(false);
+$("cwForm").onsubmit=e=>{e.preventDefault();if(chatSend($("cwIn").value)){$("cwIn").value=""}};
 // ===== 화면 =====
 const RV={tok:0,round:-1,phase:"",n:0,done:false},sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // 답장 순차 공개: 한 장 공개 → 음성 재생 → 음성이 "끝난 뒤(완료 이벤트)" 다음 답장 공개. 음성이 꺼져 있거나 실패/미지원이면 글자 수에 비례한 간격으로 넘어감
@@ -807,7 +886,7 @@ function onView(v){const o=V;V=v;if(!o||o.round!==v.round||o.phase!==v.phase){se
  if((v.phase==="result"||v.phase==="ended")&&(!o||o.phase==="judging")){Sfx.win();const w=v.players.find(p=>p.id===v.winnerId);Voice.stop();Voice.speak(TT[CFG.ttsLang].winner(spName(w?w.name:"")),1);const ws=v.subs.find(s=>s.id===v.winnerId);if(ws)say(ws.text,2+Math.max(0,v.players.findIndex(p=>p.id===v.winnerId)))}
  if(v.phase==="ended"&&(!o||o.phase!=="ended"))setTimeout(()=>Voice.speak(TT[CFG.ttsLang].over(spName(v.players.slice().sort((a,b)=>b.score-a.score)[0].name)),1),1800);
  if(v.casual&&v.phase==="result"&&o&&o.phase==="playing")startReveal(v);
- render()}
+ render();chatSync()}
 const nm=(v,id)=>(v.players.find(p=>p.id===id)||{}).name||"?";
 function render(){const v=V;if(!v)return;show("lobby",false);show("room",v.phase==="lobby");show("game",v.phase!=="lobby");const host=v.hostId===v.you;
  if(v.phase==="lobby"){$("roomCode").textContent=roomId;$("roomPl").innerHTML=v.players.map(p=>`<span class="chip">${p.id===v.hostId?"👑 ":""}${esc(p.name)}${p.id===v.you?" (나)":""}</span>`).join("")+(v.note?`<p class="muted">${esc(v.note)}</p>`:"");
@@ -857,7 +936,7 @@ function syncVoices(){const lang=CFG.ttsLang,LN=lang==="en"?"영어":"한국어"
  $("ttsDiag").textContent=Voice.diag();renderInv()}
 function renderInv(){const rows=Voice.inventory();$("invBody").innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.lang)}</td><td>${esc(r.voiceURI)}</td><td>${r.c.provider}</td><td>${r.c.basis}</td><td>${r.c.loc}</td><td>${r.c.kind}</td><td>${r.c.gender==="f"?"여성":r.c.gender==="m"?"남성":"확인 불가"}</td><td>${r.c.use}</td></tr>`).join(""):`<tr><td colspan="9">기기에서 읽을 수 있는 음성 목록이 비어 있습니다</td></tr>`}
 $("setRows").innerHTML=SET.map(([k,l,t,a,b])=>`<div class="set"><label for="s_${k}">${l}</label>`+(t==="chk"?`<input type="checkbox" id="s_${k}"><span></span>`:t==="sel"?`<select id="s_${k}"></select><span></span>`:`<input type="range" id="s_${k}" min="${a}" max="${b}" step="1"><span id="v_${k}"></span>`)+`</div>`).join("")+`<p class="muted" id="engLine1" style="margin:6px 0 2px;color:#ffd24c"></p><p class="muted" id="engLine2" style="margin:2px 0 6px"></p><p class="muted" id="voiceNote"></p><p class="muted" id="poolNote"></p><div class="row"><button class="btn g" id="btnRecheck">연결 확인</button><button class="btn g" id="btnVoices">음성 목록 보기</button></div><div id="voiceInv" class="hidden"><div class="invwrap"><table class="inv"><thead><tr><th>이름</th><th>언어</th><th>voiceURI</th><th>제공자</th><th>판별 근거</th><th>위치</th><th>유형</th><th>성별</th><th>자동 배정</th></tr></thead><tbody id="invBody"></tbody></table></div><div class="row"><button class="btn g" id="btnCopy">목록 복사</button></div></div><p class="muted" id="ttsDiag" style="font-size:11px;word-break:break-all"></p>`;
-SET.forEach(([k,l,t])=>{const e=$("s_"+k);e.oninput=e.onchange=()=>{CFG[k==="voice"?vKey():k]=t==="chk"?e.checked:t==="sel"?e.value:+e.value;if(k==="ttsOn"&&!CFG.ttsOn)Voice.stop();if(k==="engine"||k==="ttsLang"||k==="showAll"){Voice.stop();syncVoices()}if(k==="uiLang"){applyLang();tick()}syncSet();save()}});
+SET.forEach(([k,l,t])=>{const e=$("s_"+k);e.oninput=e.onchange=()=>{CFG[k==="voice"?vKey():k]=t==="chk"?e.checked:t==="sel"?e.value:+e.value;if(k==="ttsOn"&&!CFG.ttsOn)Voice.stop();if(k==="engine"||k==="ttsLang"||k==="showAll"){Voice.stop();syncVoices()}if(k==="uiLang"){applyLang();tick();renderChat()}syncSet();save()}});
 $("s_sfxVol").addEventListener("change",()=>{Sfx.init();Sfx.select()});$("s_sfxOn").addEventListener("change",()=>{Sfx.init();Sfx.select()});
 $("btnRecheck").onclick=()=>Voice.checkCloud();
 $("btnVoices").onclick=()=>{const h=$("voiceInv").classList.toggle("hidden");$("btnVoices").textContent=h?"음성 목록 보기":"음성 목록 숨기기";renderInv()};
@@ -867,8 +946,12 @@ syncVoices();syncSet();if(window.speechSynthesis)speechSynthesis.onvoiceschanged
 $("setB").onclick=()=>{Sfx.init();Voice.unlock();syncVoices();syncSet();$("setModalHost").appendChild($("setRows"));show("settings",true)};$("setClose").onclick=()=>show("settings",false);$("settings").onclick=e=>{if(e.target.id==="settings")show("settings",false)};
 $("testB").onclick=()=>{Voice.unlock();Voice.stop();Voice.speakP(TT[CFG.ttsLang].test1,0).then(r=>{$("ttsDiag").textContent=Voice.diag()+" · preview:"+r});Voice.speakP(TT[CFG.ttsLang].test2,2)};$("pickMode").onchange=e=>act("pick",{m:e.target.value});
 $("joinB").onclick=joinRoom;$("startB").onclick=()=>act("start");$("target").onchange=e=>act("target",{n:+e.target.value});$("leaveB").onclick=$("quitB").onclick=()=>location.reload();
-function go(n){document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",p.id==="pn-"+n));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("act",b.dataset.go===n||(n==="create"&&b.dataset.go==="start")));if(n==="settings"){$("setHost").appendChild($("setRows"));syncVoices();syncSet();Voice.checkCloud()}msg("")}
-document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+// 로비 메뉴 토글: 왼쪽 메뉴(#nav) 버튼을 이미 열린 메뉴에서 다시 누르면 닫힘(모든 패널 .on 제거 → 로비 배경만 보임). 다른 메뉴를 누르면 전환.
+// 패널 안의 버튼(방 만들기 등)은 fromNav=false 라서 토글되지 않고 항상 해당 패널을 연다. "방 만들기" 화면(create)은 "시작하기" 메뉴에 속한 것으로 취급.
+let curPn=null;
+function go(n,fromNav){const grp=x=>x==="create"?"start":x;if(fromNav&&curPn&&grp(curPn)===n)n=null;curPn=n;
+ document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",!!n&&p.id==="pn-"+n));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("act",!!n&&b.dataset.go===grp(n)));if(n==="settings"){$("setHost").appendChild($("setRows"));syncVoices();syncSet();Voice.checkCloud()}msg("")}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go,!!b.closest("#nav")));
 $("joinToggle").onclick=()=>show("joinRow",$("joinRow").classList.contains("hidden"));$("cMode").onchange=()=>{$("createB").textContent=$("cMode").value==="solo"?"혼자 플레이 시작":"방 만들기"};
 $("createB").onclick=()=>$("cMode").value==="solo"?soloStart():hostRoom();
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.classList.contains("card")||b.id==="sendB")return;Sfx.init();b.closest("#nav")?Sfx.nav():Sfx.click()},true);
