@@ -131,7 +131,7 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
 .inv{font-size:10.5px;border-collapse:collapse;width:100%}.inv th,.inv td{padding:3px 5px;border-bottom:1px solid #ffffff22;text-align:left;vertical-align:top;word-break:break-all}.invwrap{max-height:230px;overflow:auto;margin:6px 0}
 
 /* ===== 자유 채팅창 (#cw*): 기존 UI와 분리된 떠 있는 패널. 세로 폰=하단 시트 / 가로 폰=오른쪽 패널 / PC=오른쪽 아래 ===== */
-#cwBtn{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:500;padding:10px 16px;border:1px solid #ffffff40;border-radius:999px;background:#4c8dff;color:#fff;font-weight:800;font-size:15px;box-shadow:0 6px 20px #0008}
+#cwBtn{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(5px,env(safe-area-inset-bottom,0px));height:calc(var(--cwh) - 10px);z-index:500;padding:0 16px;border:1px solid #ffffff40;border-radius:999px;background:#4c8dff;color:#fff;font-weight:800;font-size:15px;box-shadow:0 6px 20px #0008}
 #cwBtn i{font-style:normal;margin-left:8px;background:#ff453a;border-radius:999px;padding:1px 7px;font-size:12px}
 #cw{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:500;width:min(340px,calc(100vw - 28px));height:min(440px,60vh);display:flex;flex-direction:column;background:#10141f;border:1px solid #ffffff2e;border-radius:18px;box-shadow:0 10px 36px #000c;overflow:hidden}
 #cw header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:#4c8dff22;border-bottom:1px solid #ffffff22}
@@ -147,12 +147,11 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
 #cwForm input{flex:1;min-width:0;font-size:16px;padding:9px 12px;border-radius:12px;border:1px solid #ffffff2e;background:#1b2036;color:#fff}
 #cwForm button{flex:none;border:0;border-radius:12px;background:#4c8dff;color:#fff;font-weight:800;padding:0 16px;font-size:15px}
 @media (max-width:700px) and (orientation:portrait){
- #cw{left:0;right:0;bottom:0;width:auto;height:min(52vh,420px);border-radius:18px 18px 0 0;border-left:0;border-right:0;border-bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
- #cwBtn{bottom:auto;top:calc(var(--sb,32px) + 8px + env(safe-area-inset-top,0px));padding:7px 12px;font-size:14px}
+ #cw{left:0;right:0;bottom:0;width:auto;height:min(40vh,340px);border-radius:18px 18px 0 0;border-left:0;border-right:0;border-bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
 }
 @media (max-height:520px) and (orientation:landscape){
  #cw{top:calc(var(--sb,32px) + 4px);bottom:4px;right:max(6px,env(safe-area-inset-right,0px));height:auto;width:min(300px,42vw)}
- #cwBtn{bottom:auto;top:calc(var(--sb,32px) + 6px);padding:6px 12px;font-size:13px}
+ #cwBtn{padding:0 12px;font-size:13px}
 }
 
 /* ===== 모바일/태블릿 보강 (기존 규칙 뒤에 덧씌움): 노치 safe-area, 터치 보정, 카드 크기 가변 ===== */
@@ -167,6 +166,14 @@ button{touch-action:manipulation}
 @media (min-width:701px) and (max-width:1000px) and (min-height:521px){#game{grid-template-columns:200px 1fr}}
 @media (max-width:700px) and (orientation:portrait){#hand{scroll-snap-type:x mandatory;scroll-padding:0 8px;overscroll-behavior-x:contain}#chat{overscroll-behavior:contain}}
 @media (max-height:520px) and (orientation:landscape){#game{grid-template-columns:minmax(110px,128px) minmax(0,1fr) minmax(160px,200px)}#hand{overscroll-behavior:contain}}
+
+/* ===== 채팅 버튼: 화면 맨 아래 전용 띠(strip)에 배치. 채팅이 보이는 화면(body.cwon)에서는 게임/대기실 영역의 높이를 띠만큼 줄여 버튼이 어떤 요소도 가리지 않음 ===== */
+:root{--cwh:46px}
+@media (max-height:520px) and (orientation:landscape){:root{--cwh:38px}}
+body.cwon .screen{height:calc(100% - var(--sbt) - var(--cwh) - env(safe-area-inset-bottom,0px));padding-bottom:8px}
+body.cwon #game{height:calc(100% - var(--sbt) - var(--cwh) - env(safe-area-inset-bottom,0px));padding-bottom:0}
+/* 세로 폰: 대기실에서 채팅창이 열려 있으면 채팅창(하단 시트) 높이만큼 대기실 영역을 줄여 "시작" 버튼 등을 덮지 않음 (넘치면 스크롤) */
+@media (max-width:700px) and (orientation:portrait){body.cwopen #room{height:calc(100% - var(--sbt) - min(40vh,340px) - env(safe-area-inset-bottom,0px));overflow-y:auto}}
 </style></head><body>
 <div id="status"><span id="clock">--:--</span><span class="sp"></span>
 <button id="setB" title="설정">⚙️ 설정</button>
@@ -736,6 +743,7 @@ Object.assign(UI_EN,{"복사":"Copy","복사됨!":"Copied!","복사 실패":"Cop
 "방 연결이 끊어졌습니다. 다시 시도해 주세요.":"The connection to the room was lost. Please try again.",
 "방 코드를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.":"Couldn’t generate a room code. Please try again shortly.",
 "상대 플레이어가 나가서 대기실로 돌아왔습니다.":"The other player left, so we returned to the waiting room."});
+Object.assign(UI_EN,{"대기실로":"Back to waiting room"});
 const NOTE_TPL=[ // [한국어 템플릿, 영어 템플릿]  ({LN}=음성 언어, {NM}=엔진, {PV}=기기 음성 제공자, {N}=개수)
 ["{LN} 음성이 없어 읽어주기가 작동하지 않습니다. OS 설정에서 {LN} 음성을 설치해 보세요.","No {LN} voice was found, so read-aloud won’t work. Install a {LN} voice in your OS settings."],
 ["iOS: Safari는 Apple 기기 음성만 제공합니다. Google/Microsoft 음성은 클라우드 TTS 서버가 연결돼야 쓸 수 있습니다.","iOS: Safari only provides Apple’s on-device voices. Google/Microsoft voices need a connected cloud TTS server."],
@@ -817,6 +825,8 @@ function hostAct(id,a,d){if(!S||!S.players.some(p=>p.id===id))return;d=d||{};con
  else if(a==="next"&&host&&S.phase==="result"){S.round++;S.judgeIdx++;newRound()}
  // 2인 모드(casual)는 점수·승패가 없어 종료 조건이 없었음 → 방장이 결과 화면에서 "게임 종료"를 눌러 종료. 3인 이상/솔로의 종료(목표 점수 도달)는 judge 처리에서 그대로 수행
  else if(a==="end"&&host&&S.casual&&S.phase==="result")S.phase="ended";
+ // 종료 화면(결과/점수 확인) 뒤 방장이 "대기실로"를 누르면 방 연결·참가자·방장 권한을 그대로 둔 채 phase 만 lobby 로 되돌림 → 모두 대기실 화면으로 이동
+ else if(a==="toRoom"&&host&&S.phase==="ended"){S.phase="lobby";S.note="";S.subs=[];S.winnerId=null;S.options=[]}
  else if(a==="again"&&host&&S.phase==="ended")startGame();
  else return;push()}
 function leave(id){if(!S)return;const i=S.players.findIndex(p=>p.id===id);if(i<0)return;const wasJ=id===S.judgeId;S.players.splice(i,1);if(i<S.judgeIdx%(S.players.length+1))S.judgeIdx--;
@@ -874,8 +884,10 @@ function soloStart(){chatReset();Sfx.init();Voice.unlock();mode="solo";myId="hum
 //  · view 메시지에 싣지 않고 별도 메시지로 보냄 → 채팅이 와도 카드 선택(sel)·화면 상태에 영향 없음
 //  · 시스템 메시지(게임 시작/라운드/승자·점수/종료)는 방장의 sysScan()이 상태 "전환" 시점에만 1회 생성 → 모든 플레이어가 같은 내용을 한 번씩 봄 (id 로 중복 제거)
 //  · 표시 조건: 대기실 + 게임 진행 중(choosing/playing/judging/result). 종료 화면(ended)에서는 숨김
+let roomView=false;// 종료 화면에서 참가자가 "대기실로"를 눌러 자기 화면만 대기실로 본 상태 (방 연결·세션은 그대로)
+const inRoomView=()=>!!V&&V.phase==="ended"&&roomView&&V.hostId!==V.you;
 const CH={log:[],ids:new Set(),seq:0,unread:0,open:false,room:null,sys:null,rl:{}};
-const chatVisible=()=>!!V&&V.phase!=="ended";
+const chatVisible=()=>!!V&&(V.phase!=="ended"||inRoomView());
 function chatReset(){Object.assign(CH,{log:[],ids:new Set(),seq:0,unread:0,open:false,room:null,sys:null,rl:{}});renderChat();chatSync()}
 function chatPush(m){m.id=++CH.seq;m.ts=Date.now();chatStore(m);Object.entries(conns).forEach(([id,c])=>{if(c.open&&S&&S.players.some(p=>p.id===id)){try{c.send({type:"chat",m})}catch(e){}}})}
 function chatStore(m){if(CH.ids.has(m.id))return false;CH.ids.add(m.id);const i=CH.log.findIndex(x=>x.id>m.id);if(i<0)CH.log.push(m);else CH.log.splice(i,0,m);if(CH.log.length>100)CH.log.shift();
@@ -885,7 +897,7 @@ function chatClean(m){if(!m||typeof m!=="object"||!Number.isFinite(m.id))return 
  if(m.k==="s"&&["start","round","end","over"].includes(m.c))return{id:m.id,ts:+m.ts||0,k:"s",c:m.c,a:(m.a&&typeof m.a==="object")?m.a:{}};return null}
 function chatRecv(m){const x=chatClean(m);if(x)chatStore(x)}
 function chatLoad(log){if(Array.isArray(log))log.forEach(chatRecv)}
-function hostChat(pid,t){if(!S||S.phase==="ended")return;const p=S.players.find(x=>x.id===pid);if(!p||typeof t!=="string")return;t=t.replace(/\s+/g," ").trim().slice(0,200);if(!t)return;
+function hostChat(pid,t){if(!S)return;const p=S.players.find(x=>x.id===pid);if(!p||typeof t!=="string")return;t=t.replace(/\s+/g," ").trim().slice(0,200);if(!t)return;
  const now=Date.now(),r=(CH.rl[pid]=(CH.rl[pid]||[]).filter(x=>now-x<5000));if(r.length>=6)return;r.push(now);chatPush({k:"u",f:pid,n:p.name,t})}
 function chatSend(t){t=String(t||"").trim();if(!t||!chatVisible())return false;if(mode==="client"){if(!(conn&&conn.open))return false;conn.send({type:"chat",t})}else hostChat(myId,t);return true}
 function chatSys(c,a){chatPush({k:"s",c,a})}
@@ -914,9 +926,9 @@ function renderChat(){const el=$("cwLog");if(!el)return;const stick=el.scrollHei
  const b=$("cwBadge");b.textContent=CH.unread>99?"99+":CH.unread;show("cwBadge",CH.unread>0&&!CH.open)}
 function chatOpen(on){CH.open=on;if(on)CH.unread=0;chatSync();if(on){const el=$("cwLog");el.scrollTop=el.scrollHeight;if(!matchMedia("(pointer:coarse)").matches)$("cwIn").focus()}}
 // 화면 동기화: 대기실은 처음부터 열림, 게임 시작 시 접힘(안내 뱃지만), 종료 화면에서는 완전히 숨김
-function chatSync(){const vis=chatVisible(),kind=!V?null:V.phase==="lobby"?"room":V.phase==="ended"?"end":"game";
+function chatSync(){const vis=chatVisible(),kind=!V?null:(V.phase==="lobby"||inRoomView())?"room":V.phase==="ended"?"end":"game";
  if(kind!==CH.room){CH.room=kind;if(kind==="room")CH.open=true;else if(kind==="game")CH.open=false}
- if(CH.open)CH.unread=0;show("cw",vis&&CH.open);show("cwBtn",vis&&!CH.open);renderChat()}
+ if(CH.open)CH.unread=0;show("cw",vis&&CH.open);show("cwBtn",vis&&!CH.open);document.body.classList.toggle("cwon",vis);document.body.classList.toggle("cwopen",vis&&CH.open);renderChat()}
 $("cwBtn").onclick=()=>chatOpen(true);$("cwX").onclick=()=>chatOpen(false);
 $("cwForm").onsubmit=e=>{e.preventDefault();if(chatSend($("cwIn").value)){$("cwIn").value=""}};
 // ===== 화면 =====
@@ -932,7 +944,7 @@ async function startReveal(v){const tok=++RV.tok;Voice.stop();Object.assign(RV,{
   const t0=Date.now(),r=await say(s.text,prof,pre);if(tok!==RV.tok)return;
   if(r==="ended")await sleep(450);else{const pace=Math.min(4500,1400+s.text.length*40),el=Date.now()-t0;if(el<pace)await sleep(pace-el)}}
  if(tok===RV.tok){RV.done=true;render()}}
-function onView(v){const o=V;V=v;if(!o||o.round!==v.round||o.phase!==v.phase){sel=null;RV.tok++}
+function onView(v){const o=V;V=v;if(!o||o.round!==v.round||o.phase!==v.phase){sel=null;roomView=false;RV.tok++}
  if(v.phase==="playing"&&sel!==null&&(v.mine||sel>=v.hand.length))sel=null;
  if(v.phase==="choosing"&&(!o||o.phase!=="choosing"||o.round!==v.round)){Voice.stop();Sfx.recv()}
  if(v.phase==="playing"&&(!o||o.phase!=="playing"||o.round!==v.round)){Voice.stop();Sfx.recv();say(v.prompt,0)}
@@ -942,8 +954,8 @@ function onView(v){const o=V;V=v;if(!o||o.round!==v.round||o.phase!==v.phase){se
  if(v.casual&&v.phase==="result"&&o&&o.phase==="playing")startReveal(v);
  render();chatSync()}
 const nm=(v,id)=>(v.players.find(p=>p.id===id)||{}).name||"?";
-function render(){const v=V;if(!v)return;show("lobby",false);show("room",v.phase==="lobby");show("game",v.phase!=="lobby");const host=v.hostId===v.you;
- if(v.phase==="lobby"){$("roomCode").textContent=roomId;$("roomPl").innerHTML=v.players.map(p=>`<span class="chip">${p.id===v.hostId?"👑 ":""}${esc(p.name)}${p.id===v.you?" (나)":""}</span>`).join("")+(v.note?`<p class="muted">${esc(v.note)}</p>`:"");
+function render(){const v=V;if(!v)return;const rm=v.phase==="lobby"||(v.phase==="ended"&&roomView&&v.hostId!==v.you);show("lobby",false);show("room",rm);show("game",!rm);const host=v.hostId===v.you;
+ if(rm){$("roomCode").textContent=roomId;$("roomPl").innerHTML=v.players.map(p=>`<span class="chip">${p.id===v.hostId?"👑 ":""}${esc(p.name)}${p.id===v.you?" (나)":""}</span>`).join("")+(v.note?`<p class="muted">${esc(v.note)}</p>`:"");
   $("target").value=v.target;$("target").disabled=!host;$("pickMode").value=v.pick;$("pickMode").disabled=!host;$("startB").disabled=!host||v.players.length<2;$("startB").textContent=host?(v.players.length<2?`인원 부족 (${v.players.length}/2)`:v.players.length===2?"2인 모드 시작 (승패 없음)":"게임 시작"):"방장이 시작하길 기다리는 중";return}
  const judge=v.judgeId===v.you;$("goal").textContent=v.casual?`2인 모드 · 승패 없음 · ${v.round}라운드`:`목표 ${v.target}점 · ${v.round}라운드 · ${v.pick==="choose"?"출제자 선택":"무작위 출제"}`;$("soloN").textContent=v.solo?"혼자 테스트: 가상 플레이어는 문장을 생성하지 않고, 가진 카드 중 문자와 글자가 많이 겹치는 카드를 고르는 규칙 기반 봇입니다.":"";
  $("plist").innerHTML=v.players.map(p=>{const jd=p.id===v.judgeId,st=v.phase==="choosing"?(jd?"📝 출제 중":"출제 대기"):v.phase==="playing"?(jd?"심판 대기":p.done?"✅ 제출 완료":"✍️ 답장 작성 중…"):v.phase==="judging"?(jd?"고르는 중…":"제출함"):v.phase==="ended"?"":(p.id===v.winnerId?"🏆 이번 라운드 승리":"");
@@ -962,11 +974,11 @@ function render(){const v=V;if(!v)return;show("lobby",false);show("room",v.phase
  else if(v.phase==="playing")b=`<span class="t">👑 심판입니다. 모두가 답장할 때까지 기다려 주세요.</span>`;
  else if(v.phase==="judging")b=!revDone(v)?`<span class="t">답장 공개 중…</span>`:judge?`<span class="t">가장 웃긴 답장을 누르세요</span><button class="btn" id="judgeB" ${sel===null?"disabled":""}>👑 이 답장 선택</button>`:`<span class="t">심판이 고르는 중…</span>`;
  else if(v.phase==="result")b=!revDone(v)?`<span class="t">답장 공개 중…</span>`:host?`<button class="btn" id="nextB">다음 라운드 ▶</button>${v.casual?`<button class="btn g" id="endB">게임 종료</button>`:""}`:`<span class="t">방장이 다음 라운드를 시작할 때까지 대기</span>`;
- else b=host?`<button class="btn" id="againB">🔁 다시 하기</button><button class="btn g" id="lobbyB">로비로</button>`:`<span class="t">방장이 다음 판을 시작할 때까지 대기</span>`;
+ else b=host?`<button class="btn" id="againB">🔁 다시 하기</button><button class="btn g" id="lobbyB">대기실로</button>`:`<span class="t">방장이 다음 판을 시작할 때까지 대기</span><button class="btn g" id="lobbyB">대기실로</button>`;
  $("bar").innerHTML=b;const g=id=>$(id);
  if(g("chooseB"))g("chooseB").onclick=()=>{act("choose",{i:sel});sel=null};
  if(g("sendB"))g("sendB").onclick=()=>{const t=V.hand[sel];if(t===undefined)return;Sfx.send();act("play",{text:t});sel=null};
- if(g("judgeB"))g("judgeB").onclick=()=>act("judge",{i:sel});if(g("nextB"))g("nextB").onclick=()=>act("next");if(g("endB"))g("endB").onclick=()=>act("end");if(g("againB"))g("againB").onclick=()=>act("again");if(g("lobbyB"))g("lobbyB").onclick=()=>location.reload();
+ if(g("judgeB"))g("judgeB").onclick=()=>act("judge",{i:sel});if(g("nextB"))g("nextB").onclick=()=>act("next");if(g("endB"))g("endB").onclick=()=>act("end");if(g("againB"))g("againB").onclick=()=>act("again");if(g("lobbyB"))g("lobbyB").onclick=()=>{if(V.hostId===V.you)act("toRoom");else{roomView=true;render();chatSync()}};
  const can=v.phase==="playing"&&!judge&&!v.mine,hs=v.hand,n=hs.length;
  $("preview").textContent=can&&sel!==null&&hs[sel]?`“${hs[sel]}”`:"";
  const hsig=(judge?"J":v.mine?"M":"H"+can)+"|"+hs.join("|");if(hsig===handSig){$("hand").querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("sel",sel===i))}else{handSig=hsig;$("hand").innerHTML=judge?`<div class="note">심판은 카드를 내지 않습니다. 답장을 평가해 주세요 👑</div>`:(v.phase==="playing"&&v.mine?`<div class="note">답장을 보냈습니다. 다음 라운드에 새 카드가 채워져요.</div>`:hs.map((t,i)=>`<button class="card ${sel===i?"sel":""}" ${can?"":"disabled"} data-i="${i}" title="${esc(t)}" style="--r:${((i-(n-1)/2)*2.5+((i*37+n*11)%7-3)*.35).toFixed(1)}deg;--y:${(Math.abs(i-(n-1)/2)*3).toFixed(0)}px;--z:${i}"><small>REPLY CARD</small><b>${esc(t)}</b></button>`).join(""));
