@@ -176,7 +176,7 @@ body.cwon #game{height:calc(100% - var(--sbt) - var(--cwh) - env(safe-area-inset
 @media (max-width:700px) and (orientation:portrait){body.cwopen #room{height:calc(100% - var(--sbt) - min(40vh,340px) - env(safe-area-inset-bottom,0px));overflow-y:auto}}
 </style></head><body>
 <div id="status"><span id="clock">--:--</span><span class="sp"></span>
-<button id="setB" title="설정">⚙️ 설정</button>
+<button id="ttsChip" class="hidden" title="소리가 나지 않아요. 눌러서 다시 시도">🔇 음성 꺼짐</button><button id="setB" title="설정">⚙️ 설정</button>
 <svg width="18" height="14" viewBox="0 0 18 14" fill="#fff"><path d="M9 11.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM3.2 7.5l1.4 1.4a6.4 6.4 0 0 1 8.8 0l1.4-1.4a8.4 8.4 0 0 0-11.6 0zM.4 4.7l1.4 1.4a10.4 10.4 0 0 1 14.4 0l1.4-1.4a12.4 12.4 0 0 0-17.2 0z" transform="translate(0 -2)"/></svg>
 <span class="bat"><span id="batT">87%</span><i><b id="batB" style="width:87%"></b></i></span></div>
 
@@ -610,7 +610,7 @@ function classify(v){const n=v.name||"",u=v.voiceURI||"",base=n.toLowerCase().re
  else if(IS_ANDROID){provider=PV_ANDROID;basis="실행 환경"}
  const[gender,gbasis]=genderOfVoice(v);
  return{provider,basis,kind,rank,gender,gbasis,loc:v.localService?"내장":"네트워크",use:rank>=2?"사용":kind==="효과음성"?"제외: 효과음성":kind==="Eloquence"?"제외: Eloquence":"제외: 구형 합성음"}}
-const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1e9,vDone:false,vWait:0,timer:0,wd:0,wd2:0,cur:null,curItem:null,cache:new Map(),trace:[],stat:{started:0,ended:0,failed:0,retried:0},lastErr:"",lastUsed:null,onCloud:null,
+const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1e9,vDone:false,vWait:0,timer:0,wd:0,wd2:0,cur:null,curItem:null,cache:new Map(),trace:[],stat:{started:0,ended:0,failed:0,retried:0},fails:0,dead:false,blocked:false,warming:false,vc:-1,deadAt:0,probes:0,probing:false,gestureRevives:0,RECOVER_MS:20000,noVoiceObj:false,voiceRetryOk:0,primeSt:"none",onHealth:null,onVoices:null,lastErr:"",lastUsed:null,onCloud:null,
  cloud:{state:"unset",providers:{google:false,microsoft:false},fails:0},el:typeof Audio!=="undefined"?new Audio():null,
  now(){return performance.now()},
  log(e,x){this.trace.push({e,t:Math.round(this.now()),x});if(this.trace.length>300)this.trace.shift()},
@@ -624,8 +624,21 @@ const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1
  route(){const eng=CFG.engine;if(this.base()&&this.cloud.state==="ok"&&this.cloud.providers[eng])return{kind:"cloud",eng};
   const why=!this.base()?"unset":this.cloud.state==="checking"?"checking":this.cloud.state!=="ok"?"unreachable":"nocred";return{kind:"device",eng,why}},
  usable(){return this.supported()||this.route().kind==="cloud"},
- unlock(){this.unlocked=true;if(this.primed)return;this.primed=true;
-  if(this.supported()){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}catch(e){}}
+ // 음성 목록 로딩: voiceschanged 가 안 오거나 먼저 지나간 브라우저를 위해 getVoices() 개수를 최대 6초간 폴링(개수가 바뀌면 onVoices 호출)
+ warm(){if(!this.supported()||this.warming)return;this.warming=true;let n=0;const t=setInterval(()=>{let c=0;try{c=speechSynthesis.getVoices().length}catch(e){}if(c!==this.vc){this.vc=c;this.onVoices&&this.onVoices()}if(c>0||++n>20){clearInterval(t);this.warming=false}},300)},
+ // "음성 목록이 있다"와 "실제로 재생된다"를 구분: stat.started(실제 onstart 발생 횟수)로만 정상(ok) 판정
+ health(){if(!CFG.ttsOn)return"off";if(!this.usable())return"unsupported";if(this.dead)return"dead";if(this.blocked)return"blocked";return this.stat.started>0?"ok":"untested"},
+ bad(){const h=this.health();return h==="unsupported"||h==="dead"||h==="blocked"},
+ revive(){this.dead=false;this.blocked=false;this.fails=0;this.probes=0;this.probing=false;this.primed=false;this.onHealth&&this.onHealth()},
+ // 사용자가 직접 누른 "다시 시도": 제한 초기화 → 제스처 안에서 다시 프라임 → 짧은 문장을 실제로 재생해 성공 여부(onstart 발생)를 돌려줌
+ async reenable(){this.revive();this.unlock();this.stop();const before=this.stat.started,r=await this.speakP(TT[CFG.ttsLang].test1,0),ok=r==="ended"&&this.stat.started>before;this.onHealth&&this.onHealth();return ok},
+ unlock(){this.unlocked=true;this.warm();
+  // 브라우저가 "자동 재생 차단"을 알려온 뒤의 터치는 차단 해제의 기회 → 이 터치 안에서 다시 프라임. 한 번도 못 읽은 채 dead 가 된 경우도 터치로 최대 2회까지 다시 시도(무한 지연 방지)
+  if(this.blocked){this.blocked=false;this.primed=false;this.onHealth&&this.onHealth()}
+  if(this.dead&&this.stat.started===0&&this.gestureRevives<2&&this.now()-this.deadAt>3000){this.gestureRevives++;this.revive()}
+  if(this.primed)return;this.primed=true;
+  // 사용자 제스처 안에서 무음 발화를 한 번 보내 "사용자 조작 후에만 재생" 제한을 풀어 둔다. 이미 읽는 중이면 건드리지 않고, 끝나지 않는 프라임 발화가 큐를 막지 않도록 0.9초 뒤 안전 취소
+  if(this.supported()&&!this.busy&&!this.q.length){try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;u.lang=CFG.ttsLang==="en"?"en-US":"ko-KR";const pid=this.id;u.onstart=()=>{if(this.primeSt==="none")this.primeSt="started"};u.onerror=e=>{const er=(e&&e.error)||"error";if(er==="not-allowed"||er==="service-not-allowed"){this.primeSt="not-allowed";this.blocked=true;this.onHealth&&this.onHealth()}else if(er!=="canceled"&&er!=="interrupted")this.primeSt="error:"+er};speechSynthesis.speak(u);setTimeout(()=>{if(!this.busy&&this.id===pid&&speechSynthesis.speaking){try{speechSynthesis.cancel()}catch(e){}this.cancelAt=this.now();this.log("prime-cancel")}},900)}catch(e){}}
   if(this.el){try{this.el.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";const p=this.el.play();p&&p.catch&&p.catch(()=>{})}catch(e){}}},
  // ---- 기기 음성 ----
  all(l=CFG.ttsLang){if(!this.supported())return[];const re=l==="en"?/^en/i:/^ko/i;return speechSynthesis.getVoices().filter(v=>re.test((v.lang||"").replace("_","-")))},
@@ -641,34 +654,41 @@ const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1
  cloudList(p,l,g){const c=CLOUD[p][l];let a=g?c[g]:cloudAll(p,l);const b=CFG["cv_"+p+"_"+l];if(!g&&b&&a.includes(b))a=[b,...a.filter(x=>x!==b)];return a},
  cloudVoice(prof,g,l){const a=this.cloudList(CFG.engine,l,g);return a[prof%a.length]},
  norm(s){return s.replace(/[\u{1F000}-\u{1FFFF}\u2600-\u27BF]/gu,"").replace(/[ㅋㅎ]{2,}/g,"크크").replace(/[ㅠㅜ]+/g,"").replace(/\.{2,}|…/g,", ").replace(/\s+/g," ").trim()},
- diag(){const r=this.route(),u=this.lastUsed;return`${IS_IOS?"iOS":IS_ANDROID?"Android":"Desktop"}${IN_APP?" (in-app browser)":""} · speech:${this.supported()?"yes":"NO"} · device voices ko:${this.all("ko").length} en:${this.all("en").length} · engine:${CFG.engine} route:${r.kind}${r.why?"("+r.why+")":""} · last:${u?u.kind+"/"+u.provider+"/"+u.voice+(u.fallback?" (fallback)":""):"none"} · started:${this.stat.started} ended:${this.stat.ended} failed:${this.stat.failed} retried:${this.stat.retried} · last error: ${this.lastErr||"none"}`},
+ diag(){const r=this.route(),u=this.lastUsed;return`health:${this.health()} fails:${this.fails} · ${IS_IOS?"iOS":IS_ANDROID?"Android":"Desktop"}${IN_APP?" (in-app browser)":""} · speech:${this.supported()?"yes":"NO"} · device voices ko:${this.all("ko").length} en:${this.all("en").length} · engine:${CFG.engine} route:${r.kind}${r.why?"("+r.why+")":""} · last:${u?u.kind+"/"+u.provider+"/"+u.voice+(u.fallback?" (fallback)":""):"none"} · started:${this.stat.started} ended:${this.stat.ended} failed:${this.stat.failed} retried:${this.stat.retried} · prime:${this.primeSt} voiceObj:${this.noVoiceObj?"off":"on"} probes:${this.probes} · last error: ${this.lastErr||"none"}`},
  stop(){const items=[...this.q,this.curItem];this.q=[];this.curItem=null;this.id++;this.busy=false;clearTimeout(this.timer);clearTimeout(this.wd);clearTimeout(this.wd2);this.timer=this.wd=this.wd2=0;this.cur=null;
   if(this.supported()&&(speechSynthesis.speaking||speechSynthesis.pending)){speechSynthesis.cancel();this.cancelAt=this.now();this.log("cancel")}
   if(this.el&&!this.el.paused){try{this.el.pause()}catch(e){}}
   items.forEach(it=>it&&it.cb&&it.cb("aborted"))},
- speakP(text,prof=0,g=null,lang=CFG.ttsLang){return new Promise(res=>{if(!CFG.ttsOn||!this.unlocked||!this.usable())return res("skipped");const s=this.norm(String(text));if(!s)return res("skipped");
-  const parts=(s.length>110?s.split(/(?<=[.!?])\s+/):[s]).filter(Boolean);parts.forEach((x,i)=>this.q.push({s:x,prof,g,lang,attempt:0,cb:i===parts.length-1?res:null}));this.prefetch();this.next()})},
+ speakP(text,prof=0,g=null,lang=CFG.ttsLang){return new Promise(res=>{if(!CFG.ttsOn||!this.unlocked||!this.usable())return res("skipped");if(this.dead){if(this.probes<3&&this.now()-this.deadAt>this.RECOVER_MS){this.probes++;this.dead=false;this.fails=1;this.probing=true;this.log("probe-recover")}else{this.log("skip-dead");return res("skipped")}}const s=this.norm(String(text));if(!s)return res("skipped");
+  const parts=(s.length>110?s.split(/(?<=[.!?])\s+/):[s]).filter(Boolean);parts.forEach((x,i)=>this.q.push({s:x,prof,g,lang,attempt:this.probing?1:0,cb:i===parts.length-1?res:null}));this.prefetch();this.next()})},
  speak(...a){this.speakP(...a)},
  next(){if(this.busy||this.timer||!this.q.length)return;
   const R=this.route(),cloud=R.kind==="cloud";
-  if(!this.vDone&&!cloud&&this.supported()&&!this.all(this.q[0].lang).length){if(!this.vWait)this.vWait=setTimeout(()=>{this.vDone=true;this.next()},700);return}
-  this.vDone=true;const n=this.now();let w=Math.max(this.hold-n,this.cancelAt+60-n);
+  if(!this.vDone&&!cloud&&this.supported()&&!this.all(this.q[0].lang).length){if(!this.vWait)this.vWait=setTimeout(()=>{this.vDone=true;this.next()},IS_ANDROID||IS_IOS?1200:700);return}
+  this.vDone=true;const n=this.now();
+  if(this.supported()&&!this.busy&&(speechSynthesis.speaking||speechSynthesis.pending)&&n-this.cancelAt>400){try{speechSynthesis.cancel()}catch(e){}this.cancelAt=n;this.log("flush")}
+  let w=Math.max(this.hold-n,this.cancelAt+(IS_ANDROID||IS_IOS?120:60)-n);
   if(w<=0&&n-this.cancelAt<400&&this.supported()&&(speechSynthesis.speaking||speechSynthesis.pending))w=20;
   if(w>0){this.timer=setTimeout(()=>{this.timer=0;this.next()},Math.ceil(w));return}
   const it=this.q.shift(),id=++this.id;this.busy=true;this.curItem=it;let over=false,hadVoice=false;
   const alive=()=>!over&&id===this.id;
-  const done=res=>{if(over||id!==this.id)return;over=true;clearTimeout(this.wd);clearTimeout(this.wd2);this.busy=false;this.curItem=null;this.log(res,it.s);if(res==="ended")this.stat.ended++;if(res==="failed")this.stat.failed++;if(it.cb)it.cb(res);this.next()};
-  const fail=why=>{if(!alive())return;this.lastErr=why;this.log("err",why);if(it.attempt===0&&hadVoice){it.attempt=1;this.stat.retried++;try{speechSynthesis.cancel()}catch(e){}setTimeout(()=>alive()&&browser(false),80)}else done("failed")};
+  const done=res=>{if(over||id!==this.id)return;over=true;clearTimeout(this.wd);clearTimeout(this.wd2);this.busy=false;this.curItem=null;this.log(res,it.s);
+   this.probing=false;if(res==="ended"){this.stat.ended++;this.fails=0;this.dead=false;this.probes=0}
+   if(res==="failed"){this.stat.failed++;this.fails++;if((this.stat.started===0&&this.fails>=(IN_APP?1:2))||this.fails>=3){this.dead=true;this.deadAt=this.now()}// 앱 내 브라우저(WebView)는 음성이 아예 안 되는 경우가 많아 첫 실패에서 건너뜀 모드로 전환(이후 자동 탐침/터치로 복구 재시도)// 재생 시작조차 못 하는 환경이면 계속 기다리지 않고 건너뜀
+    if(this.supported()&&(speechSynthesis.speaking||speechSynthesis.pending)){try{speechSynthesis.cancel()}catch(e){}this.cancelAt=this.now()}}// 늦게 뒤따라 재생되어 겹치는 일 방지
+   this.onHealth&&this.onHealth();if(it.cb)it.cb(res);this.next()};
+  const fail=why=>{if(!alive())return;this.lastErr=why;this.log("err",why);if(why==="not-allowed"||why==="service-not-allowed"){this.blocked=true;return done("failed")}if(it.attempt===0&&hadVoice){it.attempt=1;this.stat.retried++;try{speechSynthesis.cancel()}catch(e){}setTimeout(()=>alive()&&browser(false),80)}else done("failed")};
   const browser=useVoice=>{if(!this.supported())return done("failed");
    const u=new SpeechSynthesisUtterance(it.s),{v}=this.pick(it.prof,it.g,it.lang);hadVoice=!!v;
    u.lang=v&&v.lang?v.lang.replace("_","-"):(it.lang==="en"?"en-US":"ko-KR");
-   if(v&&useVoice)u.voice=v;u.rate=Math.min(2,Math.max(.5,CFG.rate/100));u.pitch=Math.min(2,Math.max(.2,CFG.pitch/100));u.volume=CFG.tvol/100;
-   let started=false;u.onstart=()=>{started=true;clearTimeout(this.wd);this.stat.started++;this.lastUsed={kind:"device",provider:v?classify(v).provider:PV_UNKNOWN,voice:v?v.name:"(system default)",fallback:cloudTried||!this.deviceList(it.lang).native};this.log("start",it.s)};
-   u.onend=()=>done("ended");u.onerror=e=>{if(!alive())return;const er=(e&&e.error)||"error";if(er==="canceled"||er==="interrupted")return;fail(er)};
+   if(v&&useVoice&&!this.noVoiceObj)u.voice=v;u.rate=Math.min(2,Math.max(.5,CFG.rate/100));u.pitch=Math.min(2,Math.max(.2,CFG.pitch/100));u.volume=CFG.tvol/100;
+   let started=false;const t0=this.now(),maxMs=Math.max(5000,3000+it.s.length*(it.lang==="en"?85:150)/Math.max(.5,Math.min(2,CFG.rate/100)));u.onstart=()=>{if(!alive())return;started=true;this.blocked=false;if(!useVoice&&hadVoice&&!this.noVoiceObj&&++this.voiceRetryOk>=2){this.noVoiceObj=true;this.log("voice-object-off")}if(this.vc<=0)this.warm();clearTimeout(this.wd);clearTimeout(this.wd2);this.wd2=setTimeout(()=>{if(!alive())return;try{speechSynthesis.cancel()}catch(e){}done("ended")},maxMs);this.stat.started++;this.onHealth&&this.onHealth();this.lastUsed={kind:"device",provider:u.voice?classify(u.voice).provider:PV_UNKNOWN,voice:u.voice?u.voice.name:"(system default)",fallback:cloudTried||!this.deviceList(it.lang).native};this.log("start",it.s)};
+   u.onend=()=>{if(!alive())return;if(!started&&this.now()-t0<400)return fail("instant-end");if(!started){started=true;this.stat.started++}done("ended")};u.onerror=e=>{if(!alive())return;const er=(e&&e.error)||"error";if(er==="canceled"||er==="interrupted")return;fail(er)};
    this.cur=u;
-   clearTimeout(this.wd);this.wd=setTimeout(()=>{if(!alive()||started)return;if(speechSynthesis.speaking){started=true;return}fail("no-start")},3500);
-   // 종료 이벤트가 유실될 때를 대비한 상한(예상 낭독 시간 기준)
-   clearTimeout(this.wd2);this.wd2=setTimeout(()=>{if(!alive())return;try{speechSynthesis.cancel()}catch(e){}done("ended")},Math.max(5000,3000+it.s.length*(it.lang==="en"?85:150)/Math.max(.5,u.rate)));
+   // 시작 감시: onstart 가 오지 않으면 실패 처리. "speaking=true" 만으로는 시작으로 보지 않고(소리 없는 엔진 구분) 한 번만 유예. 첫 발화는 엔진 초기화가 느릴 수 있어 더 길게
+   const first=this.stat.started===0&&!this.probing;let grace=false;const chk=()=>{if(!alive()||started)return;if(speechSynthesis.speaking&&!grace){grace=true;clearTimeout(this.wd);this.wd=setTimeout(chk,first?3500:2500);return}fail("no-start")};
+   clearTimeout(this.wd);this.wd=setTimeout(chk,this.probing?2500:first?(it.attempt?2500:4500):3500);// 첫 시도는 엔진 초기화를 기다리되, 재시도·탐침은 짧게
+   // (종료 이벤트 유실 대비 상한 wd2 는 onstart 이후에 무장 — 위 onstart 참고)
    try{speechSynthesis.resume()}catch(e){}try{speechSynthesis.speak(u)}catch(e){fail("speak-throw")}};
   let cloudTried=false;
   if(cloud){cloudTried=true;this.cloudPlay(it,id,alive,done).catch(()=>{if(!alive())return;this.lastErr="cloud";this.log("cloud-fail");if(++this.cloud.fails>=2){this.cloud.state="unreachable";this.onCloud&&this.onCloud();setTimeout(()=>this.checkCloud(),30000)}browser(true)})}else browser(true)},
@@ -744,6 +764,13 @@ Object.assign(UI_EN,{"복사":"Copy","복사됨!":"Copied!","복사 실패":"Cop
 "방 코드를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.":"Couldn’t generate a room code. Please try again shortly.",
 "상대 플레이어가 나가서 대기실로 돌아왔습니다.":"The other player left, so we returned to the waiting room."});
 Object.assign(UI_EN,{"대기실로":"Back to waiting room"});
+Object.assign(UI_EN,{"🔇 음성 꺼짐":"🔇 Voice off","외부 브라우저로 열기":"Open in external browser","링크 복사":"Copy link",
+"이 앱 안의 브라우저는 음성 합성을 지원하지 않습니다. 외부 브라우저(Chrome·Safari 등)에서 열어 주세요.":"This in-app browser doesn’t support speech synthesis. Please open the game in an external browser (Chrome, Safari, etc.).",
+"이 브라우저는 음성 합성을 지원하지 않습니다. Chrome이나 Safari 등 다른 브라우저에서 열어 주세요.":"This browser doesn’t support speech synthesis. Please open the game in Chrome, Safari, or another browser.",
+"브라우저가 자동 음성 재생을 막았습니다. 화면 위쪽 🔇 버튼을 눌러 다시 시도해 주세요. (화면을 터치한 뒤에만 재생을 허용하는 환경이 있습니다)":"The browser blocked automatic speech. Tap the 🔇 button at the top to try again. (Some browsers only allow speech after a screen tap.)",
+"음성이 재생되지 않아 읽어주기를 건너뛰고 있습니다. 앱 안의 브라우저는 음성을 막거나 지원하지 않는 경우가 많으니 외부 브라우저에서 열어 보세요.":"Speech isn’t playing, so read-aloud is being skipped. In-app browsers often block or don’t support speech — try opening the game in an external browser.",
+"음성이 재생되지 않아 읽어주기를 건너뛰고 있습니다. 🔇 버튼으로 다시 시도하거나, 미디어 볼륨과 (아이폰은) 무음 스위치, 휴대폰 설정의 '텍스트 음성 변환' 한국어 음성 데이터를 확인해 주세요.":"Speech isn’t playing, so read-aloud is being skipped. Tap 🔇 to retry, and check the media volume, the silent switch (iPhone), and the voice data under your phone’s text-to-speech settings.",
+"앱 안의 브라우저에서는 음성이 나오지 않을 수 있습니다. 소리가 나지 않으면 외부 브라우저에서 열어 주세요.":"Speech may not work in an in-app browser. If you hear nothing, open the game in an external browser."});
 const NOTE_TPL=[ // [한국어 템플릿, 영어 템플릿]  ({LN}=음성 언어, {NM}=엔진, {PV}=기기 음성 제공자, {N}=개수)
 ["{LN} 음성이 없어 읽어주기가 작동하지 않습니다. OS 설정에서 {LN} 음성을 설치해 보세요.","No {LN} voice was found, so read-aloud won’t work. Install a {LN} voice in your OS settings."],
 ["iOS: Safari는 Apple 기기 음성만 제공합니다. Google/Microsoft 음성은 클라우드 TTS 서버가 연결돼야 쓸 수 있습니다.","iOS: Safari only provides Apple’s on-device voices. Google/Microsoft voices need a connected cloud TTS server."],
@@ -1003,18 +1030,32 @@ function syncVoices(){const lang=CFG.ttsLang,LN=lang==="en"?"영어":"한국어"
  $("engLine2").textContent=none?fillT(13,{}):R.kind==="cloud"?fillT(10,{NM}):D.native?fillT(11,{NM}):fillT(12,{NM,PV:D.provider||PV_UNKNOWN});
  $("voiceNote").textContent=!Voice.supported()&&R.kind!=="cloud"?(IN_APP?"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다. 카카오톡·네이버 등 앱 안의 브라우저라면 Chrome이나 Samsung Internet, Safari에서 열어 보세요.":"이 브라우저는 음성 합성(Web Speech)을 지원하지 않아 읽어주기가 작동하지 않습니다."):!D.list.length&&R.kind!=="cloud"?fillT(0,{LN}):IS_IOS?fillT(1,{}):IS_ANDROID?fillT(2,{}):"";
  $("poolNote").textContent=R.kind==="cloud"?"":D.list.length?(D.list.length>1?fillT(3,{LN,N:D.list.length}):fillT(4,{LN})):"";
- $("ttsDiag").textContent=Voice.diag();renderInv()}
+ $("ttsDiag").textContent=Voice.diag();renderInv();updateTtsHelp()}
 function renderInv(){const rows=Voice.inventory();$("invBody").innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.lang)}</td><td>${esc(r.voiceURI)}</td><td>${r.c.provider}</td><td>${r.c.basis}</td><td>${r.c.loc}</td><td>${r.c.kind}</td><td>${r.c.gender==="f"?"여성":r.c.gender==="m"?"남성":"확인 불가"}</td><td>${r.c.use}</td></tr>`).join(""):`<tr><td colspan="9">기기에서 읽을 수 있는 음성 목록이 비어 있습니다</td></tr>`}
-$("setRows").innerHTML=SET.map(([k,l,t,a,b])=>`<div class="set"><label for="s_${k}">${l}</label>`+(t==="chk"?`<input type="checkbox" id="s_${k}"><span></span>`:t==="sel"?`<select id="s_${k}"></select><span></span>`:`<input type="range" id="s_${k}" min="${a}" max="${b}" step="1"><span id="v_${k}"></span>`)+`</div>`).join("")+`<p class="muted" id="engLine1" style="margin:6px 0 2px;color:#ffd24c"></p><p class="muted" id="engLine2" style="margin:2px 0 6px"></p><p class="muted" id="voiceNote"></p><p class="muted" id="poolNote"></p><div class="row"><button class="btn g" id="btnRecheck">연결 확인</button><button class="btn g" id="btnVoices">음성 목록 보기</button></div><div id="voiceInv" class="hidden"><div class="invwrap"><table class="inv"><thead><tr><th>이름</th><th>언어</th><th>voiceURI</th><th>제공자</th><th>판별 근거</th><th>위치</th><th>유형</th><th>성별</th><th>자동 배정</th></tr></thead><tbody id="invBody"></tbody></table></div><div class="row"><button class="btn g" id="btnCopy">목록 복사</button></div></div><p class="muted" id="ttsDiag" style="font-size:11px;word-break:break-all"></p>`;
+$("setRows").innerHTML=SET.map(([k,l,t,a,b])=>`<div class="set"><label for="s_${k}">${l}</label>`+(t==="chk"?`<input type="checkbox" id="s_${k}"><span></span>`:t==="sel"?`<select id="s_${k}"></select><span></span>`:`<input type="range" id="s_${k}" min="${a}" max="${b}" step="1"><span id="v_${k}"></span>`)+`</div>`).join("")+`<p class="muted" id="engLine1" style="margin:6px 0 2px;color:#ffd24c"></p><p class="muted" id="engLine2" style="margin:2px 0 6px"></p><p class="muted" id="voiceNote"></p><div id="ttsHelp" class="hidden"><p class="muted" id="ttsHelpTxt" style="color:#ffd24c"></p><div class="row"><button class="btn g hidden" id="ttsExtB" type="button">외부 브라우저로 열기</button><button class="btn g hidden" id="ttsCopyB" type="button">링크 복사</button></div></div><p class="muted" id="poolNote"></p><div class="row"><button class="btn g" id="btnRecheck">연결 확인</button><button class="btn g" id="btnVoices">음성 목록 보기</button></div><div id="voiceInv" class="hidden"><div class="invwrap"><table class="inv"><thead><tr><th>이름</th><th>언어</th><th>voiceURI</th><th>제공자</th><th>판별 근거</th><th>위치</th><th>유형</th><th>성별</th><th>자동 배정</th></tr></thead><tbody id="invBody"></tbody></table></div><div class="row"><button class="btn g" id="btnCopy">목록 복사</button></div></div><p class="muted" id="ttsDiag" style="font-size:11px;word-break:break-all"></p>`;
 SET.forEach(([k,l,t])=>{const e=$("s_"+k);e.oninput=e.onchange=()=>{CFG[k==="voice"?vKey():k]=t==="chk"?e.checked:t==="sel"?e.value:+e.value;if(k==="ttsOn"&&!CFG.ttsOn)Voice.stop();if(k==="engine"||k==="ttsLang"||k==="showAll"){Voice.stop();syncVoices()}if(k==="uiLang"){applyLang();tick();renderChat()}syncSet();save()}});
 $("s_sfxVol").addEventListener("change",()=>{Sfx.init();Sfx.select()});$("s_sfxOn").addEventListener("change",()=>{Sfx.init();Sfx.select()});
 $("btnRecheck").onclick=()=>Voice.checkCloud();
 $("btnVoices").onclick=()=>{const h=$("voiceInv").classList.toggle("hidden");$("btnVoices").textContent=h?"음성 목록 보기":"음성 목록 숨기기";renderInv()};
 $("btnCopy").onclick=async()=>{const rows=Voice.inventory().map(r=>({name:r.name,lang:r.lang,voiceURI:r.voiceURI,localService:r.local,default:r.def,provider:r.c.provider,providerBasis:r.c.basis,kind:r.c.kind,gender:r.c.gender,genderBasis:r.c.gbasis,autoAssign:r.c.use})),txt=JSON.stringify({userAgent:UA,platform:navigator.platform,voices:rows},null,1);try{await navigator.clipboard.writeText(txt);$("btnCopy").textContent="복사됨"}catch(e){window.prompt(trUI("목록을 복사하세요"),txt)}};
 Voice.onCloud=()=>{try{syncVoices();syncSet()}catch(e){}};
-syncVoices();syncSet();if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{syncVoices();syncSet();Voice.vDone=true;clearTimeout(Voice.vWait);Voice.next()};
+// ===== TTS 상태 표시 / 안내 (재생이 실제로 안 될 때만 표시. 정상으로 가장하지 않음) =====
+const KAKAO=/KAKAOTALK/i.test(UA),CAN_EXT=KAKAO&&/^https?:$/.test(location.protocol);
+function ttsHelpText(){const h=Voice.health();
+ if(h==="unsupported")return IN_APP?"이 앱 안의 브라우저는 음성 합성을 지원하지 않습니다. 외부 브라우저(Chrome·Safari 등)에서 열어 주세요.":"이 브라우저는 음성 합성을 지원하지 않습니다. Chrome이나 Safari 등 다른 브라우저에서 열어 주세요.";
+ if(h==="blocked")return"브라우저가 자동 음성 재생을 막았습니다. 화면 위쪽 🔇 버튼을 눌러 다시 시도해 주세요. (화면을 터치한 뒤에만 재생을 허용하는 환경이 있습니다)";
+ if(h==="dead")return IN_APP?"음성이 재생되지 않아 읽어주기를 건너뛰고 있습니다. 앱 안의 브라우저는 음성을 막거나 지원하지 않는 경우가 많으니 외부 브라우저에서 열어 보세요.":"음성이 재생되지 않아 읽어주기를 건너뛰고 있습니다. 🔇 버튼으로 다시 시도하거나, 미디어 볼륨과 (아이폰은) 무음 스위치, 휴대폰 설정의 '텍스트 음성 변환' 한국어 음성 데이터를 확인해 주세요.";
+ if(IN_APP&&h==="untested")return"앱 안의 브라우저에서는 음성이 나오지 않을 수 있습니다. 소리가 나지 않으면 외부 브라우저에서 열어 주세요.";return""}
+function updateTtsHelp(){const t=ttsHelpText();show("ttsHelp",!!t);$("ttsHelpTxt").textContent=t;show("ttsExtB",!!t&&CAN_EXT);show("ttsCopyB",!!t&&IN_APP)}
+Voice.onHealth=()=>{show("ttsChip",Voice.bad());updateTtsHelp()};
+$("ttsChip").onclick=async()=>{Sfx.init();const ok=await Voice.reenable();if(!ok)$("setB").onclick()};
+$("ttsExtB").onclick=()=>{location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(location.href)};
+$("ttsCopyB").onclick=async()=>{let ok=false;try{await navigator.clipboard.writeText(location.href);ok=true}catch(e){try{const ta=document.createElement("textarea");ta.value=location.href;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();ok=document.execCommand("copy");ta.remove()}catch(_){}}
+ $("ttsCopyB").textContent=ok?"복사됨!":"복사 실패";setTimeout(()=>{$("ttsCopyB").textContent="링크 복사"},1500)};
+Voice.onVoices=()=>{syncVoices();syncSet();Voice.vDone=true;clearTimeout(Voice.vWait);Voice.next()};
+syncVoices();syncSet();if(window.speechSynthesis)speechSynthesis.onvoiceschanged=Voice.onVoices;Voice.warm();Voice.onHealth();
 $("setB").onclick=()=>{Sfx.init();Voice.unlock();syncVoices();syncSet();$("setModalHost").appendChild($("setRows"));show("settings",true)};$("setClose").onclick=()=>show("settings",false);$("settings").onclick=e=>{if(e.target.id==="settings")show("settings",false)};
-$("testB").onclick=()=>{Voice.unlock();Voice.stop();Voice.speakP(TT[CFG.ttsLang].test1,0).then(r=>{$("ttsDiag").textContent=Voice.diag()+" · preview:"+r});Voice.speakP(TT[CFG.ttsLang].test2,2)};$("pickMode").onchange=e=>act("pick",{m:e.target.value});
+$("testB").onclick=()=>{Voice.revive();Voice.unlock();Voice.stop();Voice.speakP(TT[CFG.ttsLang].test1,0).then(r=>{$("ttsDiag").textContent=Voice.diag()+" · preview:"+r});Voice.speakP(TT[CFG.ttsLang].test2,2)};$("pickMode").onchange=e=>act("pick",{m:e.target.value});
 $("joinB").onclick=joinRoom;$("roomInput").oninput=e=>{e.target.value=normCode(e.target.value).slice(0,CODE_LEN)};
 $("copyB").onclick=async()=>{const t=roomId||"";let ok=false;try{await navigator.clipboard.writeText(t);ok=true}catch(e){try{const ta=document.createElement("textarea");ta.value=t;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();ok=document.execCommand("copy");ta.remove()}catch(_){}}
  $("copyB").textContent=ok?"복사됨!":"복사 실패";setTimeout(()=>{$("copyB").textContent="복사"},1500)};$("startB").onclick=()=>act("start");$("target").onchange=e=>act("target",{n:+e.target.value});$("leaveB").onclick=$("quitB").onclick=()=>location.reload();
@@ -1027,6 +1068,8 @@ document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go,
 $("joinToggle").onclick=()=>show("joinRow",$("joinRow").classList.contains("hidden"));$("cMode").onchange=()=>{$("createB").textContent=$("cMode").value==="solo"?"혼자 플레이 시작":"방 만들기"};
 $("createB").onclick=()=>$("cMode").value==="solo"?soloStart():hostRoom();
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.classList.contains("card")||b.id==="sendB")return;Sfx.init();b.closest("#nav")?Sfx.nav():Sfx.click()},true);
-document.addEventListener("click",()=>{Sfx.init();Voice.unlock()},{once:true});
+["click","touchend","keydown"].forEach(t=>document.addEventListener(t,()=>{Sfx.init();Voice.unlock()},{passive:true,capture:true}));
+// 앱 전환/화면 꺼짐 후 복귀: 멈춘 발화를 정리하고 다음 터치에서 다시 프라임 (iOS 는 백그라운드 후 음성이 막히는 경우가 있음 — 추정)
+document.addEventListener("visibilitychange",()=>{if(document.hidden){Voice.stop()}else{Voice.primed=false;if(Voice.stat.started>0)Voice.revive();Voice.warm()}});
 initLang();Voice.checkCloud();
 </script></body></html>
