@@ -34,6 +34,7 @@ main{grid-area:main;display:flex;justify-content:center;padding:10px;min-height:
 .msg.in .b:before,.msg.out .b:before{content:"";position:absolute;bottom:0;width:14px;height:16px}
 .msg.in .b:before{left:-6px;background:#e5e5ea;border-bottom-right-radius:14px}.msg.out .b:before{right:-6px;background:#0b84ff;border-bottom-left-radius:14px}
 .msg.in .b:after,.msg.out .b:after{content:"";position:absolute;bottom:0;width:10px;height:16px;background:#fff}.msg.in .b:after{left:-10px;border-bottom-right-radius:10px}.msg.out .b:after{right:-10px;border-bottom-left-radius:10px}
+.dots{display:inline-flex;align-items:center;gap:5px;height:1.45em;padding:0 2px}.dots i{width:8px;height:8px;border-radius:50%;background:#8e8e93;animation:dotb 1.2s infinite ease-in-out}.dots i:nth-child(2){animation-delay:.18s}.dots i:nth-child(3){animation-delay:.36s}@keyframes dotb{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-4px);opacity:1}}
 .msg .tm{font-size:10px;color:#999;margin:2px 8px}.msg.new{animation:pop .4s cubic-bezier(.2,1.4,.4,1)}
 .msg.pick{cursor:pointer}.msg.pick .b{outline:3px solid transparent}.msg.pick:hover .b{outline-color:#ffd24c}.msg.sel .b{outline:3px solid #ff9f0a!important}.msg.win .b{background:#34c759}.msg.win .b:before{background:#34c759}
 .msg.gr:not(.win) .b{background:#30c04a!important;color:#fff}
@@ -229,7 +230,7 @@ body.cwon #game{height:calc(100% - var(--sbt) - var(--cwh) - env(safe-area-inset
 <nav id="nav"><h1>📱 New Phone,<br>Who Dis?</h1><button data-go="start">시작하기</button><button data-go="help">도움말</button><button data-go="settings">설정</button><button data-go="exit">나가기</button></nav>
 <section class="stage">
 <div class="pn" id="pn-start"><h2>시작하기</h2><label class="muted">닉네임</label><input id="name" maxlength="10" placeholder="닉네임을 입력하세요"><div class="row"><button class="btn" data-go="create">방 만들기</button><button class="btn g" id="joinToggle">방 참가하기</button></div><div id="joinRow" class="row hidden"><input id="roomInput" placeholder="방 코드 입력 (6자리)" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn" id="joinB">참가</button></div></div>
-<div class="pn" id="pn-create"><h2>방 만들기</h2><label class="muted">목표 점수</label><select id="cTarget"><option value="5">5점</option><option value="10">10점</option></select><label class="muted">받은 메시지 카드 선택 방식</label><select id="cPick"><option value="random">무작위</option><option value="choose">심판이 선택</option></select><label class="muted">카드 구성</label><select id="cDeck"><option value="fav">선별 카드 위주</option><option value="all">전체 카드 섞기</option></select><label class="row" style="align-items:center;justify-content:flex-start;gap:10px;margin:14px 0"><input type="checkbox" id="cSafe"> 안전 모드</label><div class="row"><button class="btn g" data-go="start">뒤로</button><button class="btn" id="createB">방 만들기</button></div></div>
+<div class="pn" id="pn-create"><h2>방 만들기</h2><label class="muted">목표 점수</label><select id="cTarget"><option value="5">5점</option><option value="10">10점</option></select><label class="muted">받은 메시지 카드 선택 방식</label><select id="cPick"><option value="random">무작위</option><option value="choose">심판이 선택</option></select><label class="muted">카드 구성</label><select id="cDeck"><option value="fav">선별 카드 조금 더 자주</option><option value="all">전체 카드 섞기</option></select><label class="row" style="align-items:center;justify-content:flex-start;gap:10px;margin:14px 0"><input type="checkbox" id="cSafe"> 안전 모드</label><div class="row"><button class="btn g" data-go="start">뒤로</button><button class="btn" id="createB">방 만들기</button></div></div>
 <div class="pn help" id="pn-help"><h2>도움말</h2>
 <h3>기본 규칙</h3><p>황당한 문자(상황 카드)가 도착하면, 손패 7장 중 가장 웃긴 답장 카드를 골라 보내는 파티 게임입니다.</p>
 <h3>진행 방식</h3><ul><li>문자가 도착합니다. 무작위로 나오거나, 방 설정에 따라 심판이 후보 5장 중 하나를 골라 출제합니다.</li><li>심판을 뺀 모두가 답장 카드를 하나씩 제출합니다.</li><li>모두 제출하면 이름 없이 한 장씩 차례로 공개되고, 음성으로 읽은 뒤 다음 답장이 나옵니다.</li><li>심판이 가장 웃긴 답장을 고르면 그 작성자가 1점을 얻습니다.</li><li>다음 라운드에서는 심판이 교대하고, 목표 점수(5점/10점)에 먼저 도달하면 게임이 끝납니다.</li></ul>
@@ -887,7 +888,8 @@ const UNSAFE_CARDS=new Set([
 ]);
 const pool=a=>safeMode?a.filter(c=>!UNSAFE_CARDS.has(c)):a;
 const FAV_CARDS=new Set([...INBOX_V6,...REPLY_V6,"확실히 말해둘게. 엄마랑 아빠가 이혼하는 건 사랑이 식어서가 아니야. 너 때문이야.","나 지금 임테기 하고있는데 모르는거지 뭐 3~5분 뒤에 너 아빠 될 수도 있어.","내가 천왕성을 부수고나면 행성은 7개만 남을거야 ㅎㅎ","나한테 아빠라고 말하는 거 그만해줄래? 진짜 불편해","와우.. 내 동생이랑 그 짓을 해놓고 어떻게 나한테 문자를 하냐?","엄마, 뭐?","답장하기 전에 말해두는데, 나 아홉 살이야.","아빠?"]);
-const order=a=>favMode?[...shuffle(a.filter(c=>!FAV_CARDS.has(c))),...shuffle(a.filter(c=>FAV_CARDS.has(c)))]:shuffle(a); // 덱은 뒤에서부터 뽑으므로 선별 카드를 맨 뒤에 둠
+const FAV_W=1.6; // 선별 카드 가중치: 1은 동일, 클수록 더 자주
+const order=a=>favMode?a.map(c=>[Math.pow(Math.random(),1/(FAV_CARDS.has(c)?FAV_W:1)),c]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]):shuffle(a);
 Object.assign(CARD_EN,{
 "내 생일파티에 안 온 이유를 300자 이내로 작성해 줘. 마감은 오늘 밤.": "Explain in 300 characters or less why you skipped my birthday party. Due tonight.",
 "네가 소개해 준 사람이 내 전 애인이었어. 알고 그랬지?": "The person you introduced me to was my ex. You did that on purpose, didn't you?",
@@ -1029,7 +1031,7 @@ const UI_EN={
 "Android 시스템 TTS(엔진 확인 불가)":"Android system TTS (engine unknown)","기기에서 읽을 수 있는 음성 목록이 비어 있습니다":"The device reports no voices"
 };
 Object.assign(UI_EN,{"💬 채팅":"💬 Chat","채팅":"Chat","플레이어 대화 · 게임 알림":"Player chat · game updates","메시지 입력":"Type a message","전송":"Send","채팅 열기":"Open chat","채팅 닫기":"Close chat"});
-Object.assign(UI_EN,{"카드 구성":"Card set","선별 카드 위주":"Featured cards first","전체 카드 섞기":"Shuffle all cards"});
+Object.assign(UI_EN,{"카드 구성":"Card set","선별 카드 조금 더 자주":"Featured cards a bit more often","전체 카드 섞기":"Shuffle all cards"});
 Object.assign(UI_EN,{"게임 종료":"End game","🏁 게임 종료":"🏁 Game over","승패 없이 즐겁게 끝났어요":"No winners or losers — hope you had fun!"});
 Object.assign(UI_EN,{"복사":"Copy","복사됨!":"Copied!","복사 실패":"Copy failed","연결 중…":"Connecting…","방 코드 입력 (6자리)":"Enter room code (6 characters)",
 "코드 형식이 올바르지 않습니다. 영문 대문자와 숫자 6자리입니다.":"Invalid code format. Codes are 6 characters: capital letters and digits.",
@@ -1113,6 +1115,7 @@ const TT={ko:{replyNo:n=>`${n}번 답장. `,casual:n=>`${n}님의 답장. `,winn
 const G_M=/아들아|아빠가 네 검색|현 남편|내 아내|제 아내|제 와이프/,G_F=/임신|임테기|입덧|출산|오빠|남편이 다|남편 이름|우리 남편|제 전 남자친구/;
 const genderOf=ko=>G_M.test(ko)?"m":G_F.test(ko)?"f":null;
 // 카드(한국어 원문)를 음성 언어에 맞게 읽기: 영어면 영어 번역을 읽음. 번역이 없으면 한국어 음성으로 읽음(한글을 영어 발음으로 읽지 않음)
+function sayPre(card,prof,pre){let lang=CFG.ttsLang;if(lang==="en"&&!CARD_EN[card])lang="ko";return Voice.speakP(pre(lang),prof,genderOf(card),lang)}
 function say(card,prof,pre){let lang=CFG.ttsLang,txt=card;if(lang==="en"){const e=CARD_EN[card];if(e)txt=e;else lang="ko"}return Voice.speakP((pre?pre(lang):"")+txt,prof,genderOf(card),lang)}
 // ===== 상태 =====
 let botOpen=false,handSig="",mode=null,peer=null,conn=null,conns={},S=null,V=null,myId="",myName="",roomId="",sel=null,seen=new Set(),times={},botKey="",safeMode=false,favMode=false;
@@ -1239,25 +1242,27 @@ function renderChat(){const el=$("cwLog");if(!el)return;const stick=el.scrollHei
  if(stick||CH.log.length&&CH.log[CH.log.length-1].f===myId)el.scrollTop=el.scrollHeight;
  const b=$("cwBadge");b.textContent=CH.unread>99?"99+":CH.unread;show("cwBadge",CH.unread>0&&!CH.open)}
 function chatOpen(on){CH.open=on;if(on)CH.unread=0;chatSync();if(on){const el=$("cwLog");el.scrollTop=el.scrollHeight;if(!matchMedia("(pointer:coarse)").matches)$("cwIn").focus()}}
-// 화면 동기화: 대기실은 처음부터 열림, 게임 시작 시 접힘(안내 뱃지만), 종료 화면에서는 완전히 숨김
+// 화면 동기화: 대기실과 게임은 닫힌 상태로 시작(버튼과 알림 뱃지 표시), 종료 화면에서는 완전히 숨김
 function chatSync(){const vis=chatVisible(),kind=!V?null:(V.phase==="lobby"||inRoomView())?"room":V.phase==="ended"?"end":"game";
- if(kind!==CH.room){CH.room=kind;if(kind==="room")CH.open=true;else if(kind==="game")CH.open=false}
+ if(kind!==CH.room){CH.room=kind;if(kind==="room"||kind==="game")CH.open=false}
  if(CH.open)CH.unread=0;show("cw",vis&&CH.open);show("cwBtn",vis&&!CH.open);document.body.classList.toggle("cwon",vis);document.body.classList.toggle("cwopen",vis&&CH.open);renderChat()}
 $("cwBtn").onclick=()=>chatOpen(true);$("cwX").onclick=()=>chatOpen(false);
 $("cwForm").onsubmit=e=>{e.preventDefault();if(chatSend($("cwIn").value)){$("cwIn").value=""}};
 // ===== 화면 =====
-const RV={tok:0,round:-1,phase:"",n:0,done:false},sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const RV={tok:0,round:-1,phase:"",n:0,done:false,typing:false},sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // 답장 순차 공개: 한 장 공개 → 음성 재생 → 음성이 "끝난 뒤(완료 이벤트)" 다음 답장 공개. 음성이 꺼져 있거나 실패/미지원이면 글자 수에 비례한 간격으로 넘어감
 const revActive=v=>v.phase==="judging"||(v.casual&&v.phase==="result");
 const revDone=v=>!revActive(v)||(RV.round===v.round&&RV.phase===v.phase?RV.done:true);
 const shownSubs=v=>revDone(v)?v.subs:v.subs.slice(0,RV.n);
 function whenRevealed(r,fn){const w=()=>{if(!S||S.round!==r||S.phase!=="judging")return;if(V&&V.round===r&&revDone(V))setTimeout(fn,1200);else setTimeout(w,400)};w()}
-async function startReveal(v){const tok=++RV.tok;Voice.stop();Object.assign(RV,{round:v.round,phase:v.phase,n:0,done:false});render();
- for(let i=0;i<v.subs.length;i++){if(tok!==RV.tok)return;const s=v.subs[i];RV.n=i+1;Sfx.recv();render();
+async function startReveal(v){const tok=++RV.tok;Voice.stop();Object.assign(RV,{round:v.round,phase:v.phase,n:0,done:false,typing:false});render();
+ for(let i=0;i<v.subs.length;i++){if(tok!==RV.tok)return;const s=v.subs[i];RV.n=i+1;RV.typing=true;Sfx.recv();render();
   const pre=v.casual?(l=>TT[l].casual(spName(nm(v,s.id)))):(l=>TT[l].replyNo(s.i+1)),prof=v.casual?2+Math.max(0,v.players.findIndex(p=>p.id===s.id)):2+((s.i*3+v.round)%5);
-  const t0=Date.now(),r=await say(s.text,prof,pre);if(tok!==RV.tok)return;
+  const ta=Date.now(),pr=await sayPre(s.text,prof,pre);if(tok!==RV.tok)return;{const el=Date.now()-ta,mn=pr==="ended"?800:1100;if(el<mn)await sleep(mn-el);if(tok!==RV.tok)return}
+  RV.typing=false;Sfx.recv();render();
+  const t0=Date.now(),r=await say(s.text,prof);if(tok!==RV.tok)return;
   if(r==="ended")await sleep(450);else{const pace=Math.min(4500,1400+s.text.length*40),el=Date.now()-t0;if(el<pace)await sleep(pace-el)}}
- if(tok===RV.tok){RV.done=true;render()}}
+ if(tok===RV.tok){RV.typing=false;RV.done=true;render()}}
 function onView(v){const o=V;V=v;if(!o||o.round!==v.round||o.phase!==v.phase){sel=null;roomView=false;RV.tok++}
  if(v.phase==="playing"&&sel!==null&&(v.mine||sel>=v.hand.length))sel=null;
  if(v.phase==="choosing"&&(!o||o.phase!=="choosing"||o.round!==v.round)){Voice.stop();Sfx.recv()}
@@ -1283,11 +1288,11 @@ function render(){const v=V;if(!v)return;const rm=v.phase==="lobby"||(v.phase===
  const m=[];if(v.prompt)m.push({k:"p"+v.round,c:"in",w:"모르는 번호",t:v.prompt});
  if(v.phase==="choosing"){if(judge)v.options.forEach((o,i)=>m.push({k:"o"+v.round+"_"+i,c:"in pick"+(sel===i?" sel":""),w:"후보 "+(i+1),t:o,i}));m.push({s:1,k:"c"+v.round,t:judge?"출제자(심판)입니다. 보낼 문자를 하나 고르세요. 고른 문자만 모두에게 공개됩니다.":"출제자가 상황 문자를 고르는 중…"})}
  if(v.phase==="playing"){const n=v.players.filter(p=>p.done).length,tot=v.players.length-(v.casual?0:1);if(v.mine)m.push({k:"m"+v.round,c:"out",w:"나",t:v.mine});m.push({s:1,k:"w"+v.round+n,t:judge?`당신은 심판입니다. 답장 도착 ${n}/${tot}`:`답장 ${n}/${tot}명 제출`})}
- else{shownSubs(v).forEach(s=>{const win=v.winnerId&&s.id===v.winnerId;m.push({k:"s"+v.round+"_"+s.i,c:"out"+(win?" win":"")+(judge&&v.phase==="judging"&&revDone(v)?" pick":"")+(sel===s.i?" sel":""),w:s.id?nm(v,s.id)+(win?" 🏆":""):"익명 "+(s.i+1),t:s.text,i:s.i})});
+ else{shownSubs(v).forEach((s,idx)=>{const win=v.winnerId&&s.id===v.winnerId;m.push({k:"s"+v.round+"_"+s.i,c:"out"+(win?" win":"")+(judge&&v.phase==="judging"&&revDone(v)?" pick":"")+(sel===s.i?" sel":""),w:s.id?nm(v,s.id)+(win?" 🏆":""):"익명 "+(s.i+1),t:s.text,i:s.i,typing:RV.typing&&!revDone(v)&&RV.n===idx+1})});
   if(!revDone(v))m.push({s:1,k:"rv"+v.round+"_"+RV.n,t:`답장 공개 중 (${RV.n}/${v.subs.length})`});
   if(v.phase==="result"&&revDone(v))m.push({s:1,k:"r"+v.round,t:v.casual?"서로의 답장이 공개됐어요! 승패 없이 카드 구경을 즐겨 보세요 😄":`🏆 ${nm(v,v.winnerId)}님 +1점!`});
   if(v.phase==="ended"&&v.casual)m.push({s:1,k:"e",t:`<div class="rank"><b>🏁 게임 종료</b><div><span>총 ${v.round}라운드</span></div><div><span>승패 없이 즐겁게 끝났어요</span></div></div>`,raw:1});else if(v.phase==="ended"){const r=v.players.slice().sort((a,b)=>b.score-a.score);m.push({s:1,k:"e",t:`<div class="rank"><b>🎉 우승: ${esc(r[0].name)}</b>${r.map((p,i)=>`<div><span>${i+1}위 ${esc(p.name)}</span><b>${p.score}점</b></div>`).join("")}</div>`,raw:1})}}
- $("chat").innerHTML=m.map(x=>{const nw=!seen.has(x.k);if(!times[x.k])times[x.k]=Date.now();return x.s?`<div class="sys ${nw?"new":""}">${x.raw?x.t:esc(x.t)}</div>`:`<div class="msg ${x.c} ${GREEN_CARDS.has(x.t)?"gr":""} ${nw?"new":""}" ${x.i!==undefined?`data-i="${x.i}"`:""}><div class="who">${esc(x.w)}</div><div class="b">${esc(x.t)}</div><div class="tm">${hhmm(times[x.k])}</div></div>`}).join("");m.forEach(x=>seen.add(x.k));$("chat").scrollTop=1e9;
+ $("chat").innerHTML=m.map(x=>{const nw=!seen.has(x.k);if(!times[x.k])times[x.k]=Date.now();return x.s?`<div class="sys ${nw?"new":""}">${x.raw?x.t:esc(x.t)}</div>`:`<div class="msg ${x.c} ${GREEN_CARDS.has(x.t)?"gr":""} ${nw?"new":""}" ${x.i!==undefined?`data-i="${x.i}"`:""}><div class="who">${esc(x.w)}</div><div class="b">${x.typing?`<span class="dots"><i></i><i></i><i></i></span>`:esc(x.t)}</div><div class="tm">${hhmm(times[x.k])}</div></div>`}).join("");m.forEach(x=>seen.add(x.k));$("chat").scrollTop=1e9;
  $("chat").querySelectorAll(".pick").forEach(e=>e.onclick=()=>{sel=+e.dataset.i;Sfx.select();render()});
  let b="";if(v.phase==="choosing")b=judge?`<button class="btn" id="chooseB" ${sel===null?"disabled":""}>📝 이 문자로 출제</button>`:`<span class="t">출제자가 문자를 고르는 중…</span>`;else if(v.phase==="playing"&&!judge)b=v.mine?`<span class="t">답장 전송 완료! 다른 플레이어를 기다리는 중…</span>`:`<button class="btn" id="sendB" ${sel===null?"disabled":""}>📤 이 답장 보내기</button>`;
  else if(v.phase==="playing")b=`<span class="t">👑 심판입니다. 모두가 답장할 때까지 기다려 주세요.</span>`;
