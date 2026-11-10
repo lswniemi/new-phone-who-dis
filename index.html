@@ -36,6 +36,8 @@ main{grid-area:main;display:flex;justify-content:center;padding:10px;min-height:
 .msg.in .b:after,.msg.out .b:after{content:"";position:absolute;bottom:0;width:10px;height:16px;background:#fff}.msg.in .b:after{left:-10px;border-bottom-right-radius:10px}.msg.out .b:after{right:-10px;border-bottom-left-radius:10px}
 .msg .tm{font-size:10px;color:#999;margin:2px 8px}.msg.new{animation:pop .4s cubic-bezier(.2,1.4,.4,1)}
 .msg.pick{cursor:pointer}.msg.pick .b{outline:3px solid transparent}.msg.pick:hover .b{outline-color:#ffd24c}.msg.sel .b{outline:3px solid #ff9f0a!important}.msg.win .b{background:#34c759}.msg.win .b:before{background:#34c759}
+.msg.gr:not(.win) .b{background:#30c04a!important;color:#fff}
+.msg.gr:not(.win) .b:before{background:#30c04a!important}
 .sys{align-self:center;background:#f2f2f7;color:#555;border-radius:14px;padding:8px 14px;font-size:13px;text-align:center}.sys.new{animation:pop .4s}
 @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.8)}to{opacity:1;transform:none}}
 #bar{padding:10px;background:#f2f2f7;border-top:1px solid #ddd;display:flex;gap:8px;align-items:center;justify-content:center;min-height:56px}
@@ -59,11 +61,16 @@ input[type=range]{padding:0;border:0;background:none;margin:6px 0;accent-color:#
 #hand{height:234px;padding-top:62px;flex:none}
 
 .bgscreen{background:linear-gradient(rgba(6,8,16,.32),rgba(6,8,16,.62)),var(--lobby-bg) center/cover no-repeat,radial-gradient(circle at 30% 20%,#2a3563,#12141c 70%)}
-.menu{display:flex;gap:28px;width:min(940px,92vw);margin:auto auto auto 6vw;align-items:stretch}
+.menu{display:flex;gap:48px;width:min(940px,92vw);margin:auto auto auto 6vw;align-items:stretch}
 #nav{width:270px;flex:none;display:flex;flex-direction:column;justify-content:center}
 #nav h1{font-size:30px;line-height:1.2;margin:0 0 22px;text-shadow:0 2px 14px #000}
-#nav button{width:100%;text-align:left;font-size:20px;font-weight:700;padding:16px 20px;margin:7px 0;border:1px solid #ffffff26;border-radius:14px;background:rgba(20,24,40,.62);color:#fff;backdrop-filter:blur(6px);transition:transform .2s,background .2s}
-#nav button:hover{transform:translateX(8px);background:rgba(76,141,255,.55)}#nav button.act{background:#4c8dff;transform:translateX(8px)}
+#nav button{position:relative;width:100%;text-align:left;font-size:20px;font-weight:700;padding:16px 20px;margin:9px 0;border:1px solid #ffffff26;border-radius:22px 22px 22px 6px;background:rgba(48,55,82,.94);color:#fff;backdrop-filter:blur(6px);transition:transform .2s,background .2s}
+#nav button:hover{transform:translateX(8px);background:rgba(76,141,255,.8)}#nav button.act{background:#4c8dff;transform:translateX(8px);border-radius:22px 22px 6px 22px}
+/* 말풍선 꼬리: 선택 전 = 왼쪽, 선택됨(파란색) = 오른쪽 */
+#nav button:after{content:"";position:absolute;left:-13px;bottom:-1px;width:15px;height:17px;background:inherit;clip-path:path("M15 0L15 17L0 17Q11 13 11 0Z");pointer-events:none}
+#nav button.act:after{left:auto;right:-13px;clip-path:path("M0 0L0 17L15 17Q4 13 4 0Z")}
+/* 선택했을 때 나오는 창: 오른쪽 아래 꼬리 */
+.stage:after{content:"";position:absolute;right:-12px;bottom:0;width:14px;height:17px;background:rgba(34,41,66,.95);clip-path:path("M0 0L0 17L14 17Q4 13 4 0Z");opacity:0;transition:opacity .28s;pointer-events:none}.stage.open:after{opacity:1}
 .stage{flex:0 1 580px;position:relative;min-height:460px}
 .stage h2{margin:0 0 12px}.stage label{display:block;margin-top:10px}
 .pn{position:absolute;inset:0;padding:26px 26px 44px;overflow:auto;opacity:0;visibility:hidden;transform:translateX(28px);transition:opacity .28s,transform .28s,visibility 0s .28s}
@@ -78,7 +85,7 @@ input[type=range]::-moz-range-track{height:16px;border-radius:9px;background:#ff
 input[type=checkbox]{-webkit-appearance:none;appearance:none;width:50px;height:30px;padding:0;margin:0;border:0;border-radius:15px;background:#4a5070;position:relative;transition:background .2s;cursor:pointer}
 input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0006;transition:left .2s}input[type=checkbox]:checked:after{left:23px}
 .set{background:#ffffff12;border-radius:14px;padding:8px 14px;margin:8px 0}
-.pn{background:rgba(14,18,32,.88);border-radius:22px;border:1px solid #ffffff22;backdrop-filter:blur(10px)}
+.pn{background:rgba(34,41,66,.95);border-radius:22px 22px 8px 22px;border:1px solid #ffffff22;backdrop-filter:blur(10px)}
 .help h3{margin:14px 0 4px;color:#ffd24c;font-size:15px}.help p,.help li{font-size:14px;line-height:1.6;color:#d6dbec;margin:0 0 4px}.help ul{margin:0;padding-left:18px}
 
 /* ===== 모바일 반응형 ===== (PC/태블릿 기본 레이아웃은 위 규칙 그대로)
@@ -88,8 +95,8 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
 @media (max-width:700px) and (orientation:portrait){
  :root{--sb:28px}#status{gap:8px;padding:0 10px;font-size:12px}
  .box{padding:18px;border-radius:16px}.set{grid-template-columns:96px 1fr 54px;gap:6px;padding:8px 10px}
- .menu{flex-direction:column;width:94vw;margin:auto;gap:10px}
- #nav{width:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}#nav h1{grid-column:1/3;font-size:22px;margin:0}#nav button{margin:0;padding:12px 14px;font-size:16px}#nav button:hover,#nav button.act{transform:none}
+ .menu{flex-direction:column;width:94vw;margin:auto;gap:14px}.stage{margin-right:12px}
+ #nav{width:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;padding:0 12px}#nav h1{grid-column:1/3;font-size:22px;margin:0}#nav button{margin:0;padding:12px 14px;font-size:16px}#nav button:hover,#nav button.act{transform:none}
  .stage{flex:none;min-height:400px}.pn{padding:16px 16px 40px}
  #game{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"side" "main" "hand"}
  #side{display:flex;align-items:center;gap:8px;padding:6px 8px;overflow-x:auto;overflow-y:hidden}
@@ -110,8 +117,8 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
 @media (max-height:520px) and (orientation:landscape){
  :root{--sb:24px}#status{padding:0 10px;font-size:11px;gap:8px}#status button{font-size:12px}
  .box{padding:14px}.set{padding:6px 10px;margin:5px 0}
- .menu{flex-direction:row;width:96vw;gap:12px;margin:auto}
- #nav{width:150px}#nav h1{font-size:16px;margin:0 0 6px}#nav button{padding:8px 12px;font-size:14px;margin:3px 0}
+ .menu{flex-direction:row;width:96vw;gap:30px;margin:auto}
+ #nav{width:150px;padding-left:12px;box-sizing:border-box}#nav h1{font-size:16px;margin:0 0 6px}#nav button{padding:8px 12px;font-size:14px;margin:4px 0}
  .stage{flex:1 1 auto;min-height:0;height:calc(100dvh - var(--sb) - 20px);align-self:stretch}.pn{padding:12px 14px 36px}
  #game{grid-template-columns:128px minmax(0,1fr) 200px;grid-template-rows:minmax(0,1fr);grid-template-areas:"side main hand"}
  #side{padding:6px;overflow-y:auto}#side h3,#soloN{display:none}
@@ -222,7 +229,7 @@ body.cwon #game{height:calc(100% - var(--sbt) - var(--cwh) - env(safe-area-inset
 <nav id="nav"><h1>📱 New Phone,<br>Who Dis?</h1><button data-go="start">시작하기</button><button data-go="help">도움말</button><button data-go="settings">설정</button><button data-go="exit">나가기</button></nav>
 <section class="stage">
 <div class="pn" id="pn-start"><h2>시작하기</h2><label class="muted">닉네임</label><input id="name" maxlength="10" placeholder="닉네임을 입력하세요"><div class="row"><button class="btn" data-go="create">방 만들기</button><button class="btn g" id="joinToggle">방 참가하기</button></div><div id="joinRow" class="row hidden"><input id="roomInput" placeholder="방 코드 입력 (6자리)" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn" id="joinB">참가</button></div></div>
-<div class="pn" id="pn-create"><h2>방 만들기</h2><label class="muted">목표 점수</label><select id="cTarget"><option value="5">5점</option><option value="10">10점</option></select><label class="muted">받은 메시지 카드 선택 방식</label><select id="cPick"><option value="random">무작위</option><option value="choose">심판이 선택</option></select><div class="row"><button class="btn g" data-go="start">뒤로</button><button class="btn" id="createB">방 만들기</button></div></div>
+<div class="pn" id="pn-create"><h2>방 만들기</h2><label class="muted">목표 점수</label><select id="cTarget"><option value="5">5점</option><option value="10">10점</option></select><label class="muted">받은 메시지 카드 선택 방식</label><select id="cPick"><option value="random">무작위</option><option value="choose">심판이 선택</option></select><label class="row" style="align-items:center;justify-content:flex-start;gap:10px;margin:14px 0"><input type="checkbox" id="cSafe"> 안전 모드</label><div class="row"><button class="btn g" data-go="start">뒤로</button><button class="btn" id="createB">방 만들기</button></div></div>
 <div class="pn help" id="pn-help"><h2>도움말</h2>
 <h3>기본 규칙</h3><p>황당한 문자(상황 카드)가 도착하면, 손패 7장 중 가장 웃긴 답장 카드를 골라 보내는 파티 게임입니다.</p>
 <h3>진행 방식</h3><ul><li>문자가 도착합니다. 무작위로 나오거나, 방 설정에 따라 심판이 후보 5장 중 하나를 골라 출제합니다.</li><li>심판을 뺀 모두가 답장 카드를 하나씩 제출합니다.</li><li>모두 제출하면 이름 없이 한 장씩 차례로 공개되고, 음성으로 읽은 뒤 다음 답장이 나옵니다.</li><li>심판이 가장 웃긴 답장을 고르면 그 작성자가 1점을 얻습니다.</li><li>다음 라운드에서는 심판이 교대하고, 목표 점수(5점/10점)에 먼저 도달하면 게임이 끝납니다.</li></ul>
@@ -740,6 +747,233 @@ const Voice={q:[],id:0,unlocked:false,primed:false,busy:false,hold:0,cancelAt:-1
 const vKey=()=>Voice.route().kind==="cloud"?"cv_"+CFG.engine+"_"+CFG.ttsLang:"v_"+CFG.ttsLang;
 // ===== 화면 언어(i18n) · TTS 문구 · 음성 성별 판별 =====
 // 화면 언어(CFG.uiLang)와 음성 언어(CFG.ttsLang)는 서로 독립. 한국어 원문은 그대로 두고, 영어 화면일 때만 표시 단계에서 번역한다.
+// ===== 6단계 신규 카드. 구역 ① 자체 창작 중 사용자가 선별한 카드, 구역 ② 사용자가 실제 게임에서 찾아 제공한 카드(원문 출처는 이 파일에서 검증하지 않음) =====
+// 데이터 형식은 기존과 동일한 문자열 배열이며, 영어 번역은 아래 CARD_EN 에 합칩니다
+const INBOX_V6=[
+// ① 자체 창작(사용자 선별)
+"내 생일파티에 안 온 이유를 300자 이내로 작성해 줘. 마감은 오늘 밤.",
+"네가 소개해 준 사람이 내 전 애인이었어. 알고 그랬지?",
+"방금 단톡방에 쓴 '그 사람 진짜 별로'의 '그 사람' 거기 있는 거 알지? 지금 읽고 있어.",
+"축하합니다! 무료 크루즈 여행에 당첨되셨습니다. 단, 침몰 중인 배라는 점 양해 바랍니다.",
+"[입금] 월급 3,000,000원 [출금] 3,000,000원 / 잔액 0원.",
+"회사 해킹 사고 원인이 네 비밀번호 1234였대. 인사팀에서 널 찾아.",
+"축하해! 올해의 문제 직원으로 선정됐어. 소감 한마디 해 줘.",
+"회식 때 네가 부장님께 한 말 때문에 부장님이 아직도 잠을 못 주무신대.",
+// ② 사용자 제공(실제 게임에서 가져온 카드)
+"하지만 넌 내 남자친구가 되고 싶은거지? ;)",
+"네 어머니와 나는 이혼할 거야.",
+"우리가 엄밀히 말하면 사촌 사이인 건 알지만, 우리를 그냥 사촌 사이 이상으로 생각해본 적 있어?",
+"제 결혼 13년차 남편이 어릴 적 친구 집에서 자고 오겠다고 우기네요. 그 친구는 아주 글래머러스하고 예쁜 여자예요.",
+"가끔은 제 쌍둥이 형의 여자친구를 만나기도 해요. 왜냐하면  그녀는 그게 저인 줄 모르거든요. 이게 잘못됐나요?",
+"헤나, 왜 네 욕실에서 양성 임신 테스트기가 나온 거야?",
+"저는 지금 추락하는 비행기 안에 있어요. 조종하는 방법을 모르겠는데, 팁좀 주세요.",
+"우리 사이에 35살 차이가 나고 내가 예전에 네 베이비시터였던 것도 알지만, 사랑에는 나이가 없다고 진심으로 믿어.",
+"왜 하이파이브 하고 나서 내 손가락을 핥았어? 솔직히 말해.",
+"제가 아이를 돌보고 있었는데 아이가 도망갔어요. 아무리 찾아도 안 보이는데 부모님은 한 시간 후에 집에 오실 거예요.",
+"내 아파트에 유령이 살고 있어요. 나는 저것과 친구가 되고 싶은데, 저것은 계속해서 내 옆을 스쳐 지나가면서 내 엉덩이를 때리기만 해.",
+"제가 선물을 열 때 정말 기뻐 보였던 건 알지만, 사실 뚫어뻥은 별로 필요 없었어요.",
+"오늘 서커스에 갔는데, 코끼리 똥이 얼마나 큰지 믿을 수가 없었어요.",
+"지금은 안 돼. 화장실에 앉아서 유튜브 보느라 다리에 쥐가 났거든.",
+"잠이 더럽게 안 오네. 개들도 천국에 갈까, 아님 못 갈까?",
+"우버 기사님이 맥도날드에서 똥 싸려고  차를 세웠어. 30분째인데 어떡하지?",
+"빌리, 헛소리 그만해. 교직원 휴게실에서 생선가스 데운 사람 너인 거 다 알아.",
+"사람들이 왜 술을 마시는지 완전히 알겠어. 벌써 4병째, 기분 최고야.",
+"할머니가 잠결에 꽃게 걸음을 하고 계셔. 이번엔 네가 깨울 차례야",
+"약속 취소해서 미안해. 하지만 어제 어떤 여자가 나보고 '자기'라고 불렀거든. 너를 만나는 건 그녀를 배신하는 것 같아. 이해해주길 바랄게.",
+"너 아직 싱글이야?",
+"안녕 맷, 네 이름 매트리스 줄임말이야?",
+"자기야, 우리 이제 다른 사람 만나야 할 것 같아. 사랑하지만 우리 아빠가 더 나은 사람 만날 수 있대"
+];
+const REPLY_V6=[
+// ① 자체 창작(사용자 선별)
+"네, 맞습니다. 근데 저는 그 시간에 외계인에게 납치돼 있었습니다.",
+"일단 숨 좀 쉬고 얘기하죠. 저는 못 쉬고 있지만요.",
+"그 부분은 AI가 쓴 거라 저는 책임이 없습니다.",
+"제 변호사는 아니지만 제 어머니가 답장하실 겁니다.",
+"몰래카메라라고 말해줘요. 카메라가 어딨는지는 안 물을게요.",
+"그건 예술이었습니다. 이해 못 하시는 건 수준 문제입니다.",
+"저희 집 고양이가 대신 답하겠습니다. 야옹.",
+"이 상황을 일기장에 쓰면 베스트셀러가 되겠네요.",
+"그럴 수도 있죠. 아니, 그럴 리가 없죠. 아니, 그럴 수도 있죠.",
+"죄송합니다만 저는 3분 전에 이미 퇴사했습니다.",
+"저는 제 인생에서 가장 현명한 선택을 하겠습니다. 도망입니다.",
+"이 일이 알려지면 저는 이민을 가겠습니다. 달로요.",
+"이제야 말씀드리는데, 저도 제가 누군지 잘 모릅니다.",
+"인정합니다. 그래도 저는 조금도 반성하지 않습니다.",
+"제 입장에서 보면 저는 아무 잘못이 없습니다. 제 입장이 이상할 뿐.",
+"한 가지만 약속해 주세요. 이 이야기에서 저를 빼 주세요. 주인공이 저지만.",
+"그럼 저는 이만 잠수 타겠습니다. 숨은 쉬면서요.",
+"몰라요, 모르쇠 중입니다. 모르쇠 장인이라서요.",
+"제 대답은 '예'입니다. 예의상 한 말이고 사실은 아니오입니다.",
+"저는 철수가 아닙니다. 하지만 철수하겠습니다.",
+"'내 인생 망했다'로 검색하면 제 이름이 나옵니다.",
+"솔직히 저도 궁금했습니다. 제가 왜 그랬는지.",
+"제가 어른이라는 증거부터 확인하고 대답하겠습니다.",
+"그런 건 저희 엄마한테 직접 말씀하세요. 제 편입니다. 아마도요.",
+"저는 그날 알리바이가 있습니다. 증인은 없지만요.",
+"그거 제가 한 거 맞습니다. 근데 제 의도는 훨씬 더 나빴습니다.",
+"제가 사과하면 이 상황이 끝나나요? 그럼 두 번 드리겠습니다.",
+// ② 사용자 제공(실제 게임에서 가져온 카드)
+"이제 됐어. 제발 이혼 서류에 서명좀 해줘!",
+"제발 이혼 서류에 서명좀 하고 이딴 문자좀 보내지 마.",
+"닥쳐, 스테파니!",
+"글쎄 :)",
+"바로 그게.. 그게 제가 말하고 싶은 문제라고요.",
+"네 문자 때문에 내가 글을 읽는 법을 배운 걸 후회하게 됐어.",
+"미안해 아빠",
+"이상한 자랑이지만, 나는 그게 좋아요.",
+"아빠, 중년의 위기같은 문제를 겪고 계신 건 알겠지만 제발 이런 문자는 보내지 마세요.",
+"답장이 2년 늦어서 미안. 샤워 중이었어.",
+"내가 하는 모든 일은 상징적이며, 내 생각은 바뀌지 않을 거야.",
+"... 뇌가 없으신가요?",
+"할머니, 오늘 약 드시는 거 깜빡하셨어요?",
+"네가 성욕 대신 마음에 따랐더라면, 애초에 이런 상황에 처하지 않았을 지도 몰라.",
+"지금은 이걸 감당할 수 없어. 내 전담을 어디서도 찾을 수 없고, 마리화나도 없어.",
+"할머니, 정말 야만적이시네요.",
+"음, 적어도 \"좋은 아침입니다.\"라는 인사라도 먼저 해주시겠어요?",
+"그 전에 미리 경고라도 해주면 안 돼?!?! 젠장.",
+"우웩, 너 안드로이드폰 쓰는구나?",
+"방금 뭐라고 했어? 나 하버드 수석 졸업한 사람이야, 이 바보야.",
+"네가 말하는 모든 것들이 내가 술을 먹는 이유가 돼...",
+"데이브, 나도 예전이 그립지만 아내들이 알면 우린 죽어.",
+"미안해요 노아 삼촌, 아빠가 이제 삼촌이랑 말하지 말래요.",
+"어쩔 건데, 이 자식아?!",
+"부모님 탓해, 내가 이렇게 무례하게 자란 건 내 잘못이 아냐.",
+"완전 혼란스러워. 지난주 바에서 만났을 땐 우리 서로 쳐다보지도 않았잖아."
+];
+INBOX.push(...INBOX_V6);REPLIES.push(...REPLY_V6);
+// 출력할 때 말풍선을 녹색(안드로이드 문자색)으로 표시할 카드. 카드 데이터는 기존과 같은 문자열이고, 이 목록에 문장을 넣으면 됩니다
+const GREEN_CARDS=new Set(["우웩, 너 안드로이드폰 쓰는구나?"]);
+const UNSAFE_CARDS=new Set([
+"지금 네가 듣고 싶지 않을 수도 있겠지만, 의사가 헤르페스일 수 있다고 하더라.",
+"남편이 죽었어요. 재혼은 싫고 성관계만 원해요. 여기 눌러 채팅하기.",
+"나 임신한 것 같아. 우리 이제 어떻게 하지?",
+"나 지금 임테기 하고있는데 모르는거지 뭐 3~5분 뒤에 너 아빠 될 수도 있어.",
+"내가 천왕성을 부수고나면 행성은 7개만 남을거야 ㅎㅎ",
+"나한테 아빠라고 말하는 거 그만해줄래? 진짜 불편해",
+"오빠 어제 기억 안 난다더니 사실 다 기억나. 영상도 있어.",
+"엄마가 네 서랍에서 이상한 걸 발견했는데, 이거 뭐에 쓰는 거니? 사진 보낸다.",
+"[국세청] 귀하의 은밀한 소비 내역이 확인되어 연락드립니다.",
+"우리 사이 이대로 괜찮을까? 사실 남편이 다 알고 있어.",
+"할머니가 가족 단톡방에 야한 링크를 공유하셨어. 심지어 즐겨찾기였대.",
+"여보, 결혼기념일 선물로 아파트 계약했어. 근데 명의는 비서 이름이야.",
+"옆집인데요. 어젯밤 벽 너머로 들린 소리가 너무 커서 박수를 쳐드리고 싶었습니다.",
+"헤어진 지 1년 됐는데 아직도 네 넷플릭스 쓰고 있어. 그리고 네 침대도.",
+"친자확인 결과가 나왔어. 놀라지 마.",
+"방금 소개팅남이 계산하고 갔는데 내 신장 시세까지 정산하고 갔더라.",
+"여기 모텔인데 카운터에서 네 이름이 VIP 회원이래.",
+"자기야 미안, 방금 말실수했어. 너를 남편 이름으로 불렀어.",
+"오늘 밤에 나 혼자 있는데, 혹시 우리 남편 퇴근하기 전에 올래?",
+"룸메이트가 네 칫솔로 뭘 했는지 알고 싶어?",
+"당신의 위치 공유 기록을 아내분께 전달했습니다. 좋은 하루 되세요.",
+"우리가 엄밀히 말하면 사촌 사이인 건 알지만, 우리를 그냥 사촌 사이 이상으로 생각해본 적 있어?",
+"제 결혼 13년차 남편이 어릴 적 친구 집에서 자고 오겠다고 우기네요. 그 친구는 아주 글래머러스하고 예쁜 여자예요.",
+"가끔은 제 쌍둥이 형의 여자친구를 만나기도 해요. 왜냐하면  그녀는 그게 저인 줄 모르거든요. 이게 잘못됐나요?",
+"헤나, 왜 네 욕실에서 양성 임신 테스트기가 나온 거야?",
+"저는 지금 추락하는 비행기 안에 있어요. 조종하는 방법을 모르겠는데, 팁좀 주세요.",
+"우리 사이에 35살 차이가 나고 내가 예전에 네 베이비시터였던 것도 알지만, 사랑에는 나이가 없다고 진심으로 믿어.",
+"왜 하이파이브 하고 나서 내 손가락을 핥았어? 솔직히 말해.",
+"제가 아이를 돌보고 있었는데 아이가 도망갔어요. 아무리 찾아도 안 보이는데 부모님은 한 시간 후에 집에 오실 거예요.",
+"내 아파트에 유령이 살고 있어요. 나는 저것과 친구가 되고 싶은데, 저것은 계속해서 내 옆을 스쳐 지나가면서 내 엉덩이를 때리기만 해.",
+"사람들이 왜 술을 마시는지 완전히 알겠어. 벌써 4병째, 기분 최고야.",
+"와우.. 내 동생이랑 그 짓을 해놓고 어떻게 나한테 문자를 하냐?",
+"답장하기 전에 말해두는데, 나 아홉 살이야.",
+"전원이 꺼져 있어 연결이 되지 않습니다. 삐 소리 후 사망하세요.",
+"네가 성욕 대신 마음에 따랐더라면, 애초에 이런 상황에 처하지 않았을 지도 몰라.",
+"지금은 이걸 감당할 수 없어. 내 전담을 어디서도 찾을 수 없고, 마리화나도 없어.",
+"네가 말하는 모든 것들이 내가 술을 먹는 이유가 돼...",
+"데이브, 나도 예전이 그립지만 아내들이 알면 우린 죽어.",
+"완전 혼란스러워. 지난주 바에서 만났을 땐 우리 서로 쳐다보지도 않았잖아."
+]);
+const pool=a=>safeMode?a.filter(c=>!UNSAFE_CARDS.has(c)):a;
+Object.assign(CARD_EN,{
+"내 생일파티에 안 온 이유를 300자 이내로 작성해 줘. 마감은 오늘 밤.": "Explain in 300 characters or less why you skipped my birthday party. Due tonight.",
+"네가 소개해 준 사람이 내 전 애인이었어. 알고 그랬지?": "The person you introduced me to was my ex. You did that on purpose, didn't you?",
+"방금 단톡방에 쓴 '그 사람 진짜 별로'의 '그 사람' 거기 있는 거 알지? 지금 읽고 있어.": "You know the 'that person' in the 'I really can't stand that person' you just wrote in the group chat is in there, right? They're reading it now.",
+"축하합니다! 무료 크루즈 여행에 당첨되셨습니다. 단, 침몰 중인 배라는 점 양해 바랍니다.": "Congratulations! You've won a free cruise. Please note the ship is currently sinking.",
+"[입금] 월급 3,000,000원 [출금] 3,000,000원 / 잔액 0원.": "[Deposit] Salary 3,000,000 won [Withdrawal] 3,000,000 won / Balance: 0 won.",
+"회사 해킹 사고 원인이 네 비밀번호 1234였대. 인사팀에서 널 찾아.": "They say the company hack was caused by your password, 1234. HR is looking for you.",
+"축하해! 올해의 문제 직원으로 선정됐어. 소감 한마디 해 줘.": "Congratulations! You've been named Problem Employee of the Year. Say a few words.",
+"회식 때 네가 부장님께 한 말 때문에 부장님이 아직도 잠을 못 주무신대.": "The department head still can't sleep because of what you said to them at the company dinner.",
+"하지만 넌 내 남자친구가 되고 싶은거지? ;)": "But you want to be my boyfriend, don't you? ;)",
+"네 어머니와 나는 이혼할 거야.": "Your mother and I are getting a divorce.",
+"우리가 엄밀히 말하면 사촌 사이인 건 알지만, 우리를 그냥 사촌 사이 이상으로 생각해본 적 있어?": "I know we're technically cousins, but have you ever thought of us as more than just cousins?",
+"제 결혼 13년차 남편이 어릴 적 친구 집에서 자고 오겠다고 우기네요. 그 친구는 아주 글래머러스하고 예쁜 여자예요.": "My husband of 13 years insists on sleeping over at a childhood friend's house. That friend is a very glamorous, beautiful woman.",
+"가끔은 제 쌍둥이 형의 여자친구를 만나기도 해요. 왜냐하면  그녀는 그게 저인 줄 모르거든요. 이게 잘못됐나요?": "Sometimes I hang out with my twin brother's girlfriend, because she doesn't know it's me. Is that wrong?",
+"헤나, 왜 네 욕실에서 양성 임신 테스트기가 나온 거야?": "Henna, why was there a positive pregnancy test in your bathroom?",
+"저는 지금 추락하는 비행기 안에 있어요. 조종하는 방법을 모르겠는데, 팁좀 주세요.": "I'm on a plane that's going down right now. I don't know how to fly it. Any tips?",
+"우리 사이에 35살 차이가 나고 내가 예전에 네 베이비시터였던 것도 알지만, 사랑에는 나이가 없다고 진심으로 믿어.": "I know there's a 35-year age gap and that I used to be your babysitter, but I truly believe love has no age.",
+"왜 하이파이브 하고 나서 내 손가락을 핥았어? 솔직히 말해.": "Why did you lick my fingers after that high five? Tell me honestly.",
+"제가 아이를 돌보고 있었는데 아이가 도망갔어요. 아무리 찾아도 안 보이는데 부모님은 한 시간 후에 집에 오실 거예요.": "I was babysitting and the kid ran away. I can't find them anywhere, and the parents will be home in an hour.",
+"내 아파트에 유령이 살고 있어요. 나는 저것과 친구가 되고 싶은데, 저것은 계속해서 내 옆을 스쳐 지나가면서 내 엉덩이를 때리기만 해.": "There's a ghost living in my apartment. I want to be friends with it, but it just keeps passing by me and smacking my butt.",
+"제가 선물을 열 때 정말 기뻐 보였던 건 알지만, 사실 뚫어뻥은 별로 필요 없었어요.": "I know I looked really happy when I opened your gift, but I didn't actually need a plunger.",
+"오늘 서커스에 갔는데, 코끼리 똥이 얼마나 큰지 믿을 수가 없었어요.": "I went to the circus today and you would not believe how big the elephant poop was.",
+"지금은 안 돼. 화장실에 앉아서 유튜브 보느라 다리에 쥐가 났거든.": "Not now. I've been sitting on the toilet watching YouTube and my leg fell asleep.",
+"잠이 더럽게 안 오네. 개들도 천국에 갈까, 아님 못 갈까?": "I can't sleep at all. Do dogs go to heaven, or not?",
+"우버 기사님이 맥도날드에서 똥 싸려고  차를 세웠어. 30분째인데 어떡하지?": "My Uber driver pulled over at McDonald's to poop. It's been 30 minutes. What do I do?",
+"빌리, 헛소리 그만해. 교직원 휴게실에서 생선가스 데운 사람 너인 거 다 알아.": "Billy, cut the nonsense. We all know you're the one who reheated fish cutlets in the faculty lounge.",
+"사람들이 왜 술을 마시는지 완전히 알겠어. 벌써 4병째, 기분 최고야.": "I totally get why people drink now. Four bottles in and I feel amazing.",
+"할머니가 잠결에 꽃게 걸음을 하고 계셔. 이번엔 네가 깨울 차례야": "Grandma is sleepwalking like a crab. It's your turn to wake her up.",
+"약속 취소해서 미안해. 하지만 어제 어떤 여자가 나보고 '자기'라고 불렀거든. 너를 만나는 건 그녀를 배신하는 것 같아. 이해해주길 바랄게.": "Sorry for canceling. But yesterday a woman called me 'babe.' Seeing you would feel like betraying her. I hope you understand.",
+"너 아직 싱글이야?": "Are you still single?",
+"안녕 맷, 네 이름 매트리스 줄임말이야?": "Hey Matt, is your name short for mattress?",
+"자기야, 우리 이제 다른 사람 만나야 할 것 같아. 사랑하지만 우리 아빠가 더 나은 사람 만날 수 있대": "Babe, I think we should see other people. I love you, but my dad says I can do better.",
+"네, 맞습니다. 근데 저는 그 시간에 외계인에게 납치돼 있었습니다.": "Yes, that's right. But at that time I was being abducted by aliens.",
+"일단 숨 좀 쉬고 얘기하죠. 저는 못 쉬고 있지만요.": "Let's take a breath first. Though I can't.",
+"그 부분은 AI가 쓴 거라 저는 책임이 없습니다.": "That part was written by AI, so I'm not responsible.",
+"제 변호사는 아니지만 제 어머니가 답장하실 겁니다.": "I don't have a lawyer, but my mother will be replying.",
+"몰래카메라라고 말해줘요. 카메라가 어딨는지는 안 물을게요.": "Tell me it's a prank. I won't ask where the camera is.",
+"그건 예술이었습니다. 이해 못 하시는 건 수준 문제입니다.": "It was art. If you don't get it, that's a you problem.",
+"저희 집 고양이가 대신 답하겠습니다. 야옹.": "My cat will reply on my behalf. Meow.",
+"이 상황을 일기장에 쓰면 베스트셀러가 되겠네요.": "If I wrote this in my diary, it'd be a bestseller.",
+"그럴 수도 있죠. 아니, 그럴 리가 없죠. 아니, 그럴 수도 있죠.": "It could happen. No, it couldn't. No, it could.",
+"죄송합니다만 저는 3분 전에 이미 퇴사했습니다.": "Sorry, but I resigned three minutes ago.",
+"저는 제 인생에서 가장 현명한 선택을 하겠습니다. 도망입니다.": "I'm about to make the wisest decision of my life. Running away.",
+"이 일이 알려지면 저는 이민을 가겠습니다. 달로요.": "If this gets out, I'm emigrating. To the moon.",
+"이제야 말씀드리는데, 저도 제가 누군지 잘 모릅니다.": "I might as well say it now: I don't really know who I am either.",
+"인정합니다. 그래도 저는 조금도 반성하지 않습니다.": "I admit it. I still don't regret anything.",
+"제 입장에서 보면 저는 아무 잘못이 없습니다. 제 입장이 이상할 뿐.": "From where I stand, I did nothing wrong. It's just that where I stand is weird.",
+"한 가지만 약속해 주세요. 이 이야기에서 저를 빼 주세요. 주인공이 저지만.": "Promise me one thing: leave me out of this story. Even though I'm the main character.",
+"그럼 저는 이만 잠수 타겠습니다. 숨은 쉬면서요.": "Then I'll go underground now. I'll keep breathing, though.",
+"몰라요, 모르쇠 중입니다. 모르쇠 장인이라서요.": "I don't know. I'm in denial mode. I'm a denial craftsman.",
+"제 대답은 '예'입니다. 예의상 한 말이고 사실은 아니오입니다.": "My answer is 'yes.' It's just manners. It's actually no.",
+"저는 철수가 아닙니다. 하지만 철수하겠습니다.": "I'm not Cheol-su. But I'm pulling out (cheol-su, 'withdraw').",
+"'내 인생 망했다'로 검색하면 제 이름이 나옵니다.": "If you search 'my life is ruined,' my name comes up.",
+"솔직히 저도 궁금했습니다. 제가 왜 그랬는지.": "Honestly, I've been wondering too. Why did I do that?",
+"제가 어른이라는 증거부터 확인하고 대답하겠습니다.": "I'll answer after checking proof that I'm an adult.",
+"그런 건 저희 엄마한테 직접 말씀하세요. 제 편입니다. 아마도요.": "Tell my mom directly. She's on my side. Probably.",
+"저는 그날 알리바이가 있습니다. 증인은 없지만요.": "I have an alibi for that day. No witnesses, though.",
+"그거 제가 한 거 맞습니다. 근데 제 의도는 훨씬 더 나빴습니다.": "I did do that. But my intentions were much worse.",
+"제가 사과하면 이 상황이 끝나나요? 그럼 두 번 드리겠습니다.": "Will this end if I apologize? Then I'll apologize twice.",
+"이제 됐어. 제발 이혼 서류에 서명좀 해줘!": "That's enough. Please just sign the divorce papers!",
+"제발 이혼 서류에 서명좀 하고 이딴 문자좀 보내지 마.": "Please sign the divorce papers and stop sending me texts like this.",
+"닥쳐, 스테파니!": "Shut up, Stephanie!",
+"글쎄 :)": "Maybe :)",
+"바로 그게.. 그게 제가 말하고 싶은 문제라고요.": "That's exactly... that's the problem I'm trying to talk about.",
+"네 문자 때문에 내가 글을 읽는 법을 배운 걸 후회하게 됐어.": "Your text makes me regret learning how to read.",
+"미안해 아빠": "Sorry, Dad.",
+"이상한 자랑이지만, 나는 그게 좋아요.": "Weird flex, but I like it.",
+"아빠, 중년의 위기같은 문제를 겪고 계신 건 알겠지만 제발 이런 문자는 보내지 마세요.": "Dad, I know you're going through something like a midlife crisis, but please stop sending me texts like this.",
+"답장이 2년 늦어서 미안. 샤워 중이었어.": "Sorry my reply is two years late. I was in the shower.",
+"내가 하는 모든 일은 상징적이며, 내 생각은 바뀌지 않을 거야.": "Everything I do is symbolic, and my mind will not be changed.",
+"... 뇌가 없으신가요?": "...Do you not have a brain?",
+"할머니, 오늘 약 드시는 거 깜빡하셨어요?": "Grandma, did you forget to take your medicine today?",
+"네가 성욕 대신 마음에 따랐더라면, 애초에 이런 상황에 처하지 않았을 지도 몰라.": "If you'd followed your heart instead of your urges, maybe we wouldn't be in this situation in the first place.",
+"지금은 이걸 감당할 수 없어. 내 전담을 어디서도 찾을 수 없고, 마리화나도 없어.": "I can't handle this right now. I can't find my vape anywhere, and I don't have any weed.",
+"할머니, 정말 야만적이시네요.": "Grandma, you are savage.",
+"음, 적어도 \"좋은 아침입니다.\"라는 인사라도 먼저 해주시겠어요?": "Um, could you at least say \"Good morning\" first?",
+"그 전에 미리 경고라도 해주면 안 돼?!?! 젠장.": "Could you at least warn me first?!?! Damn.",
+"우웩, 너 안드로이드폰 쓰는구나?": "Ew, you have an Android?",
+"방금 뭐라고 했어? 나 하버드 수석 졸업한 사람이야, 이 바보야.": "What did you just say? I graduated top of my class at Harvard, you idiot.",
+"네가 말하는 모든 것들이 내가 술을 먹는 이유가 돼...": "Everything you say is why I drink...",
+"데이브, 나도 예전이 그립지만 아내들이 알면 우린 죽어.": "Dave, I miss the old days too, but if our wives find out, we're dead.",
+"미안해요 노아 삼촌, 아빠가 이제 삼촌이랑 말하지 말래요.": "Sorry, Uncle Noah, Dad says I'm not allowed to talk to you anymore.",
+"어쩔 건데, 이 자식아?!": "What are you gonna do about it, punk?!",
+"부모님 탓해, 내가 이렇게 무례하게 자란 건 내 잘못이 아냐.": "Blame my parents. It's not my fault I was raised this rude.",
+"완전 혼란스러워. 지난주 바에서 만났을 땐 우리 서로 쳐다보지도 않았잖아.": "I'm so confused. When we met at the bar last week, we didn't even look at each other."
+});
+
+
 const UI_EN={
 "New Phone, Who Dis? (한국어 파티 카드게임)":"New Phone, Who Dis? (Party Card Game)",
 "시작하기":"Start","도움말":"Help","설정":"Settings","나가기":"Exit","⚙️ 설정":"⚙️ Settings","닫기":"Close","뒤로":"Back","참가":"Join",
@@ -878,15 +1112,15 @@ const genderOf=ko=>G_M.test(ko)?"m":G_F.test(ko)?"f":null;
 // 카드(한국어 원문)를 음성 언어에 맞게 읽기: 영어면 영어 번역을 읽음. 번역이 없으면 한국어 음성으로 읽음(한글을 영어 발음으로 읽지 않음)
 function say(card,prof,pre){let lang=CFG.ttsLang,txt=card;if(lang==="en"){const e=CARD_EN[card];if(e)txt=e;else lang="ko"}return Voice.speakP((pre?pre(lang):"")+txt,prof,genderOf(card),lang)}
 // ===== 상태 =====
-let botOpen=false,handSig="",mode=null,peer=null,conn=null,conns={},S=null,V=null,myId="",myName="",roomId="",sel=null,seen=new Set(),times={},botKey="";
+let botOpen=false,handSig="",mode=null,peer=null,conn=null,conns={},S=null,V=null,myId="",myName="",roomId="",sel=null,seen=new Set(),times={},botKey="",safeMode=false;
 const show=(id,on)=>$(id).classList.toggle("hidden",!on),msg=s=>{$("connectMsg").textContent=s;show("connectMsg",!!s)};
 // ===== 호스트(권위 서버): 모든 규칙 검증은 여기서만 수행 =====
 const P=(id,name,bot)=>({id,name,bot:!!bot,score:0,hand:[]});
 // 덱 재충전 시 이미 누군가의 손패에 있거나 이번 라운드에 제출돼 놓인 카드는 제외하고 섞는다 (손패 카드 중복 방지)
-function draw(){if(!S.deck.length){const held=new Set([...S.players.flatMap(p=>p.hand),...S.subs.map(s=>s.text)]);S.deck=shuffle([...new Set(REPLIES)].filter(c=>!held.has(c)))}return S.deck.pop()}
+function draw(){if(!S.deck.length){const held=new Set([...S.players.flatMap(p=>p.hand),...S.subs.map(s=>s.text)]);S.deck=shuffle([...new Set(pool(REPLIES))].filter(c=>!held.has(c)))}return S.deck.pop()}
 function fill(p){let n=0;while(p.hand.length<HAND&&n++<60){const c=draw();if(c&&!p.hand.includes(c))p.hand.push(c)}}
-function newRound(){S.judgeId=S.casual?null:S.players[S.judgeIdx%S.players.length].id;if(S.pdeck.length<6)S.pdeck=shuffle(INBOX);S.subs=[];S.winnerId=null;S.options=[];S.players.forEach(p=>{if(p.id!==S.judgeId)fill(p)});if(S.pick==="choose"&&!S.casual){S.options=S.pdeck.splice(-5);S.prompt=null;S.phase="choosing"}else{S.prompt=S.pdeck.pop();S.phase="playing"}}
-function startGame(){S.casual=S.players.length===2;S.deck=shuffle(REPLIES);S.pdeck=shuffle(INBOX);S.round=1;S.judgeIdx=0;S.players.forEach(p=>{p.score=0;p.hand=[]});newRound()}
+function newRound(){S.judgeId=S.casual?null:S.players[S.judgeIdx%S.players.length].id;if(S.pdeck.length<6)S.pdeck=shuffle(pool(INBOX));S.subs=[];S.winnerId=null;S.options=[];S.players.forEach(p=>{if(p.id!==S.judgeId)fill(p)});if(S.pick==="choose"&&!S.casual){S.options=S.pdeck.splice(-5);S.prompt=null;S.phase="choosing"}else{S.prompt=S.pdeck.pop();S.phase="playing"}}
+function startGame(){S.casual=S.players.length===2;S.deck=shuffle(pool(REPLIES));S.pdeck=shuffle(pool(INBOX));S.round=1;S.judgeIdx=0;S.players.forEach(p=>{p.score=0;p.hand=[]});newRound()}
 function allIn(){if(S.phase==="playing"&&S.subs.length===S.players.filter(p=>p.id!==S.judgeId).length){if(S.casual){S.winnerId=null;S.phase="result"}else{S.subs=shuffle(S.subs);S.phase="judging"}}}
 function hostAct(id,a,d){if(!S||!S.players.some(p=>p.id===id))return;d=d||{};const host=id===S.hostId;
  if(a==="target"&&host&&S.phase==="lobby"&&[5,10].includes(+d.n))S.target=+d.n;
@@ -941,7 +1175,7 @@ async function hostRoom(){if(creating)return;creating=true;$("createB").disabled
  creating=false;$("createB").disabled=false;
  if(!ok){mode=null;try{peer&&peer.destroy()}catch(e){}peer=null;return msg(last&&last.type==="unavailable-id"?"방 코드를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.":"방을 만들지 못했습니다. 인터넷 연결(PeerJS 서버)을 확인해 주세요.")}
  peer.on("disconnected",()=>{try{peer.reconnect()}catch(e){}});// 시그널링 서버와 끊겨도 같은 ID 로 복구 → 방 코드로 계속 참가 가능
- S={hostId:myId,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,round:0,subs:[],players:[P(myId,myName)]};push()}
+ safeMode=!!$("cSafe").checked;S={hostId:myId,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,round:0,subs:[],players:[P(myId,myName)]};push()}
 async function joinRoom(){if(joining)return;chatReset();Sfx.init();Voice.unlock();myName=$("name").value.trim()||dn("플레이어","Player");const code=normCode($("roomInput").value);
  if(!code)return msg("방 코드를 입력해 주세요.");if(!validCode(code))return msg("코드 형식이 올바르지 않습니다. 영문 대문자와 숫자 6자리입니다.");
  joining=true;mode="client";msg("");const jb=$("joinB");jb.disabled=true;jb.textContent="연결 중…";let joined=false,dead=false,timer=0;
@@ -1050,7 +1284,7 @@ function render(){const v=V;if(!v)return;const rm=v.phase==="lobby"||(v.phase===
   if(!revDone(v))m.push({s:1,k:"rv"+v.round+"_"+RV.n,t:`답장 공개 중 (${RV.n}/${v.subs.length})`});
   if(v.phase==="result"&&revDone(v))m.push({s:1,k:"r"+v.round,t:v.casual?"서로의 답장이 공개됐어요! 승패 없이 카드 구경을 즐겨 보세요 😄":`🏆 ${nm(v,v.winnerId)}님 +1점!`});
   if(v.phase==="ended"&&v.casual)m.push({s:1,k:"e",t:`<div class="rank"><b>🏁 게임 종료</b><div><span>총 ${v.round}라운드</span></div><div><span>승패 없이 즐겁게 끝났어요</span></div></div>`,raw:1});else if(v.phase==="ended"){const r=v.players.slice().sort((a,b)=>b.score-a.score);m.push({s:1,k:"e",t:`<div class="rank"><b>🎉 우승: ${esc(r[0].name)}</b>${r.map((p,i)=>`<div><span>${i+1}위 ${esc(p.name)}</span><b>${p.score}점</b></div>`).join("")}</div>`,raw:1})}}
- $("chat").innerHTML=m.map(x=>{const nw=!seen.has(x.k);if(!times[x.k])times[x.k]=Date.now();return x.s?`<div class="sys ${nw?"new":""}">${x.raw?x.t:esc(x.t)}</div>`:`<div class="msg ${x.c} ${nw?"new":""}" ${x.i!==undefined?`data-i="${x.i}"`:""}><div class="who">${esc(x.w)}</div><div class="b">${esc(x.t)}</div><div class="tm">${hhmm(times[x.k])}</div></div>`}).join("");m.forEach(x=>seen.add(x.k));$("chat").scrollTop=1e9;
+ $("chat").innerHTML=m.map(x=>{const nw=!seen.has(x.k);if(!times[x.k])times[x.k]=Date.now();return x.s?`<div class="sys ${nw?"new":""}">${x.raw?x.t:esc(x.t)}</div>`:`<div class="msg ${x.c} ${GREEN_CARDS.has(x.t)?"gr":""} ${nw?"new":""}" ${x.i!==undefined?`data-i="${x.i}"`:""}><div class="who">${esc(x.w)}</div><div class="b">${esc(x.t)}</div><div class="tm">${hhmm(times[x.k])}</div></div>`}).join("");m.forEach(x=>seen.add(x.k));$("chat").scrollTop=1e9;
  $("chat").querySelectorAll(".pick").forEach(e=>e.onclick=()=>{sel=+e.dataset.i;Sfx.select();render()});
  let b="";if(v.phase==="choosing")b=judge?`<button class="btn" id="chooseB" ${sel===null?"disabled":""}>📝 이 문자로 출제</button>`:`<span class="t">출제자가 문자를 고르는 중…</span>`;else if(v.phase==="playing"&&!judge)b=v.mine?`<span class="t">답장 전송 완료! 다른 플레이어를 기다리는 중…</span>`:`<button class="btn" id="sendB" ${sel===null?"disabled":""}>📤 이 답장 보내기</button>`;
  else if(v.phase==="playing")b=`<span class="t">👑 심판입니다. 모두가 답장할 때까지 기다려 주세요.</span>`;
@@ -1120,7 +1354,7 @@ $("copyB").onclick=async()=>{const t=roomId||"";let ok=false;try{await navigator
 // 패널 안의 버튼(방 만들기 등)은 fromNav=false 라서 토글되지 않고 항상 해당 패널을 연다. "방 만들기" 화면(create)은 "시작하기" 메뉴에 속한 것으로 취급.
 let curPn=null;
 function go(n,fromNav){const grp=x=>x==="create"?"start":x;if(fromNav&&curPn&&grp(curPn)===n)n=null;curPn=n;
- document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",!!n&&p.id==="pn-"+n));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("act",!!n&&b.dataset.go===grp(n)));if(n==="settings"){$("setHost").appendChild($("setRows"));syncVoices();syncSet();Voice.checkCloud()}msg("")}
+ document.querySelector("#lobby .stage").classList.toggle("open",!!n);document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",!!n&&p.id==="pn-"+n));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("act",!!n&&b.dataset.go===grp(n)));if(n==="settings"){$("setHost").appendChild($("setRows"));syncVoices();syncSet();Voice.checkCloud()}msg("")}
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go,!!b.closest("#nav")));
 $("joinToggle").onclick=()=>show("joinRow",$("joinRow").classList.contains("hidden"));
 $("createB").onclick=hostRoom;
