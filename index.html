@@ -79,8 +79,8 @@ input[type=range]{padding:0;border:0;background:none;margin:6px 0;accent-color:#
 #nav button{position:relative;width:100%;text-align:left;font-size:20px;font-weight:700;padding:16px 20px;margin:9px 0;border:0;border-radius:22px 22px 22px 6px;background:#303752;color:#fff;transition:transform .2s,background .2s}
 #nav button:hover{transform:translateX(8px);background:#3d6fcf}#nav button.act{background:#4c8dff;transform:translateX(8px);border-radius:22px 22px 6px 22px}
 /* 말풍선 꼬리: 선택 전 = 왼쪽, 선택됨(파란색) = 오른쪽 */
-#nav button:after{content:"";position:absolute;left:-13px;bottom:0;width:15px;height:17px;background:inherit;clip-path:path("M15 0L15 17L0 17Q11 13 11 0Z");pointer-events:none}
-#nav button.act:after{left:auto;right:-13px;clip-path:path("M0 0L0 17L15 17Q4 13 4 0Z")}
+#nav button:after{content:"";position:absolute;left:-13px;bottom:0;width:21px;height:17px;background:inherit;clip-path:path("M21 0L21 17L0 17Q13 13 13 0Z");pointer-events:none}
+#nav button.act:after{left:auto;right:-13px;clip-path:path("M0 0L0 17L21 17Q8 13 8 0Z")}
 /* 선택했을 때 나오는 창: 오른쪽 아래 꼬리 */
 .stage:after{content:"";position:absolute;right:-12px;bottom:0;width:14px;height:17px;background:rgba(34,41,66,.95);clip-path:path("M0 0L0 17L14 17Q4 13 4 0Z");opacity:0;transition:opacity .28s;pointer-events:none}.stage.open:after{opacity:1}
 .stage{flex:0 1 580px;position:relative;min-height:460px}
@@ -126,6 +126,8 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
  .card small{font-size:9px;margin-bottom:3px}.card b{font-size:12.5px;max-height:106px}
  .card.sel,.card.sel:hover:not(:disabled){outline:3px solid #ff9f0a;transform:translateY(-6px)!important;background:#fff3d6}
 }
+/* 넓은 PC 화면: 참여자 영역을 손패 높이까지 확장 */
+@media (min-width:1200px) and (min-height:521px){#game{grid-template-areas:"side main" "side hand"}}
 @media (max-height:520px) and (orientation:landscape){
  :root{--sb:24px}#status{padding:0 10px;font-size:11px;gap:8px}#status button{font-size:12px}
  .box{padding:14px}.set{padding:6px 10px;margin:5px 0}
