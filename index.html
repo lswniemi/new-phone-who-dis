@@ -235,6 +235,7 @@ body.cwon #game{height:calc(100% - var(--sbt) - var(--cwh) - env(safe-area-inset
 /* 로비: 숨은 패널(오른쪽 28px 이동)·꼬리 때문에 생기는 가로 스크롤/흔들림 차단 */
 .screen{overflow-x:hidden;overscroll-behavior:none}
 .screen>.menu{max-width:100%}
+@media (max-width:700px) and (orientation:portrait){.menu{overflow-x:clip}#lobby{touch-action:pan-y}html,body{position:fixed;inset:0;width:100%}}
 
 /* ===== 가상 플레이어 (대기실) ===== */
 #roomPl .chip{vertical-align:middle}
