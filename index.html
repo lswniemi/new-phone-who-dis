@@ -670,7 +670,10 @@ const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"']/g,c=>(
 const shuffle=a=>{a=[...a];for(let i=a.length;i>1;){const j=Math.random()*i--|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const hhmm=d=>new Date(d||Date.now()).toLocaleTimeString(CFG.uiLang==="en"?"en-US":"ko-KR",{hour:"numeric",minute:"2-digit"});
 const MAXP=8,HAND=7;
-const PEER_CONFIG={config:{iceServers:[{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302","stun:global.stun.twilio.com:3478"]},
+// ★ 본인 TURN(중계) 서버 정보를 여기에 넣으세요. 예(Metered 대시보드 값 그대로):
+//   {urls:["turn:global.relay.metered.ca:80","turn:global.relay.metered.ca:80?transport=tcp","turn:global.relay.metered.ca:443","turns:global.relay.metered.ca:443?transport=tcp"],username:"발급받은ID",credential:"발급받은비번"}
+const TURN_CUSTOM=[];
+const PEER_CONFIG={config:{iceServers:[...TURN_CUSTOM,{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302","stun:global.stun.twilio.com:3478"]},
  {urls:["turn:eu-0.turn.peerjs.com:3478","turn:us-0.turn.peerjs.com:3478"],username:"peerjs",credential:"peerjsp"},
  {urls:["turn:openrelay.metered.ca:80","turn:openrelay.metered.ca:443","turn:openrelay.metered.ca:443?transport=tcp","turns:openrelay.metered.ca:443?transport=tcp"],username:"openrelayproject",credential:"openrelayproject"}],sdpSemantics:"unified-plan"}};// 엄격한 NAT 환경용 TURN 서버가 있다면 {config:{iceServers:[...]}} 형태로 지정
 const TTS_PROXY_URL="";// Cloudflare Worker 주소(예: https://npwd-tts.내계정.workers.dev). 비워 두면 클라우드 음성은 "연결 안 됨"으로 표시되고 기기 음성만 사용합니다. API 키는 절대 여기에 넣지 마세요(Worker Secret에만 보관).
@@ -1241,13 +1244,13 @@ async function hostRoom(){if(creating)return;creating=true;$("createB").disabled
  safeMode=!!$("cSafe").checked;favMode=$("cDeck").value==="fav";S={hostId:myId,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,round:0,subs:[],players:[P(myId,myName)]};push()}
 async function joinRoom(){if(joining)return;chatReset();Sfx.init();Voice.unlock();myName=$("name").value.trim()||dn("플레이어","Player");const code=normCode($("roomInput").value);
  if(!code)return msg("방 코드를 입력해 주세요.");if(!validCode(code))return msg("코드 형식이 올바르지 않습니다. 영문 대문자와 숫자 6자리입니다.");
- joining=true;mode="client";msg("");const jb=$("joinB");jb.disabled=true;jb.textContent="연결 중…";let joined=false,dead=false,timer=0;const ct=new Set(),dg=()=>" [진단: 후보 "+([...ct].join(",")||"없음")+(ct.has("relay")?"":" · 중계서버 미연결")+"]",netMsg=()=>"방장과 직접 연결을 맺지 못했습니다(네트워크 차단). 방 코드는 맞는 것 같습니다. VPN·보안 DNS를 끄거나 다른 통신망으로 바꿔 보세요."+dg();
+ joining=true;mode="client";msg("");const jb=$("joinB");jb.disabled=true;jb.textContent="연결 중…";let joined=false,dead=false,timer=0;const ct=new Set(),ce=new Set(),dg=()=>" [진단: 후보 "+([...ct].join(",")||"없음")+(ct.has("relay")?"":" · 중계서버 미연결")+(ce.size?" · 오류 "+[...ce].slice(0,4).join(" / "):"")+"]",netMsg=()=>"방장과 직접 연결을 맺지 못했습니다(네트워크 차단). 방 코드는 맞는 것 같습니다. VPN·보안 DNS를 끄거나 다른 통신망으로 바꿔 보세요."+dg();
  const fail=m=>{if(joined||dead)return;dead=true;clearTimeout(timer);joining=false;mode=null;try{conn&&conn.close()}catch(e){}conn=null;try{peer&&peer.destroy()}catch(e){}peer=null;jb.disabled=false;jb.textContent="참가";msg(m)};
  try{await initPeer()}catch(e){return fail("온라인 연결을 시작하지 못했습니다. 인터넷 연결을 확인해 주세요.")}
  myId=peer.id;roomId=code;
  peer.on("error",e=>{if(!joined)fail(e&&e.type==="peer-unavailable"?"해당 코드의 방을 찾을 수 없습니다. 코드를 다시 확인하고, 방장이 방을 열어 둔 상태인지 확인해 주세요.":"연결 서버 오류("+(e&&e.type||"unknown")+"). 잠시 후 다시 시도해 주세요.")});
  conn=peer.connect(PEER_PREFIX+code,{reliable:true});timer=setTimeout(()=>{const st=conn&&conn.peerConnection?conn.peerConnection.iceConnectionState:"";fail(st==="checking"||st==="new"||st==="disconnected"?netMsg():"방 연결 시간이 초과되었습니다. 방장이 방을 열어 둔 상태인지 확인하고 다시 시도해 주세요."+dg())},25000);
- try{const pc=conn.peerConnection;if(pc){pc.addEventListener("icecandidate",e=>{if(e.candidate&&e.candidate.type)ct.add(e.candidate.type)});pc.addEventListener("iceconnectionstatechange",()=>{if(pc.iceConnectionState==="failed")fail(netMsg())})}}catch(e){}
+ try{const pc=conn.peerConnection;if(pc){pc.addEventListener("icecandidate",e=>{if(e.candidate&&e.candidate.type)ct.add(e.candidate.type)});pc.addEventListener("icecandidateerror",e=>{if(e&&e.url&&/^turns?:/.test(e.url))ce.add(String(e.url).replace(/^turns?:/,"").split("?")[0]+" "+e.errorCode)});pc.addEventListener("iceconnectionstatechange",()=>{if(pc.iceConnectionState==="failed")fail(netMsg())})}}catch(e){}
  conn.on("open",()=>conn.send({type:"join",name:myName}));
  // view 를 받을 때마다 sel=null 하던 것을 제거: 남이 제출할 때마다 내 카드 선택이 풀렸음. 선택 초기화는 onView 가 라운드/단계가 바뀔 때(와 제출 직후) 수행
  conn.on("data",d=>{if(!d||typeof d!=="object")return;if(d.type==="view"){if(!joined){joined=true;joining=false;clearTimeout(timer);jb.disabled=false;jb.textContent="참가";msg("")}onView(d.v)}
