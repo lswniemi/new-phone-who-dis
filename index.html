@@ -672,7 +672,8 @@ const hhmm=d=>new Date(d||Date.now()).toLocaleTimeString(CFG.uiLang==="en"?"en-U
 const MAXP=8,HAND=7;
 // ★ 본인 TURN(중계) 서버 정보를 여기에 넣으세요. 예(Metered 대시보드 값 그대로):
 //   {urls:["turn:global.relay.metered.ca:80","turn:global.relay.metered.ca:80?transport=tcp","turn:global.relay.metered.ca:443","turns:global.relay.metered.ca:443?transport=tcp"],username:"발급받은ID",credential:"발급받은비번"}
-const TURN_CUSTOM=[];
+const TURN_CUSTOM=[{urls:"stun:stun.relay.metered.ca:80"},
+ {urls:["turn:global.relay.metered.ca:80","turn:global.relay.metered.ca:80?transport=tcp","turn:global.relay.metered.ca:443","turns:global.relay.metered.ca:443?transport=tcp"],username:"d5284201beb0635adb890904",credential:"lHlzSxFaanYBDlPW"}];
 const PEER_CONFIG={config:{iceServers:[...TURN_CUSTOM,{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302","stun:global.stun.twilio.com:3478"]},
  {urls:["turn:eu-0.turn.peerjs.com:3478","turn:us-0.turn.peerjs.com:3478"],username:"peerjs",credential:"peerjsp"},
  {urls:["turn:openrelay.metered.ca:80","turn:openrelay.metered.ca:443","turn:openrelay.metered.ca:443?transport=tcp","turns:openrelay.metered.ca:443?transport=tcp"],username:"openrelayproject",credential:"openrelayproject"}],sdpSemantics:"unified-plan"}};// 엄격한 NAT 환경용 TURN 서버가 있다면 {config:{iceServers:[...]}} 형태로 지정
