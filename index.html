@@ -67,7 +67,7 @@ input[type=range]{padding:0;border:0;background:none;margin:6px 0;accent-color:#
 .bgscreen{background:linear-gradient(rgba(8,10,18,.6),rgba(8,10,18,.8)),var(--lobby-bg) center/cover no-repeat,radial-gradient(circle at 30% 20%,#2a3563,#12141c 70%)}
 .bgscreen .box{background:rgba(24,28,44,.88);backdrop-filter:blur(8px);border:1px solid #ffffff22}
 #settings{position:fixed;inset:0;background:#000a;z-index:999;display:flex;align-items:center;justify-content:center}#settings .box{max-height:92vh;overflow:auto}
-.set{display:grid;grid-template-columns:110px 1fr 60px;align-items:center;gap:8px;margin:6px 0}.set.fs-set{grid-template-columns:110px minmax(150px,1fr) minmax(60px,auto)}.set.fs-set #fsBtn{justify-self:start}.set span{text-align:right;color:#ffd24c;font-weight:700;font-size:13px}
+.set{display:grid;grid-template-columns:110px 1fr 60px;align-items:center;gap:8px;margin:6px 0}.set.fs-set{grid-template-columns:minmax(0,110px) minmax(0,1fr) 26px}.set.fs-set #fsBtn{justify-self:start}.set span{text-align:right;color:#ffd24c;font-weight:700;font-size:13px}
 #game{grid-template-rows:1fr 292px}#handWrap{justify-content:flex-start}
 #preview{position:static;transform:none;width:min(680px,92%);height:58px;flex:none;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1.3}
 #hand{height:234px;padding-top:62px;flex:none}
@@ -76,13 +76,14 @@ input[type=range]{padding:0;border:0;background:none;margin:6px 0;accent-color:#
 .menu{display:flex;gap:48px;width:min(940px,92vw);margin:auto auto auto 6vw;align-items:stretch}
 #nav{width:270px;flex:none;display:flex;flex-direction:column;justify-content:center}
 #nav h1{font-size:30px;line-height:1.2;margin:0 0 22px;text-shadow:0 2px 14px #000}
-#nav button{position:relative;width:100%;text-align:left;font-size:20px;font-weight:700;padding:16px 20px;margin:9px 0;border:0;border-radius:22px 22px 22px 6px;background:#303752;color:#fff;transition:transform .2s,background .2s}
-#nav button:hover{transform:translateX(8px);background:#3d6fcf}#nav button.act{background:#4c8dff;transform:translateX(8px);border-radius:22px 22px 6px 22px}
+@property --nb{syntax:"<color>";inherits:true;initial-value:#303752}\n#nav button{position:relative;width:100%;text-align:left;font-size:20px;font-weight:700;padding:16px 20px;margin:9px 0;border:0;border-radius:22px 22px 22px 6px; --nb:#303752;background:var(--nb);color:#fff;transition:transform .2s,--nb .2s}
+#nav button:hover{transform:translateX(8px);--nb:#3d6fcf}#nav button.act{--nb:#4c8dff;transform:translateX(8px);border-radius:22px 22px 6px 22px}
 /* 말풍선 꼬리: 선택 전 = 왼쪽, 선택됨(파란색) = 오른쪽 */
-#nav button:after{content:"";position:absolute;left:-13px;bottom:0;width:21px;height:17px;background:inherit;clip-path:path("M21 0L21 17L0 17Q13 13 13 0Z");pointer-events:none}
+#nav button:after{content:"";position:absolute;left:-13px;bottom:0;width:21px;height:17px;background:var(--nb);clip-path:path("M21 0L21 17L0 17Q13 13 13 0Z");pointer-events:none}
 #nav button.act:after{left:auto;right:-13px;clip-path:path("M0 0L0 17L21 17Q8 13 8 0Z")}
-/* 선택했을 때 나오는 창: 오른쪽 아래 꼬리 */
-.stage:after{content:"";position:absolute;right:-12px;bottom:0;width:14px;height:17px;background:rgba(34,41,66,.95);clip-path:path("M0 0L0 17L14 17Q4 13 4 0Z");opacity:0;transition:opacity .28s;pointer-events:none}.stage.open:after{opacity:1}
+/* 선택했을 때 나오는 창: 패널과 같은 이동·페이드로 나타나는 꼬리 */
+.stage>.tl{position:absolute;right:-12px;bottom:0;width:22px;height:17px;background:rgba(34,41,66,.95);clip-path:path("M0 0L0 17L22 17Q10 13 10 0Z");opacity:0;visibility:hidden;transform:translateX(28px);transition:opacity .28s,transform .28s,visibility 0s .28s;pointer-events:none}
+.stage>.tl.on{opacity:1;visibility:visible;transform:none;transition:opacity .28s .06s,transform .28s .06s,visibility 0s}
 .stage{flex:0 1 580px;position:relative;min-height:460px}
 .stage h2{margin:0 0 12px}.stage label{display:block;margin-top:10px}
 .pn{position:absolute;inset:0;padding:26px 26px 44px;overflow:auto;opacity:0;visibility:hidden;transform:translateX(28px);transition:opacity .28s,transform .28s,visibility 0s .28s}
@@ -127,7 +128,15 @@ input[type=checkbox]:checked{background:#34c759}input[type=checkbox]:after{conte
  .card.sel,.card.sel:hover:not(:disabled){outline:3px solid #ff9f0a;transform:translateY(-6px)!important;background:#fff3d6}
 }
 /* 넓은 PC 화면: 참여자 영역을 손패 높이까지 확장 */
-@media (min-width:1200px) and (min-height:521px){#game{grid-template-areas:"side main" "side hand"}}
+@media (min-width:1200px) and (min-height:521px){
+ #game{grid-template-areas:"side main" "side hand"}
+ #side{padding:14px 14px}
+ #plist .pl{padding:clamp(5px,1.3vh,13px) 12px;margin-bottom:clamp(3px,.8vh,9px);gap:11px;border-radius:14px}
+ #plist .av{width:clamp(26px,4.6vh,40px);height:clamp(26px,4.6vh,40px);font-size:clamp(13px,2.2vh,20px)}
+ #plist .pl .n{font-size:clamp(13.5px,1.9vh,16px)}
+ #plist .pl small{font-size:clamp(11px,1.5vh,13px);margin-top:2px}
+ #plist .pl .s{font-size:clamp(18px,2.8vh,24px)}
+}
 @media (max-height:520px) and (orientation:landscape){
  :root{--sb:24px}#status{padding:0 10px;font-size:11px;gap:8px}#status button{font-size:12px}
  .box{padding:14px}.set{padding:6px 10px;margin:5px 0}
@@ -196,12 +205,23 @@ body.cwon #game{height:calc(100% - var(--sbt) - var(--cwh) - env(safe-area-inset
 /* 세로 폰: 대기실에서 채팅창이 열려 있으면 채팅창(하단 시트) 높이만큼 대기실 영역을 줄여 "시작" 버튼 등을 덮지 않음 (넘치면 스크롤) */
 @media (max-width:700px) and (orientation:portrait){body.cwopen #room{height:calc(100% - var(--sbt) - min(40vh,340px) - env(safe-area-inset-bottom,0px));overflow-y:auto}body.cwopen #startRow{position:sticky;bottom:0;background:#1a1f33;padding:6px 0;z-index:2}}
 
+/* ===== 자유 채팅 말풍선: 참여자 행에 최근 메시지 표시 ===== */
+@media (min-width:701px) and (min-height:521px){
+ .pl{flex-wrap:wrap}
+ .pb{flex:0 0 calc(100% - 38px);margin:6px 0 2px 38px;box-sizing:border-box;padding:6px 10px;border-radius:4px 14px 14px 14px;background:#f3f4f8;color:#1b1e2b;font-size:12.5px;line-height:1.35;font-weight:500;cursor:pointer;animation:pbIn .18s ease-out}
+ .pb span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+}
+#pbLayer{position:fixed;inset:0;pointer-events:none;z-index:60}
+.pbf{position:fixed;box-sizing:border-box;padding:4px 9px;border-radius:4px 12px 12px 12px;background:#f3f4f8;color:#1b1e2b;font-size:11.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:auto;cursor:pointer;box-shadow:0 2px 8px #0008;animation:pbIn .18s ease-out}
+.pbf.in{padding:2px 7px;font-size:10.5px;border-radius:3px 9px 9px 9px;box-shadow:0 1px 5px #000a}
+@keyframes pbIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
 /* 어두운 파랑 계열 스크롤바 */
-.pn,#side,#plist{scrollbar-width:thin;scrollbar-color:#4a5378 transparent}
-.pn::-webkit-scrollbar,#side::-webkit-scrollbar,#plist::-webkit-scrollbar{width:10px}
-.pn::-webkit-scrollbar-track,#side::-webkit-scrollbar-track,#plist::-webkit-scrollbar-track{background:transparent}
-.pn::-webkit-scrollbar-thumb,#side::-webkit-scrollbar-thumb,#plist::-webkit-scrollbar-thumb{background:#4a5378;border-radius:6px;border:2px solid transparent;background-clip:content-box}
-.pn::-webkit-scrollbar-thumb:hover,#side::-webkit-scrollbar-thumb:hover,#plist::-webkit-scrollbar-thumb:hover{background:#6573a3;background-clip:content-box}
+.pn,#side,#plist,#settings .box,.screen,.invwrap,#hand{scrollbar-width:thin;scrollbar-color:#4a5378 transparent}
+.pn::-webkit-scrollbar, #side::-webkit-scrollbar, #plist::-webkit-scrollbar, #settings .box::-webkit-scrollbar, .screen::-webkit-scrollbar, .invwrap::-webkit-scrollbar, #hand::-webkit-scrollbar{width:10px;height:10px}
+.pn::-webkit-scrollbar-track, #side::-webkit-scrollbar-track, #plist::-webkit-scrollbar-track, #settings .box::-webkit-scrollbar-track, .screen::-webkit-scrollbar-track, .invwrap::-webkit-scrollbar-track, #hand::-webkit-scrollbar-track{background:transparent}
+.pn::-webkit-scrollbar-thumb, #side::-webkit-scrollbar-thumb, #plist::-webkit-scrollbar-thumb, #settings .box::-webkit-scrollbar-thumb, .screen::-webkit-scrollbar-thumb, .invwrap::-webkit-scrollbar-thumb, #hand::-webkit-scrollbar-thumb{background:#4a5378;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+.pn::-webkit-scrollbar-thumb:hover, #side::-webkit-scrollbar-thumb:hover, #plist::-webkit-scrollbar-thumb:hover, #settings .box::-webkit-scrollbar-thumb:hover, .screen::-webkit-scrollbar-thumb:hover, .invwrap::-webkit-scrollbar-thumb:hover, #hand::-webkit-scrollbar-thumb:hover{background:#6573a3;background-clip:content-box}
 
 /* ===== 가상 플레이어 (대기실) ===== */
 #roomPl .chip{vertical-align:middle}
@@ -241,7 +261,7 @@ body.cwon #game{height:calc(100% - var(--sbt) - var(--cwh) - env(safe-area-inset
  #bar{min-height:38px;padding:3px 4px}
 }
 
-</style></head><body>
+</style></head><body><div id="pbLayer"></div>
 <div id="status"><span id="clock">--:--</span><span class="sp"></span>
 <button id="ttsChip" class="hidden" title="소리가 나지 않아요. 눌러서 다시 시도">🔇 음성 꺼짐</button><button id="setB" title="설정">⚙️ 설정</button>
 <svg width="18" height="14" viewBox="0 0 18 14" fill="#fff"><path d="M9 11.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM3.2 7.5l1.4 1.4a6.4 6.4 0 0 1 8.8 0l1.4-1.4a8.4 8.4 0 0 0-11.6 0zM.4 4.7l1.4 1.4a10.4 10.4 0 0 1 14.4 0l1.4-1.4a12.4 12.4 0 0 0-17.2 0z" transform="translate(0 -2)"/></svg>
@@ -1224,17 +1244,18 @@ async function joinRoom(){if(joining)return;chatReset();Sfx.init();Voice.unlock(
 //  · 표시 조건: 대기실 + 게임 진행 중(choosing/playing/judging/result). 종료 화면(ended)에서는 숨김
 let roomView=false;// 종료 화면에서 참가자가 "대기실로"를 눌러 자기 화면만 대기실로 본 상태 (방 연결·세션은 그대로)
 const inRoomView=()=>!!V&&V.phase==="ended"&&roomView&&V.hostId!==V.you;
-const CH={log:[],ids:new Set(),seq:0,unread:0,open:false,room:null,sys:null,rl:{}};
+const CH={log:[],ids:new Set(),seq:0,unread:0,open:false,room:null,sys:null,rl:{},loading:false};
+const PB={};
 const chatVisible=()=>!!V&&(V.phase!=="ended"||inRoomView());
-function chatReset(){Object.assign(CH,{log:[],ids:new Set(),seq:0,unread:0,open:false,room:null,sys:null,rl:{}});renderChat();chatSync()}
+function chatReset(){Object.keys(PB).forEach(k=>delete PB[k]);Object.assign(CH,{log:[],ids:new Set(),seq:0,unread:0,open:false,room:null,sys:null,rl:{},loading:false});pbPaint();renderChat();chatSync()}
 function chatPush(m){m.id=++CH.seq;m.ts=Date.now();chatStore(m);Object.entries(conns).forEach(([id,c])=>{if(c.open&&S&&S.players.some(p=>p.id===id)){try{c.send({type:"chat",m})}catch(e){}}})}
 function chatStore(m){if(CH.ids.has(m.id))return false;CH.ids.add(m.id);const i=CH.log.findIndex(x=>x.id>m.id);if(i<0)CH.log.push(m);else CH.log.splice(i,0,m);if(CH.log.length>100)CH.log.shift();
- if(m.k==="u"&&m.f!==myId&&!(CH.open&&chatVisible()))CH.unread++;renderChat();return true}
+ if(m.k==="u"&&m.f!==myId&&!(CH.open&&chatVisible()))CH.unread++;renderChat();if(m.k==="u"&&!CH.loading)pbSet(m);return true}
 function chatClean(m){if(!m||typeof m!=="object"||!Number.isFinite(m.id))return null;
  if(m.k==="u"&&typeof m.t==="string"&&typeof m.f==="string")return{id:m.id,ts:+m.ts||0,k:"u",f:m.f.slice(0,80),n:String(m.n||"?").slice(0,20),t:m.t.slice(0,200)};
  if(m.k==="s"&&["start","round","end","over"].includes(m.c))return{id:m.id,ts:+m.ts||0,k:"s",c:m.c,a:(m.a&&typeof m.a==="object")?m.a:{}};return null}
 function chatRecv(m){const x=chatClean(m);if(x)chatStore(x)}
-function chatLoad(log){if(Array.isArray(log))log.forEach(chatRecv)}
+function chatLoad(log){if(Array.isArray(log)){CH.loading=true;try{log.forEach(chatRecv)}finally{CH.loading=false}}}
 function hostChat(pid,t){if(!S)return;const p=S.players.find(x=>x.id===pid);if(!p||typeof t!=="string")return;t=t.replace(/\s+/g," ").trim().slice(0,200);if(!t)return;
  const now=Date.now(),r=(CH.rl[pid]=(CH.rl[pid]||[]).filter(x=>now-x<5000));if(r.length>=6)return;r.push(now);chatPush({k:"u",f:pid,n:p.name,t})}
 function chatSend(t){t=String(t||"").trim();if(!t||!chatVisible())return false;if(mode==="client"){if(!(conn&&conn.open))return false;conn.send({type:"chat",t})}else hostChat(myId,t);return true}
@@ -1267,6 +1288,19 @@ function chatOpen(on){CH.open=on;if(on)CH.unread=0;chatSync();if(on){const el=$(
 function chatSync(){const vis=chatVisible(),kind=!V?null:(V.phase==="lobby"||inRoomView())?"room":V.phase==="ended"?"end":"game";
  if(kind!==CH.room){CH.room=kind;if(kind==="room"||kind==="game")CH.open=false}
  if(CH.open)CH.unread=0;show("cw",vis&&CH.open);show("cwBtn",vis&&!CH.open);document.body.classList.toggle("cwon",vis);document.body.classList.toggle("cwopen",vis&&CH.open);renderChat()}
+const pbWide=()=>matchMedia("(min-width:701px) and (min-height:521px)").matches;
+function pbSet(m){PB[m.f]={id:m.id,t:m.t.length>60?m.t.slice(0,60)+"…":m.t,until:Date.now()+Math.min(7000,3500+m.t.length*60)};pbPaint()}
+function pbDrop(pid){delete PB[pid];pbPaint()}
+function pbPaint(){const now=Date.now(),L=$("pbLayer");Object.keys(PB).forEach(k=>{if(PB[k].until<=now)delete PB[k]});
+ document.querySelectorAll("#plist .pb").forEach(e=>e.remove());if(L)L.innerHTML="";clearTimeout(pbPaint.t);
+ const g=$("game");if(!g||g.classList.contains("hidden"))return;const wide=pbWide(),land=matchMedia("(max-height:520px) and (orientation:landscape)").matches;
+ document.querySelectorAll("#plist .pl").forEach(row=>{const b=PB[row.dataset.pid];if(!b)return;const d=document.createElement("div");d.onclick=()=>pbDrop(row.dataset.pid);
+  if(wide){d.className="pb";const sp=document.createElement("span");sp.textContent=b.t;d.appendChild(sp);row.appendChild(d)}
+  else{d.textContent=b.t;d.className="pbf";const r=row.getBoundingClientRect();
+   if(land){const l=r.left+30;d.classList.add("in");d.style.left=l+"px";d.style.top=(r.top+r.height*.5)+"px";d.style.width=Math.max(40,r.right-l-30)+"px"}
+   else{const l=Math.max(4,Math.min(r.left,innerWidth-80));d.style.left=l+"px";d.style.top=(r.bottom+3)+"px";d.style.maxWidth=Math.min(170,innerWidth-l-6)+"px"}L.appendChild(d)}});
+ const times=Object.values(PB).map(b=>b.until);if(times.length){const nx=Math.min(...times);pbPaint.t=setTimeout(pbPaint,Math.max(60,nx-Date.now()+30))}}
+addEventListener("resize",()=>pbPaint());$("side").addEventListener("scroll",()=>pbPaint(),{passive:true});
 $("cwBtn").onclick=()=>chatOpen(true);$("cwX").onclick=()=>chatOpen(false);
 $("cwForm").onsubmit=e=>{e.preventDefault();if(chatSend($("cwIn").value)){$("cwIn").value=""}};
 // ===== 화면 =====
@@ -1303,7 +1337,7 @@ function render(){const v=V;if(!v)return;const rm=v.phase==="lobby"||(v.phase===
   $("target").value=v.target;$("target").disabled=!host;$("pickMode").value=v.pick;$("pickMode").disabled=!host;$("startB").disabled=!host||v.players.length<2;$("startB").textContent=host?(v.players.length<2?`인원 부족 (${v.players.length}/2)`:v.players.length===2?"2인 모드 시작 (승패 없음)":"게임 시작"):"방장이 시작하길 기다리는 중";return}
  const judge=v.judgeId===v.you;$("goal").textContent=v.casual?`2인 모드 · 승패 없음 · ${v.round}라운드`:`목표 ${v.target}점 · ${v.round}라운드 · ${v.pick==="choose"?"출제자 선택":"무작위 출제"}`;$("soloN").textContent=v.players.some(p=>p.bot)?"가상 플레이어는 문장을 생성하지 않고, 가진 카드 중 문자와 글자가 많이 겹치는 카드를 고르는 규칙 기반 봇입니다.":"";
  $("plist").innerHTML=v.players.map(p=>{const jd=p.id===v.judgeId,st=v.phase==="choosing"?(jd?"📝 출제 중":"출제 대기"):v.phase==="playing"?(jd?"심판 대기":p.done?"✅ 제출 완료":"✍️ 답장 작성 중…"):v.phase==="judging"?(jd?"고르는 중…":"제출함"):v.phase==="ended"?"":(p.id===v.winnerId?"🏆 이번 라운드 승리":"");
-  return`<div class="pl ${p.id===v.you?"me":""} ${jd?"jd":""}"><div class="av">${jd?"👑":p.bot?"🤖":"🙂"}</div><div class="n">${esc(p.name)}${p.id===v.you?" (나)":""}${p.bot?" (가상)":""}<small>${st}</small></div><div class="s">${v.casual?"":p.score}</div></div>`}).join("");
+  return`<div class="pl ${p.id===v.you?"me":""} ${jd?"jd":""}" data-pid="${esc(p.id)}"><div class="av">${jd?"👑":p.bot?"🤖":"🙂"}</div><div class="n">${esc(p.name)}${p.id===v.you?" (나)":""}${p.bot?" (가상)":""}<small>${st}</small></div><div class="s">${v.casual?"":p.score}</div></div>`}).join("");
  $("chatHdr").innerHTML=`모르는 번호<small>${v.phase==="choosing"?"출제 대기":v.phase==="playing"?"새 문자 수신":v.phase==="judging"?"답장 "+v.subs.length+"개 도착":"라운드 종료"}</small>`;
  const m=[];if(v.prompt)m.push({k:"p"+v.round,c:"in",w:"모르는 번호",t:v.prompt});
  if(v.phase==="choosing"){if(judge)v.options.forEach((o,i)=>m.push({k:"o"+v.round+"_"+i,c:"in pick"+(sel===i?" sel":""),w:"후보 "+(i+1),t:o,i}));m.push({s:1,k:"c"+v.round,t:judge?"출제자(심판)입니다. 보낼 문자를 하나 고르세요. 고른 문자만 모두에게 공개됩니다.":"출제자가 상황 문자를 고르는 중…"})}
@@ -1350,12 +1384,16 @@ function syncVoices(){const lang=CFG.ttsLang,LN=lang==="en"?"영어":"한국어"
  $("ttsDiag").textContent=Voice.diag();renderInv();updateTtsHelp()}
 function renderInv(){const rows=Voice.inventory();$("invBody").innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.lang)}</td><td>${esc(r.voiceURI)}</td><td>${r.c.provider}</td><td>${r.c.basis}</td><td>${r.c.loc}</td><td>${r.c.kind}</td><td>${r.c.gender==="f"?"여성":r.c.gender==="m"?"남성":"확인 불가"}</td><td>${r.c.use}</td></tr>`).join(""):`<tr><td colspan="9">기기에서 읽을 수 있는 음성 목록이 비어 있습니다</td></tr>`}
 $("setRows").innerHTML=SET.map(([k,l,t,a,b])=>`<div class="set"><label for="s_${k}">${l}</label>`+(t==="chk"?`<input type="checkbox" id="s_${k}"><span></span>`:t==="sel"?`<select id="s_${k}"></select><span></span>`:`<input type="range" id="s_${k}" min="${a}" max="${b}" step="1"><span id="v_${k}"></span>`)+`</div>`).join("")+`<p class="muted" id="engLine1" style="margin:6px 0 2px;color:#ffd24c"></p><p class="muted" id="engLine2" style="margin:2px 0 6px"></p><p class="muted" id="voiceNote"></p><div id="ttsHelp" class="hidden"><p class="muted" id="ttsHelpTxt" style="color:#ffd24c"></p><div class="row"><button class="btn g hidden" id="ttsExtB" type="button">외부 브라우저로 열기</button><button class="btn g hidden" id="ttsCopyB" type="button">링크 복사</button></div></div><p class="muted" id="poolNote"></p><div class="row"><button class="btn g" id="btnRecheck">연결 확인</button><button class="btn g" id="btnVoices">음성 목록 보기</button></div><div id="voiceInv" class="hidden"><div class="invwrap"><table class="inv"><thead><tr><th>이름</th><th>언어</th><th>voiceURI</th><th>제공자</th><th>판별 근거</th><th>위치</th><th>유형</th><th>성별</th><th>자동 배정</th></tr></thead><tbody id="invBody"></tbody></table></div><div class="row"><button class="btn g" id="btnCopy">목록 복사</button></div></div><p class="muted" id="ttsDiag" style="font-size:11px;word-break:break-all"></p>`;
-// ===== 전체화면 버튼 (설정 맨 위). 사용자 클릭에서만 실행, 미지원 브라우저는 안내 =====
+// ===== 전체화면 버튼 (설정 맨 위). 미지원 기기는 비활성 버튼 + 접이식 안내 =====
 (function(){const de=document.documentElement,rq=de.requestFullscreen||de.webkitRequestFullscreen,ex=document.exitFullscreen||document.webkitExitFullscreen,isFs=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
- const row=document.createElement("div");row.className="set fs-set";row.innerHTML='<label>화면</label><button type="button" class="btn g" id="fsBtn"></button><span id="fsNote" class="muted" style="font-size:12px"></span>';$("setRows").insertBefore(row,$("setRows").firstChild);
- const b=$("fsBtn"),n=$("fsNote"),en=()=>CFG.uiLang==="en";
- function lab(){row.firstChild.textContent=en()?"Display":"화면";if(!rq){b.disabled=true;b.textContent=en()?"⛶ Fullscreen":"⛶ 전체화면으로 보기";n.textContent=en()?"Not supported in this browser (iPhone Safari / in-app browsers). Try Add to Home Screen.":"이 브라우저는 전체화면을 지원하지 않아요 (아이폰 Safari·앱 내 브라우저). 홈 화면에 추가하면 전체화면처럼 쓸 수 있어요.";return}b.disabled=false;b.textContent=isFs()?(en()?"⛶ Exit fullscreen":"⛶ 전체화면 끝내기"):(en()?"⛶ Fullscreen":"⛶ 전체화면으로 보기");n.textContent=""}
- b.onclick=async()=>{try{if(isFs())await ex.call(document);else await rq.call(de)}catch(e){n.textContent=en()?"Couldn't enter fullscreen.":"전체화면으로 전환하지 못했어요."}lab()};
+ const row=document.createElement("div");row.className="set fs-set";row.innerHTML='<label>화면</label><button type="button" class="btn g" id="fsBtn"></button><button type="button" class="fsq hidden" id="fsQ" aria-label="전체화면 안내" aria-expanded="false">!</button>';$("setRows").insertBefore(row,$("setRows").firstChild);
+ const note=document.createElement("div");note.id="fsNote";note.className="fsnote hidden";note.textContent="";row.after(note);
+ const b=$("fsBtn"),q=$("fsQ"),en=()=>CFG.uiLang==="en";
+ function lab(){row.firstChild.textContent=en()?"Display":"화면";
+  if(!rq){b.disabled=true;b.textContent=en()?"⛶ Fullscreen":"⛶ 전체화면으로 보기";q.classList.remove("hidden");note.textContent=en()?"Fullscreen is not supported in this browser (iPhone Safari / in-app browsers). Try Add to Home Screen.":"이 브라우저는 전체화면을 지원하지 않아요 (아이폰 Safari·앱 내 브라우저). 홈 화면에 추가하면 전체화면처럼 쓸 수 있어요.";return}
+  q.classList.add("hidden");note.classList.add("hidden");q.setAttribute("aria-expanded","false");b.disabled=false;b.textContent=isFs()?(en()?"⛶ Exit fullscreen":"⛶ 전체화면 끝내기"):(en()?"⛶ Fullscreen":"⛶ 전체화면으로 보기")}
+ q.onclick=()=>{const opened=note.classList.toggle("hidden")===false;q.setAttribute("aria-expanded",String(opened))};
+ b.onclick=async()=>{try{if(isFs())await ex.call(document);else await rq.call(de)}catch(e){note.textContent=en()?"Couldn't enter fullscreen.":"전체화면으로 전환하지 못했어요.";note.classList.remove("hidden")}lab()};
  ["fullscreenchange","webkitfullscreenchange"].forEach(t=>document.addEventListener(t,lab));window.fsLab=lab;lab()})();
 SET.forEach(([k,l,t])=>{const e=$("s_"+k);e.oninput=e.onchange=()=>{CFG[k==="voice"?vKey():k]=t==="chk"?e.checked:t==="sel"?e.value:+e.value;if(k==="ttsOn"&&!CFG.ttsOn)Voice.stop();if(k==="engine"||k==="ttsLang"||k==="showAll"){Voice.stop();syncVoices()}if(k==="uiLang"){applyLang();tick();renderChat();window.fsLab&&window.fsLab()}syncSet();save()}});
 $("s_sfxVol").addEventListener("change",()=>{Sfx.init();Sfx.select()});$("s_sfxOn").addEventListener("change",()=>{Sfx.init();Sfx.select()});
@@ -1387,9 +1425,10 @@ $("copyB").onclick=async()=>{const t=roomId||"";let ok=false;try{await navigator
  $("copyB").textContent=ok?"복사됨!":"복사 실패";setTimeout(()=>{$("copyB").textContent="복사"},1500)};$("startB").onclick=()=>act("start");$("target").onchange=e=>act("target",{n:+e.target.value});$("leaveB").onclick=$("quitB").onclick=()=>location.reload();
 // 로비 메뉴 토글: 왼쪽 메뉴(#nav) 버튼을 이미 열린 메뉴에서 다시 누르면 닫힘(모든 패널 .on 제거 → 로비 배경만 보임). 다른 메뉴를 누르면 전환.
 // 패널 안의 버튼(방 만들기 등)은 fromNav=false 라서 토글되지 않고 항상 해당 패널을 연다. "방 만들기" 화면(create)은 "시작하기" 메뉴에 속한 것으로 취급.
+(function(){const st=document.querySelector("#lobby .stage");if(!st)return;st.querySelectorAll(".pn").forEach(p=>{const t=document.createElement("i");t.className="tl";t.dataset.for=p.id;st.appendChild(t)})})();
 let curPn=null;
 function go(n,fromNav){const grp=x=>x==="create"?"start":x;if(fromNav&&curPn&&grp(curPn)===n)n=null;curPn=n;
- document.querySelector("#lobby .stage").classList.toggle("open",!!n);document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",!!n&&p.id==="pn-"+n));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("act",!!n&&b.dataset.go===grp(n)));if(n==="settings"){$("setHost").appendChild($("setRows"));syncVoices();syncSet();Voice.checkCloud()}msg("")}
+ document.querySelector("#lobby .stage").classList.toggle("open",!!n);document.querySelectorAll(".stage>.tl").forEach(t=>t.classList.toggle("on",!!n&&t.dataset.for==="pn-"+n));document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",!!n&&p.id==="pn-"+n));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("act",!!n&&b.dataset.go===grp(n)));if(n==="settings"){$("setHost").appendChild($("setRows"));syncVoices();syncSet();Voice.checkCloud()}msg("")}
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go,!!b.closest("#nav")));
 $("joinToggle").onclick=()=>show("joinRow",$("joinRow").classList.contains("hidden"));
 $("createB").onclick=hostRoom;
