@@ -235,7 +235,7 @@ body.cwon #game{height:calc(100% - var(--sbt) - var(--cwh) - env(safe-area-inset
 /* 로비: 숨은 패널(오른쪽 28px 이동)·꼬리 때문에 생기는 가로 스크롤/흔들림 차단 */
 .screen{overflow-x:hidden;overscroll-behavior:none}
 .screen>.menu{max-width:100%}
-@media (max-width:700px) and (orientation:portrait){.menu{overflow-x:clip}#lobby{touch-action:pan-y}html,body{position:fixed;inset:0;width:100%}}
+@media (max-width:700px) and (orientation:portrait){.menu{overflow-x:clip}#lobby{touch-action:pan-y pinch-zoom}html,body{position:fixed;inset:0;width:100%}}
 
 /* ===== 가상 플레이어 (대기실) ===== */
 #roomPl .chip{vertical-align:middle}
@@ -1241,18 +1241,18 @@ async function hostRoom(){if(creating)return;creating=true;$("createB").disabled
  safeMode=!!$("cSafe").checked;favMode=$("cDeck").value==="fav";S={hostId:myId,phase:"lobby",target:+$("cTarget").value||5,pick:$("cPick").value,round:0,subs:[],players:[P(myId,myName)]};push()}
 async function joinRoom(){if(joining)return;chatReset();Sfx.init();Voice.unlock();myName=$("name").value.trim()||dn("플레이어","Player");const code=normCode($("roomInput").value);
  if(!code)return msg("방 코드를 입력해 주세요.");if(!validCode(code))return msg("코드 형식이 올바르지 않습니다. 영문 대문자와 숫자 6자리입니다.");
- joining=true;mode="client";msg("");const jb=$("joinB");jb.disabled=true;jb.textContent="연결 중…";let joined=false,dead=false,timer=0;
+ joining=true;mode="client";msg("");const jb=$("joinB");jb.disabled=true;jb.textContent="연결 중…";let joined=false,dead=false,timer=0;const ct=new Set(),dg=()=>" [진단: 후보 "+([...ct].join(",")||"없음")+(ct.has("relay")?"":" · 중계서버 미연결")+"]",netMsg=()=>"방장과 직접 연결을 맺지 못했습니다(네트워크 차단). 방 코드는 맞는 것 같습니다. VPN·보안 DNS를 끄거나 다른 통신망으로 바꿔 보세요."+dg();
  const fail=m=>{if(joined||dead)return;dead=true;clearTimeout(timer);joining=false;mode=null;try{conn&&conn.close()}catch(e){}conn=null;try{peer&&peer.destroy()}catch(e){}peer=null;jb.disabled=false;jb.textContent="참가";msg(m)};
  try{await initPeer()}catch(e){return fail("온라인 연결을 시작하지 못했습니다. 인터넷 연결을 확인해 주세요.")}
  myId=peer.id;roomId=code;
- peer.on("error",e=>{if(!joined)fail(e&&e.type==="peer-unavailable"?"해당 코드의 방을 찾을 수 없습니다. 코드를 다시 확인해 주세요.":"방에 연결하지 못했습니다. 방 코드를 확인해 주세요.")});
- conn=peer.connect(PEER_PREFIX+code,{reliable:true});timer=setTimeout(()=>{const st=conn&&conn.peerConnection?conn.peerConnection.iceConnectionState:"";fail(st==="checking"||st==="new"||st==="disconnected"?"방장과 직접 연결을 맺지 못했습니다(네트워크 차단). VPN·보안 DNS를 끄거나, 같은 와이파이/다른 통신망으로 바꿔 다시 시도해 주세요.":"방 연결 시간이 초과되었습니다. 방장이 방을 열어 둔 상태인지 확인하고 다시 시도해 주세요.")},25000);
- try{const pc=conn.peerConnection;if(pc)pc.addEventListener("iceconnectionstatechange",()=>{if(pc.iceConnectionState==="failed")fail("방장과 직접 연결을 맺지 못했습니다(네트워크 차단). VPN·보안 DNS를 끄거나, 같은 와이파이/다른 통신망으로 바꿔 다시 시도해 주세요.")})}catch(e){}
+ peer.on("error",e=>{if(!joined)fail(e&&e.type==="peer-unavailable"?"해당 코드의 방을 찾을 수 없습니다. 코드를 다시 확인하고, 방장이 방을 열어 둔 상태인지 확인해 주세요.":"연결 서버 오류("+(e&&e.type||"unknown")+"). 잠시 후 다시 시도해 주세요.")});
+ conn=peer.connect(PEER_PREFIX+code,{reliable:true});timer=setTimeout(()=>{const st=conn&&conn.peerConnection?conn.peerConnection.iceConnectionState:"";fail(st==="checking"||st==="new"||st==="disconnected"?netMsg():"방 연결 시간이 초과되었습니다. 방장이 방을 열어 둔 상태인지 확인하고 다시 시도해 주세요."+dg())},25000);
+ try{const pc=conn.peerConnection;if(pc){pc.addEventListener("icecandidate",e=>{if(e.candidate&&e.candidate.type)ct.add(e.candidate.type)});pc.addEventListener("iceconnectionstatechange",()=>{if(pc.iceConnectionState==="failed")fail(netMsg())})}}catch(e){}
  conn.on("open",()=>conn.send({type:"join",name:myName}));
  // view 를 받을 때마다 sel=null 하던 것을 제거: 남이 제출할 때마다 내 카드 선택이 풀렸음. 선택 초기화는 onView 가 라운드/단계가 바뀔 때(와 제출 직후) 수행
  conn.on("data",d=>{if(!d||typeof d!=="object")return;if(d.type==="view"){if(!joined){joined=true;joining=false;clearTimeout(timer);jb.disabled=false;jb.textContent="참가";msg("")}onView(d.v)}
   if(d.type==="chat")chatRecv(d.m);else if(d.type==="chatlog")chatLoad(d.log);if(d.type==="error")fail(d.message)});
- conn.on("error",()=>fail("방에 연결하지 못했습니다. 방 코드를 확인해 주세요."));
+ conn.on("error",()=>fail(netMsg()));
  conn.on("close",()=>{if(joined){alert(trUI("방 연결이 끊어졌습니다. 로비로 돌아갑니다."));location.reload()}else if(joining)fail("방 연결이 끊어졌습니다. 다시 시도해 주세요.")})}
 // ===== 자유 채팅 (기존 문자 UI/게임 로직과 별개) =====
 // 구조: 방장이 채팅 로그의 기준(CH.log). 참가자는 {type:"chat",t} 를 방장에게 보내고, 방장이 검증·번호(id) 부여 후 전원에게 {type:"chat",m} 로 중계.
@@ -1490,4 +1490,7 @@ initLang();Voice.checkCloud();
  window.addEventListener("resize",()=>{const k=key();if(k!==orient){orient=k;reset();return}if(pos)place(pos.l,pos.t,pos.w,pos.h)});
 })();
 
+
+// 가로↔세로 회전 후 확대된 채로 남는 문제(특히 iOS): 회전 직후 잠깐 최대 배율을 1로 묶어 원래 크기로 되돌림
+(function(){const m=document.querySelector('meta[name="viewport"]');if(!m)return;const base=m.content;let t=0;const reset=()=>{clearTimeout(t);m.content=base+",maximum-scale=1";t=setTimeout(()=>{m.content=base},500)};addEventListener("orientationchange",reset);try{matchMedia("(orientation:portrait)").addEventListener("change",reset)}catch(e){}})();
 </script></body></html>
